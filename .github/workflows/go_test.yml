@@ -10,10 +10,10 @@ jobs:
   go-test:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: '1.18'
+          go-version: '1.26'
 
       - name: Build go binary
         run: make server

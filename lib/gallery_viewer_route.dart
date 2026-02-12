@@ -11,7 +11,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:img_syncer/video_route.dart';
 import 'package:img_syncer/global.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:gal/gal.dart';
 
 class GalleryViewerRoute extends StatefulWidget {
   const GalleryViewerRoute({
@@ -284,7 +284,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
           final file = File(savePath);
           await file.writeAsBytes(data);
           await file.setLastModified(asset.dateCreated());
-          await GallerySaver.saveImage(savePath, toDcim: true);
+          await Gal.putImage(savePath);
         }
       }
       SnackBarManager.showSnackBar("Download ${asset.name()} success");
@@ -358,11 +358,13 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                   icon: const Icon(Icons.share_outlined),
                   onPressed: () async {
                     final data = await all[currentIndex].imageDataAsync();
-                    Share.shareXFiles([
-                      XFile.fromData(data,
-                          name: all[currentIndex].name(),
-                          mimeType: all[currentIndex].mimeType()),
-                    ]);
+                    SharePlus.instance.share(ShareParams(
+                      files: [
+                        XFile.fromData(data,
+                            name: all[currentIndex].name(),
+                            mimeType: all[currentIndex].mimeType()),
+                      ],
+                    ));
                   },
                 ),
                 if (!all[currentIndex].isLocal())

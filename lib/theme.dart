@@ -24,10 +24,10 @@ const textThemeDark = TextTheme(
 
 const navigationBarThemeLight = NavigationBarThemeData(
   height: 67,
-  iconTheme: MaterialStatePropertyAll(
+  iconTheme: WidgetStatePropertyAll(
     IconThemeData(color: Color.fromARGB(255, 0, 37, 30)),
   ),
-  labelTextStyle: MaterialStatePropertyAll(
+  labelTextStyle: WidgetStatePropertyAll(
     TextStyle(
       fontFamily: 'Ubuntu',
       fontSize: 16,
@@ -39,10 +39,10 @@ const navigationBarThemeLight = NavigationBarThemeData(
 
 const navigationBarThemeDark = NavigationBarThemeData(
   height: 67,
-  iconTheme: MaterialStatePropertyAll(
+  iconTheme: WidgetStatePropertyAll(
     IconThemeData(color: Color.fromARGB(255, 172, 196, 192)),
   ),
-  labelTextStyle: MaterialStatePropertyAll(
+  labelTextStyle: WidgetStatePropertyAll(
     TextStyle(
       fontFamily: 'Ubuntu',
       fontSize: 16,

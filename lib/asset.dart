@@ -400,20 +400,20 @@ class Asset extends ImageProvider<Asset> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(Asset key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(Asset key, ImageDecoderCallback decode) {
     if (extension(path()) == ".gif") {
       return MultiFrameImageStreamCompleter(
-        codec: _loadAsyncMultiFrame(key, decode),
+        codec: _loadAsyncMultiFrame(key),
         scale: 1,
         informationCollector: () sync* {
           yield ErrorDescription('Image provider: ${describeIdentity(key)}');
         },
       );
     }
-    return OneFrameImageStreamCompleter(_loadAsync(key, decode));
+    return OneFrameImageStreamCompleter(_loadAsync(key));
   }
 
-  Future<ImageInfo> _loadAsync(Asset key, DecoderBufferCallback decode) async {
+  Future<ImageInfo> _loadAsync(Asset key) async {
     Uint8List data = await imageDataAsync();
     if (data.isEmpty) {
       data = await thumbnailDataAsync();
@@ -425,11 +425,10 @@ class Asset extends ImageProvider<Asset> {
     } catch (e) {
       print(e);
     }
-    return await loadImage("assets/images/gray.jpg");
+    return await loadFallbackImage("assets/images/gray.jpg");
   }
 
-  Future<ui.Codec> _loadAsyncMultiFrame(
-      Asset key, DecoderBufferCallback decode) async {
+  Future<ui.Codec> _loadAsyncMultiFrame(Asset key) async {
     Uint8List data = await imageDataAsync();
     if (data.isEmpty) {
       data = await thumbnailDataAsync();
@@ -440,9 +439,6 @@ class Asset extends ImageProvider<Asset> {
     } catch (e) {
       print(e);
     }
-    // If the data is invalid, you might want to load a fallback image.
-    // For this, you'll need to load the bytes for the fallback image and instantiate the codec for that.
-    // However, be careful, as this is a potential infinite loop if the fallback image fails to load too.
     data = await _loadFallbackImageData();
     return ui.instantiateImageCodec(data);
   }
@@ -456,7 +452,7 @@ class Asset extends ImageProvider<Asset> {
   String toString() => 'Asset(local: $local, remote: $remote)';
 }
 
-Future<ImageInfo> loadImage(String path) async {
+Future<ImageInfo> loadFallbackImage(String path) async {
   final Completer<ImageInfo> completer = Completer();
   final ImageProvider provider = AssetImage(path);
   final ImageStream stream = provider.resolve(ImageConfiguration.empty);
@@ -474,9 +470,9 @@ Future<ImageInfo> loadImage(String path) async {
 
 Future<bool> isValidImage(Uint8List imageData) async {
   try {
-    final codec =
-        await PaintingBinding.instance.instantiateImageCodec(imageData);
-    return codec != null;
+    final codec = await ui.instantiateImageCodec(imageData);
+    codec.dispose();
+    return true;
   } catch (e) {
     return false;
   }

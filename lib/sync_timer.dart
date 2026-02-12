@@ -29,7 +29,7 @@ Future<void> reloadAutoSyncTimer() async {
     final wifiOnly = prefs.getBool('backgroundSyncWifiOnly') ?? true;
     if (wifiOnly) {
       final result = await Connectivity().checkConnectivity();
-      if (result != ConnectivityResult.wifi) {
+      if (!result.contains(ConnectivityResult.wifi)) {
         return;
       }
     }

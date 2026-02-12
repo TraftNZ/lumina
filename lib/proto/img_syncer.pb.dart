@@ -1,485 +1,515 @@
-///
-//  Generated code. Do not modify.
-//  source: proto/img_syncer.proto
+// This is a generated file - do not edit.
 //
-// @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+// Generated from proto/img_syncer.proto.
+
+// @dart = 3.3
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
 
 import 'dart:core' as $core;
 
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class ListByDateRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListByDateRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'date')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.O3)
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'maxReturn', $pb.PbFieldType.O3, protoName: 'maxReturn')
-    ..hasRequiredFields = false
-  ;
+export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
-  ListByDateRequest._() : super();
+class ListByDateRequest extends $pb.GeneratedMessage {
   factory ListByDateRequest({
     $core.String? date,
     $core.int? offset,
     $core.int? maxReturn,
   }) {
-    final _result = create();
-    if (date != null) {
-      _result.date = date;
-    }
-    if (offset != null) {
-      _result.offset = offset;
-    }
-    if (maxReturn != null) {
-      _result.maxReturn = maxReturn;
-    }
-    return _result;
+    final result = create();
+    if (date != null) result.date = date;
+    if (offset != null) result.offset = offset;
+    if (maxReturn != null) result.maxReturn = maxReturn;
+    return result;
   }
-  factory ListByDateRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListByDateRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListByDateRequest clone() => ListByDateRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListByDateRequest copyWith(void Function(ListByDateRequest) updates) => super.copyWith((message) => updates(message as ListByDateRequest)) as ListByDateRequest; // ignore: deprecated_member_use
+
+  ListByDateRequest._();
+
+  factory ListByDateRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListByDateRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListByDateRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'date')
+    ..aI(2, _omitFieldNames ? '' : 'offset')
+    ..aI(3, _omitFieldNames ? '' : 'maxReturn', protoName: 'maxReturn')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListByDateRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListByDateRequest copyWith(void Function(ListByDateRequest) updates) =>
+      super.copyWith((message) => updates(message as ListByDateRequest))
+          as ListByDateRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListByDateRequest create() => ListByDateRequest._();
+  @$core.override
   ListByDateRequest createEmptyInstance() => create();
-  static $pb.PbList<ListByDateRequest> createRepeated() => $pb.PbList<ListByDateRequest>();
   @$core.pragma('dart2js:noInline')
-  static ListByDateRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListByDateRequest>(create);
+  static ListByDateRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListByDateRequest>(create);
   static ListByDateRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get date => $_getSZ(0);
   @$pb.TagNumber(1)
-  set date($core.String v) { $_setString(0, v); }
+  set date($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasDate() => $_has(0);
   @$pb.TagNumber(1)
-  void clearDate() => clearField(1);
+  void clearDate() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.int get offset => $_getIZ(1);
   @$pb.TagNumber(2)
-  set offset($core.int v) { $_setSignedInt32(1, v); }
+  set offset($core.int value) => $_setSignedInt32(1, value);
   @$pb.TagNumber(2)
   $core.bool hasOffset() => $_has(1);
   @$pb.TagNumber(2)
-  void clearOffset() => clearField(2);
+  void clearOffset() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.int get maxReturn => $_getIZ(2);
   @$pb.TagNumber(3)
-  set maxReturn($core.int v) { $_setSignedInt32(2, v); }
+  set maxReturn($core.int value) => $_setSignedInt32(2, value);
   @$pb.TagNumber(3)
   $core.bool hasMaxReturn() => $_has(2);
   @$pb.TagNumber(3)
-  void clearMaxReturn() => clearField(3);
+  void clearMaxReturn() => $_clearField(3);
 }
 
 class ListByDateResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListByDateResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'paths')
-    ..hasRequiredFields = false
-  ;
-
-  ListByDateResponse._() : super();
   factory ListByDateResponse({
     $core.bool? success,
     $core.String? message,
     $core.Iterable<$core.String>? paths,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (paths != null) {
-      _result.paths.addAll(paths);
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (paths != null) result.paths.addAll(paths);
+    return result;
   }
-  factory ListByDateResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListByDateResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListByDateResponse clone() => ListByDateResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListByDateResponse copyWith(void Function(ListByDateResponse) updates) => super.copyWith((message) => updates(message as ListByDateResponse)) as ListByDateResponse; // ignore: deprecated_member_use
+
+  ListByDateResponse._();
+
+  factory ListByDateResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListByDateResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListByDateResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'paths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListByDateResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListByDateResponse copyWith(void Function(ListByDateResponse) updates) =>
+      super.copyWith((message) => updates(message as ListByDateResponse))
+          as ListByDateResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListByDateResponse create() => ListByDateResponse._();
+  @$core.override
   ListByDateResponse createEmptyInstance() => create();
-  static $pb.PbList<ListByDateResponse> createRepeated() => $pb.PbList<ListByDateResponse>();
   @$core.pragma('dart2js:noInline')
-  static ListByDateResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListByDateResponse>(create);
+  static ListByDateResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListByDateResponse>(create);
   static ListByDateResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get paths => $_getList(2);
+  $pb.PbList<$core.String> get paths => $_getList(2);
 }
 
 class DeleteRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'paths')
-    ..hasRequiredFields = false
-  ;
-
-  DeleteRequest._() : super();
   factory DeleteRequest({
     $core.Iterable<$core.String>? paths,
   }) {
-    final _result = create();
-    if (paths != null) {
-      _result.paths.addAll(paths);
-    }
-    return _result;
+    final result = create();
+    if (paths != null) result.paths.addAll(paths);
+    return result;
   }
-  factory DeleteRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DeleteRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  DeleteRequest clone() => DeleteRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  DeleteRequest copyWith(void Function(DeleteRequest) updates) => super.copyWith((message) => updates(message as DeleteRequest)) as DeleteRequest; // ignore: deprecated_member_use
+
+  DeleteRequest._();
+
+  factory DeleteRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory DeleteRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DeleteRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'paths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeleteRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeleteRequest copyWith(void Function(DeleteRequest) updates) =>
+      super.copyWith((message) => updates(message as DeleteRequest))
+          as DeleteRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DeleteRequest create() => DeleteRequest._();
+  @$core.override
   DeleteRequest createEmptyInstance() => create();
-  static $pb.PbList<DeleteRequest> createRepeated() => $pb.PbList<DeleteRequest>();
   @$core.pragma('dart2js:noInline')
-  static DeleteRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteRequest>(create);
+  static DeleteRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DeleteRequest>(create);
   static DeleteRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.String> get paths => $_getList(0);
+  $pb.PbList<$core.String> get paths => $_getList(0);
 }
 
 class DeleteResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  DeleteResponse._() : super();
   factory DeleteResponse({
     $core.bool? success,
     $core.String? message,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
   }
-  factory DeleteResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DeleteResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  DeleteResponse clone() => DeleteResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  DeleteResponse copyWith(void Function(DeleteResponse) updates) => super.copyWith((message) => updates(message as DeleteResponse)) as DeleteResponse; // ignore: deprecated_member_use
+
+  DeleteResponse._();
+
+  factory DeleteResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory DeleteResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DeleteResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeleteResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeleteResponse copyWith(void Function(DeleteResponse) updates) =>
+      super.copyWith((message) => updates(message as DeleteResponse))
+          as DeleteResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DeleteResponse create() => DeleteResponse._();
+  @$core.override
   DeleteResponse createEmptyInstance() => create();
-  static $pb.PbList<DeleteResponse> createRepeated() => $pb.PbList<DeleteResponse>();
   @$core.pragma('dart2js:noInline')
-  static DeleteResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteResponse>(create);
+  static DeleteResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DeleteResponse>(create);
   static DeleteResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 class FilterNotUploadedRequestInfo extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FilterNotUploadedRequestInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'date')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..hasRequiredFields = false
-  ;
-
-  FilterNotUploadedRequestInfo._() : super();
   factory FilterNotUploadedRequestInfo({
     $core.String? name,
     $core.String? date,
     $core.String? id,
   }) {
-    final _result = create();
-    if (name != null) {
-      _result.name = name;
-    }
-    if (date != null) {
-      _result.date = date;
-    }
-    if (id != null) {
-      _result.id = id;
-    }
-    return _result;
+    final result = create();
+    if (name != null) result.name = name;
+    if (date != null) result.date = date;
+    if (id != null) result.id = id;
+    return result;
   }
-  factory FilterNotUploadedRequestInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FilterNotUploadedRequestInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  FilterNotUploadedRequestInfo clone() => FilterNotUploadedRequestInfo()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  FilterNotUploadedRequestInfo copyWith(void Function(FilterNotUploadedRequestInfo) updates) => super.copyWith((message) => updates(message as FilterNotUploadedRequestInfo)) as FilterNotUploadedRequestInfo; // ignore: deprecated_member_use
+
+  FilterNotUploadedRequestInfo._();
+
+  factory FilterNotUploadedRequestInfo.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory FilterNotUploadedRequestInfo.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FilterNotUploadedRequestInfo',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..aOS(2, _omitFieldNames ? '' : 'date')
+    ..aOS(3, _omitFieldNames ? '' : 'id')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FilterNotUploadedRequestInfo clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FilterNotUploadedRequestInfo copyWith(
+          void Function(FilterNotUploadedRequestInfo) updates) =>
+      super.copyWith(
+              (message) => updates(message as FilterNotUploadedRequestInfo))
+          as FilterNotUploadedRequestInfo;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
-  static FilterNotUploadedRequestInfo create() => FilterNotUploadedRequestInfo._();
+  static FilterNotUploadedRequestInfo create() =>
+      FilterNotUploadedRequestInfo._();
+  @$core.override
   FilterNotUploadedRequestInfo createEmptyInstance() => create();
-  static $pb.PbList<FilterNotUploadedRequestInfo> createRepeated() => $pb.PbList<FilterNotUploadedRequestInfo>();
   @$core.pragma('dart2js:noInline')
-  static FilterNotUploadedRequestInfo getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FilterNotUploadedRequestInfo>(create);
+  static FilterNotUploadedRequestInfo getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<FilterNotUploadedRequestInfo>(create);
   static FilterNotUploadedRequestInfo? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get name => $_getSZ(0);
   @$pb.TagNumber(1)
-  set name($core.String v) { $_setString(0, v); }
+  set name($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearName() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get date => $_getSZ(1);
   @$pb.TagNumber(2)
-  set date($core.String v) { $_setString(1, v); }
+  set date($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasDate() => $_has(1);
   @$pb.TagNumber(2)
-  void clearDate() => clearField(2);
+  void clearDate() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get id => $_getSZ(2);
   @$pb.TagNumber(3)
-  set id($core.String v) { $_setString(2, v); }
+  set id($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
   $core.bool hasId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearId() => clearField(3);
+  void clearId() => $_clearField(3);
 }
 
 class FilterNotUploadedRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FilterNotUploadedRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..pc<FilterNotUploadedRequestInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'photos', $pb.PbFieldType.PM, subBuilder: FilterNotUploadedRequestInfo.create)
-    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isFinished', protoName: 'isFinished')
-    ..hasRequiredFields = false
-  ;
-
-  FilterNotUploadedRequest._() : super();
   factory FilterNotUploadedRequest({
     $core.Iterable<FilterNotUploadedRequestInfo>? photos,
     $core.bool? isFinished,
   }) {
-    final _result = create();
-    if (photos != null) {
-      _result.photos.addAll(photos);
-    }
-    if (isFinished != null) {
-      _result.isFinished = isFinished;
-    }
-    return _result;
+    final result = create();
+    if (photos != null) result.photos.addAll(photos);
+    if (isFinished != null) result.isFinished = isFinished;
+    return result;
   }
-  factory FilterNotUploadedRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FilterNotUploadedRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  FilterNotUploadedRequest clone() => FilterNotUploadedRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  FilterNotUploadedRequest copyWith(void Function(FilterNotUploadedRequest) updates) => super.copyWith((message) => updates(message as FilterNotUploadedRequest)) as FilterNotUploadedRequest; // ignore: deprecated_member_use
+
+  FilterNotUploadedRequest._();
+
+  factory FilterNotUploadedRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory FilterNotUploadedRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FilterNotUploadedRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..pPM<FilterNotUploadedRequestInfo>(1, _omitFieldNames ? '' : 'photos',
+        subBuilder: FilterNotUploadedRequestInfo.create)
+    ..aOB(2, _omitFieldNames ? '' : 'isFinished', protoName: 'isFinished')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FilterNotUploadedRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FilterNotUploadedRequest copyWith(
+          void Function(FilterNotUploadedRequest) updates) =>
+      super.copyWith((message) => updates(message as FilterNotUploadedRequest))
+          as FilterNotUploadedRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static FilterNotUploadedRequest create() => FilterNotUploadedRequest._();
+  @$core.override
   FilterNotUploadedRequest createEmptyInstance() => create();
-  static $pb.PbList<FilterNotUploadedRequest> createRepeated() => $pb.PbList<FilterNotUploadedRequest>();
   @$core.pragma('dart2js:noInline')
-  static FilterNotUploadedRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FilterNotUploadedRequest>(create);
+  static FilterNotUploadedRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<FilterNotUploadedRequest>(create);
   static FilterNotUploadedRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<FilterNotUploadedRequestInfo> get photos => $_getList(0);
+  $pb.PbList<FilterNotUploadedRequestInfo> get photos => $_getList(0);
 
   @$pb.TagNumber(2)
   $core.bool get isFinished => $_getBF(1);
   @$pb.TagNumber(2)
-  set isFinished($core.bool v) { $_setBool(1, v); }
+  set isFinished($core.bool value) => $_setBool(1, value);
   @$pb.TagNumber(2)
   $core.bool hasIsFinished() => $_has(1);
   @$pb.TagNumber(2)
-  void clearIsFinished() => clearField(2);
+  void clearIsFinished() => $_clearField(2);
 }
 
 class FilterNotUploadedResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FilterNotUploadedResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notUploaedIDs', protoName: 'notUploaedIDs')
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isFinished', protoName: 'isFinished')
-    ..hasRequiredFields = false
-  ;
-
-  FilterNotUploadedResponse._() : super();
   factory FilterNotUploadedResponse({
     $core.bool? success,
     $core.String? message,
     $core.Iterable<$core.String>? notUploaedIDs,
     $core.bool? isFinished,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (notUploaedIDs != null) {
-      _result.notUploaedIDs.addAll(notUploaedIDs);
-    }
-    if (isFinished != null) {
-      _result.isFinished = isFinished;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (notUploaedIDs != null) result.notUploaedIDs.addAll(notUploaedIDs);
+    if (isFinished != null) result.isFinished = isFinished;
+    return result;
   }
-  factory FilterNotUploadedResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FilterNotUploadedResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  FilterNotUploadedResponse clone() => FilterNotUploadedResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  FilterNotUploadedResponse copyWith(void Function(FilterNotUploadedResponse) updates) => super.copyWith((message) => updates(message as FilterNotUploadedResponse)) as FilterNotUploadedResponse; // ignore: deprecated_member_use
+
+  FilterNotUploadedResponse._();
+
+  factory FilterNotUploadedResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory FilterNotUploadedResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FilterNotUploadedResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'notUploaedIDs', protoName: 'notUploaedIDs')
+    ..aOB(4, _omitFieldNames ? '' : 'isFinished', protoName: 'isFinished')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FilterNotUploadedResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FilterNotUploadedResponse copyWith(
+          void Function(FilterNotUploadedResponse) updates) =>
+      super.copyWith((message) => updates(message as FilterNotUploadedResponse))
+          as FilterNotUploadedResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static FilterNotUploadedResponse create() => FilterNotUploadedResponse._();
+  @$core.override
   FilterNotUploadedResponse createEmptyInstance() => create();
-  static $pb.PbList<FilterNotUploadedResponse> createRepeated() => $pb.PbList<FilterNotUploadedResponse>();
   @$core.pragma('dart2js:noInline')
-  static FilterNotUploadedResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FilterNotUploadedResponse>(create);
+  static FilterNotUploadedResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<FilterNotUploadedResponse>(create);
   static FilterNotUploadedResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get notUploaedIDs => $_getList(2);
+  $pb.PbList<$core.String> get notUploaedIDs => $_getList(2);
 
   @$pb.TagNumber(4)
   $core.bool get isFinished => $_getBF(3);
   @$pb.TagNumber(4)
-  set isFinished($core.bool v) { $_setBool(3, v); }
+  set isFinished($core.bool value) => $_setBool(3, value);
   @$pb.TagNumber(4)
   $core.bool hasIsFinished() => $_has(3);
   @$pb.TagNumber(4)
-  void clearIsFinished() => clearField(4);
+  void clearIsFinished() => $_clearField(4);
 }
 
 class SetDriveSMBRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveSMBRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'addr')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'username')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'password')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'share')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'root')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveSMBRequest._() : super();
   factory SetDriveSMBRequest({
     $core.String? addr,
     $core.String? username,
@@ -487,1200 +517,1308 @@ class SetDriveSMBRequest extends $pb.GeneratedMessage {
     $core.String? share,
     $core.String? root,
   }) {
-    final _result = create();
-    if (addr != null) {
-      _result.addr = addr;
-    }
-    if (username != null) {
-      _result.username = username;
-    }
-    if (password != null) {
-      _result.password = password;
-    }
-    if (share != null) {
-      _result.share = share;
-    }
-    if (root != null) {
-      _result.root = root;
-    }
-    return _result;
+    final result = create();
+    if (addr != null) result.addr = addr;
+    if (username != null) result.username = username;
+    if (password != null) result.password = password;
+    if (share != null) result.share = share;
+    if (root != null) result.root = root;
+    return result;
   }
-  factory SetDriveSMBRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveSMBRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBRequest clone() => SetDriveSMBRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBRequest copyWith(void Function(SetDriveSMBRequest) updates) => super.copyWith((message) => updates(message as SetDriveSMBRequest)) as SetDriveSMBRequest; // ignore: deprecated_member_use
+
+  SetDriveSMBRequest._();
+
+  factory SetDriveSMBRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveSMBRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveSMBRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'addr')
+    ..aOS(2, _omitFieldNames ? '' : 'username')
+    ..aOS(3, _omitFieldNames ? '' : 'password')
+    ..aOS(4, _omitFieldNames ? '' : 'share')
+    ..aOS(5, _omitFieldNames ? '' : 'root')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBRequest copyWith(void Function(SetDriveSMBRequest) updates) =>
+      super.copyWith((message) => updates(message as SetDriveSMBRequest))
+          as SetDriveSMBRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveSMBRequest create() => SetDriveSMBRequest._();
+  @$core.override
   SetDriveSMBRequest createEmptyInstance() => create();
-  static $pb.PbList<SetDriveSMBRequest> createRepeated() => $pb.PbList<SetDriveSMBRequest>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveSMBRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveSMBRequest>(create);
+  static SetDriveSMBRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveSMBRequest>(create);
   static SetDriveSMBRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get addr => $_getSZ(0);
   @$pb.TagNumber(1)
-  set addr($core.String v) { $_setString(0, v); }
+  set addr($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasAddr() => $_has(0);
   @$pb.TagNumber(1)
-  void clearAddr() => clearField(1);
+  void clearAddr() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get username => $_getSZ(1);
   @$pb.TagNumber(2)
-  set username($core.String v) { $_setString(1, v); }
+  set username($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasUsername() => $_has(1);
   @$pb.TagNumber(2)
-  void clearUsername() => clearField(2);
+  void clearUsername() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get password => $_getSZ(2);
   @$pb.TagNumber(3)
-  set password($core.String v) { $_setString(2, v); }
+  set password($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
   $core.bool hasPassword() => $_has(2);
   @$pb.TagNumber(3)
-  void clearPassword() => clearField(3);
+  void clearPassword() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.String get share => $_getSZ(3);
   @$pb.TagNumber(4)
-  set share($core.String v) { $_setString(3, v); }
+  set share($core.String value) => $_setString(3, value);
   @$pb.TagNumber(4)
   $core.bool hasShare() => $_has(3);
   @$pb.TagNumber(4)
-  void clearShare() => clearField(4);
+  void clearShare() => $_clearField(4);
 
   @$pb.TagNumber(5)
   $core.String get root => $_getSZ(4);
   @$pb.TagNumber(5)
-  set root($core.String v) { $_setString(4, v); }
+  set root($core.String value) => $_setString(4, value);
   @$pb.TagNumber(5)
   $core.bool hasRoot() => $_has(4);
   @$pb.TagNumber(5)
-  void clearRoot() => clearField(5);
+  void clearRoot() => $_clearField(5);
 }
 
 class SetDriveSMBResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveSMBResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveSMBResponse._() : super();
   factory SetDriveSMBResponse({
     $core.bool? success,
     $core.String? message,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
   }
-  factory SetDriveSMBResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveSMBResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBResponse clone() => SetDriveSMBResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBResponse copyWith(void Function(SetDriveSMBResponse) updates) => super.copyWith((message) => updates(message as SetDriveSMBResponse)) as SetDriveSMBResponse; // ignore: deprecated_member_use
+
+  SetDriveSMBResponse._();
+
+  factory SetDriveSMBResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveSMBResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveSMBResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBResponse copyWith(void Function(SetDriveSMBResponse) updates) =>
+      super.copyWith((message) => updates(message as SetDriveSMBResponse))
+          as SetDriveSMBResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveSMBResponse create() => SetDriveSMBResponse._();
+  @$core.override
   SetDriveSMBResponse createEmptyInstance() => create();
-  static $pb.PbList<SetDriveSMBResponse> createRepeated() => $pb.PbList<SetDriveSMBResponse>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveSMBResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveSMBResponse>(create);
+  static SetDriveSMBResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveSMBResponse>(create);
   static SetDriveSMBResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 class ListDriveSMBSharesRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveSMBSharesRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveSMBSharesRequest._() : super();
   factory ListDriveSMBSharesRequest() => create();
-  factory ListDriveSMBSharesRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveSMBSharesRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBSharesRequest clone() => ListDriveSMBSharesRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBSharesRequest copyWith(void Function(ListDriveSMBSharesRequest) updates) => super.copyWith((message) => updates(message as ListDriveSMBSharesRequest)) as ListDriveSMBSharesRequest; // ignore: deprecated_member_use
+
+  ListDriveSMBSharesRequest._();
+
+  factory ListDriveSMBSharesRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveSMBSharesRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveSMBSharesRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBSharesRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBSharesRequest copyWith(
+          void Function(ListDriveSMBSharesRequest) updates) =>
+      super.copyWith((message) => updates(message as ListDriveSMBSharesRequest))
+          as ListDriveSMBSharesRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveSMBSharesRequest create() => ListDriveSMBSharesRequest._();
+  @$core.override
   ListDriveSMBSharesRequest createEmptyInstance() => create();
-  static $pb.PbList<ListDriveSMBSharesRequest> createRepeated() => $pb.PbList<ListDriveSMBSharesRequest>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveSMBSharesRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveSMBSharesRequest>(create);
+  static ListDriveSMBSharesRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveSMBSharesRequest>(create);
   static ListDriveSMBSharesRequest? _defaultInstance;
 }
 
 class ListDriveSMBSharesResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveSMBSharesResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'shares')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveSMBSharesResponse._() : super();
   factory ListDriveSMBSharesResponse({
     $core.bool? success,
     $core.String? message,
     $core.Iterable<$core.String>? shares,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (shares != null) {
-      _result.shares.addAll(shares);
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (shares != null) result.shares.addAll(shares);
+    return result;
   }
-  factory ListDriveSMBSharesResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveSMBSharesResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBSharesResponse clone() => ListDriveSMBSharesResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBSharesResponse copyWith(void Function(ListDriveSMBSharesResponse) updates) => super.copyWith((message) => updates(message as ListDriveSMBSharesResponse)) as ListDriveSMBSharesResponse; // ignore: deprecated_member_use
+
+  ListDriveSMBSharesResponse._();
+
+  factory ListDriveSMBSharesResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveSMBSharesResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveSMBSharesResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'shares')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBSharesResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBSharesResponse copyWith(
+          void Function(ListDriveSMBSharesResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as ListDriveSMBSharesResponse))
+          as ListDriveSMBSharesResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveSMBSharesResponse create() => ListDriveSMBSharesResponse._();
+  @$core.override
   ListDriveSMBSharesResponse createEmptyInstance() => create();
-  static $pb.PbList<ListDriveSMBSharesResponse> createRepeated() => $pb.PbList<ListDriveSMBSharesResponse>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveSMBSharesResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveSMBSharesResponse>(create);
+  static ListDriveSMBSharesResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveSMBSharesResponse>(create);
   static ListDriveSMBSharesResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get shares => $_getList(2);
+  $pb.PbList<$core.String> get shares => $_getList(2);
 }
 
 class ListDriveSMBDirRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveSMBDirRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'share')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dir')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveSMBDirRequest._() : super();
   factory ListDriveSMBDirRequest({
     $core.String? share,
     $core.String? dir,
   }) {
-    final _result = create();
-    if (share != null) {
-      _result.share = share;
-    }
-    if (dir != null) {
-      _result.dir = dir;
-    }
-    return _result;
+    final result = create();
+    if (share != null) result.share = share;
+    if (dir != null) result.dir = dir;
+    return result;
   }
-  factory ListDriveSMBDirRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveSMBDirRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBDirRequest clone() => ListDriveSMBDirRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBDirRequest copyWith(void Function(ListDriveSMBDirRequest) updates) => super.copyWith((message) => updates(message as ListDriveSMBDirRequest)) as ListDriveSMBDirRequest; // ignore: deprecated_member_use
+
+  ListDriveSMBDirRequest._();
+
+  factory ListDriveSMBDirRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveSMBDirRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveSMBDirRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'share')
+    ..aOS(2, _omitFieldNames ? '' : 'dir')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBDirRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBDirRequest copyWith(
+          void Function(ListDriveSMBDirRequest) updates) =>
+      super.copyWith((message) => updates(message as ListDriveSMBDirRequest))
+          as ListDriveSMBDirRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveSMBDirRequest create() => ListDriveSMBDirRequest._();
+  @$core.override
   ListDriveSMBDirRequest createEmptyInstance() => create();
-  static $pb.PbList<ListDriveSMBDirRequest> createRepeated() => $pb.PbList<ListDriveSMBDirRequest>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveSMBDirRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveSMBDirRequest>(create);
+  static ListDriveSMBDirRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveSMBDirRequest>(create);
   static ListDriveSMBDirRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get share => $_getSZ(0);
   @$pb.TagNumber(1)
-  set share($core.String v) { $_setString(0, v); }
+  set share($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasShare() => $_has(0);
   @$pb.TagNumber(1)
-  void clearShare() => clearField(1);
+  void clearShare() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get dir => $_getSZ(1);
   @$pb.TagNumber(2)
-  set dir($core.String v) { $_setString(1, v); }
+  set dir($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasDir() => $_has(1);
   @$pb.TagNumber(2)
-  void clearDir() => clearField(2);
+  void clearDir() => $_clearField(2);
 }
 
 class ListDriveSMBDirResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveSMBDirResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dirs')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveSMBDirResponse._() : super();
   factory ListDriveSMBDirResponse({
     $core.bool? success,
     $core.String? message,
     $core.Iterable<$core.String>? dirs,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (dirs != null) {
-      _result.dirs.addAll(dirs);
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (dirs != null) result.dirs.addAll(dirs);
+    return result;
   }
-  factory ListDriveSMBDirResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveSMBDirResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBDirResponse clone() => ListDriveSMBDirResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveSMBDirResponse copyWith(void Function(ListDriveSMBDirResponse) updates) => super.copyWith((message) => updates(message as ListDriveSMBDirResponse)) as ListDriveSMBDirResponse; // ignore: deprecated_member_use
+
+  ListDriveSMBDirResponse._();
+
+  factory ListDriveSMBDirResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveSMBDirResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveSMBDirResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'dirs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBDirResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveSMBDirResponse copyWith(
+          void Function(ListDriveSMBDirResponse) updates) =>
+      super.copyWith((message) => updates(message as ListDriveSMBDirResponse))
+          as ListDriveSMBDirResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveSMBDirResponse create() => ListDriveSMBDirResponse._();
+  @$core.override
   ListDriveSMBDirResponse createEmptyInstance() => create();
-  static $pb.PbList<ListDriveSMBDirResponse> createRepeated() => $pb.PbList<ListDriveSMBDirResponse>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveSMBDirResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveSMBDirResponse>(create);
+  static ListDriveSMBDirResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveSMBDirResponse>(create);
   static ListDriveSMBDirResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get dirs => $_getList(2);
+  $pb.PbList<$core.String> get dirs => $_getList(2);
 }
 
 class SetDriveSMBShareRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveSMBShareRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'share')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'root')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveSMBShareRequest._() : super();
   factory SetDriveSMBShareRequest({
     $core.String? share,
     $core.String? root,
   }) {
-    final _result = create();
-    if (share != null) {
-      _result.share = share;
-    }
-    if (root != null) {
-      _result.root = root;
-    }
-    return _result;
+    final result = create();
+    if (share != null) result.share = share;
+    if (root != null) result.root = root;
+    return result;
   }
-  factory SetDriveSMBShareRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveSMBShareRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBShareRequest clone() => SetDriveSMBShareRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBShareRequest copyWith(void Function(SetDriveSMBShareRequest) updates) => super.copyWith((message) => updates(message as SetDriveSMBShareRequest)) as SetDriveSMBShareRequest; // ignore: deprecated_member_use
+
+  SetDriveSMBShareRequest._();
+
+  factory SetDriveSMBShareRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveSMBShareRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveSMBShareRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'share')
+    ..aOS(2, _omitFieldNames ? '' : 'root')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBShareRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBShareRequest copyWith(
+          void Function(SetDriveSMBShareRequest) updates) =>
+      super.copyWith((message) => updates(message as SetDriveSMBShareRequest))
+          as SetDriveSMBShareRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveSMBShareRequest create() => SetDriveSMBShareRequest._();
+  @$core.override
   SetDriveSMBShareRequest createEmptyInstance() => create();
-  static $pb.PbList<SetDriveSMBShareRequest> createRepeated() => $pb.PbList<SetDriveSMBShareRequest>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveSMBShareRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveSMBShareRequest>(create);
+  static SetDriveSMBShareRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveSMBShareRequest>(create);
   static SetDriveSMBShareRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get share => $_getSZ(0);
   @$pb.TagNumber(1)
-  set share($core.String v) { $_setString(0, v); }
+  set share($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasShare() => $_has(0);
   @$pb.TagNumber(1)
-  void clearShare() => clearField(1);
+  void clearShare() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get root => $_getSZ(1);
   @$pb.TagNumber(2)
-  set root($core.String v) { $_setString(1, v); }
+  set root($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasRoot() => $_has(1);
   @$pb.TagNumber(2)
-  void clearRoot() => clearField(2);
+  void clearRoot() => $_clearField(2);
 }
 
 class SetDriveSMBShareResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveSMBShareResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveSMBShareResponse._() : super();
   factory SetDriveSMBShareResponse({
     $core.bool? success,
     $core.String? message,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
   }
-  factory SetDriveSMBShareResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveSMBShareResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBShareResponse clone() => SetDriveSMBShareResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveSMBShareResponse copyWith(void Function(SetDriveSMBShareResponse) updates) => super.copyWith((message) => updates(message as SetDriveSMBShareResponse)) as SetDriveSMBShareResponse; // ignore: deprecated_member_use
+
+  SetDriveSMBShareResponse._();
+
+  factory SetDriveSMBShareResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveSMBShareResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveSMBShareResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBShareResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveSMBShareResponse copyWith(
+          void Function(SetDriveSMBShareResponse) updates) =>
+      super.copyWith((message) => updates(message as SetDriveSMBShareResponse))
+          as SetDriveSMBShareResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveSMBShareResponse create() => SetDriveSMBShareResponse._();
+  @$core.override
   SetDriveSMBShareResponse createEmptyInstance() => create();
-  static $pb.PbList<SetDriveSMBShareResponse> createRepeated() => $pb.PbList<SetDriveSMBShareResponse>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveSMBShareResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveSMBShareResponse>(create);
+  static SetDriveSMBShareResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveSMBShareResponse>(create);
   static SetDriveSMBShareResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 class SetDriveWebdavRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveWebdavRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'addr')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'username')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'password')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'root')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveWebdavRequest._() : super();
   factory SetDriveWebdavRequest({
     $core.String? addr,
     $core.String? username,
     $core.String? password,
     $core.String? root,
   }) {
-    final _result = create();
-    if (addr != null) {
-      _result.addr = addr;
-    }
-    if (username != null) {
-      _result.username = username;
-    }
-    if (password != null) {
-      _result.password = password;
-    }
-    if (root != null) {
-      _result.root = root;
-    }
-    return _result;
+    final result = create();
+    if (addr != null) result.addr = addr;
+    if (username != null) result.username = username;
+    if (password != null) result.password = password;
+    if (root != null) result.root = root;
+    return result;
   }
-  factory SetDriveWebdavRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveWebdavRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveWebdavRequest clone() => SetDriveWebdavRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveWebdavRequest copyWith(void Function(SetDriveWebdavRequest) updates) => super.copyWith((message) => updates(message as SetDriveWebdavRequest)) as SetDriveWebdavRequest; // ignore: deprecated_member_use
+
+  SetDriveWebdavRequest._();
+
+  factory SetDriveWebdavRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveWebdavRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveWebdavRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'addr')
+    ..aOS(2, _omitFieldNames ? '' : 'username')
+    ..aOS(3, _omitFieldNames ? '' : 'password')
+    ..aOS(4, _omitFieldNames ? '' : 'root')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveWebdavRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveWebdavRequest copyWith(
+          void Function(SetDriveWebdavRequest) updates) =>
+      super.copyWith((message) => updates(message as SetDriveWebdavRequest))
+          as SetDriveWebdavRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveWebdavRequest create() => SetDriveWebdavRequest._();
+  @$core.override
   SetDriveWebdavRequest createEmptyInstance() => create();
-  static $pb.PbList<SetDriveWebdavRequest> createRepeated() => $pb.PbList<SetDriveWebdavRequest>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveWebdavRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveWebdavRequest>(create);
+  static SetDriveWebdavRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveWebdavRequest>(create);
   static SetDriveWebdavRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get addr => $_getSZ(0);
   @$pb.TagNumber(1)
-  set addr($core.String v) { $_setString(0, v); }
+  set addr($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasAddr() => $_has(0);
   @$pb.TagNumber(1)
-  void clearAddr() => clearField(1);
+  void clearAddr() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get username => $_getSZ(1);
   @$pb.TagNumber(2)
-  set username($core.String v) { $_setString(1, v); }
+  set username($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasUsername() => $_has(1);
   @$pb.TagNumber(2)
-  void clearUsername() => clearField(2);
+  void clearUsername() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get password => $_getSZ(2);
   @$pb.TagNumber(3)
-  set password($core.String v) { $_setString(2, v); }
+  set password($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
   $core.bool hasPassword() => $_has(2);
   @$pb.TagNumber(3)
-  void clearPassword() => clearField(3);
+  void clearPassword() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.String get root => $_getSZ(3);
   @$pb.TagNumber(4)
-  set root($core.String v) { $_setString(3, v); }
+  set root($core.String value) => $_setString(3, value);
   @$pb.TagNumber(4)
   $core.bool hasRoot() => $_has(3);
   @$pb.TagNumber(4)
-  void clearRoot() => clearField(4);
+  void clearRoot() => $_clearField(4);
 }
 
 class SetDriveWebdavResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveWebdavResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveWebdavResponse._() : super();
   factory SetDriveWebdavResponse({
     $core.bool? success,
     $core.String? message,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
   }
-  factory SetDriveWebdavResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveWebdavResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveWebdavResponse clone() => SetDriveWebdavResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveWebdavResponse copyWith(void Function(SetDriveWebdavResponse) updates) => super.copyWith((message) => updates(message as SetDriveWebdavResponse)) as SetDriveWebdavResponse; // ignore: deprecated_member_use
+
+  SetDriveWebdavResponse._();
+
+  factory SetDriveWebdavResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveWebdavResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveWebdavResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveWebdavResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveWebdavResponse copyWith(
+          void Function(SetDriveWebdavResponse) updates) =>
+      super.copyWith((message) => updates(message as SetDriveWebdavResponse))
+          as SetDriveWebdavResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveWebdavResponse create() => SetDriveWebdavResponse._();
+  @$core.override
   SetDriveWebdavResponse createEmptyInstance() => create();
-  static $pb.PbList<SetDriveWebdavResponse> createRepeated() => $pb.PbList<SetDriveWebdavResponse>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveWebdavResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveWebdavResponse>(create);
+  static SetDriveWebdavResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveWebdavResponse>(create);
   static SetDriveWebdavResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 class ListDriveWebdavDirRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveWebdavDirRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dir')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveWebdavDirRequest._() : super();
   factory ListDriveWebdavDirRequest({
     $core.String? dir,
   }) {
-    final _result = create();
-    if (dir != null) {
-      _result.dir = dir;
-    }
-    return _result;
+    final result = create();
+    if (dir != null) result.dir = dir;
+    return result;
   }
-  factory ListDriveWebdavDirRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveWebdavDirRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveWebdavDirRequest clone() => ListDriveWebdavDirRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveWebdavDirRequest copyWith(void Function(ListDriveWebdavDirRequest) updates) => super.copyWith((message) => updates(message as ListDriveWebdavDirRequest)) as ListDriveWebdavDirRequest; // ignore: deprecated_member_use
+
+  ListDriveWebdavDirRequest._();
+
+  factory ListDriveWebdavDirRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveWebdavDirRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveWebdavDirRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'dir')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveWebdavDirRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveWebdavDirRequest copyWith(
+          void Function(ListDriveWebdavDirRequest) updates) =>
+      super.copyWith((message) => updates(message as ListDriveWebdavDirRequest))
+          as ListDriveWebdavDirRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveWebdavDirRequest create() => ListDriveWebdavDirRequest._();
+  @$core.override
   ListDriveWebdavDirRequest createEmptyInstance() => create();
-  static $pb.PbList<ListDriveWebdavDirRequest> createRepeated() => $pb.PbList<ListDriveWebdavDirRequest>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveWebdavDirRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveWebdavDirRequest>(create);
+  static ListDriveWebdavDirRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveWebdavDirRequest>(create);
   static ListDriveWebdavDirRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get dir => $_getSZ(0);
   @$pb.TagNumber(1)
-  set dir($core.String v) { $_setString(0, v); }
+  set dir($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasDir() => $_has(0);
   @$pb.TagNumber(1)
-  void clearDir() => clearField(1);
+  void clearDir() => $_clearField(1);
 }
 
 class ListDriveWebdavDirResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveWebdavDirResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dirs')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveWebdavDirResponse._() : super();
   factory ListDriveWebdavDirResponse({
     $core.bool? success,
     $core.String? message,
     $core.Iterable<$core.String>? dirs,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (dirs != null) {
-      _result.dirs.addAll(dirs);
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (dirs != null) result.dirs.addAll(dirs);
+    return result;
   }
-  factory ListDriveWebdavDirResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveWebdavDirResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveWebdavDirResponse clone() => ListDriveWebdavDirResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveWebdavDirResponse copyWith(void Function(ListDriveWebdavDirResponse) updates) => super.copyWith((message) => updates(message as ListDriveWebdavDirResponse)) as ListDriveWebdavDirResponse; // ignore: deprecated_member_use
+
+  ListDriveWebdavDirResponse._();
+
+  factory ListDriveWebdavDirResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveWebdavDirResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveWebdavDirResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'dirs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveWebdavDirResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveWebdavDirResponse copyWith(
+          void Function(ListDriveWebdavDirResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as ListDriveWebdavDirResponse))
+          as ListDriveWebdavDirResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveWebdavDirResponse create() => ListDriveWebdavDirResponse._();
+  @$core.override
   ListDriveWebdavDirResponse createEmptyInstance() => create();
-  static $pb.PbList<ListDriveWebdavDirResponse> createRepeated() => $pb.PbList<ListDriveWebdavDirResponse>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveWebdavDirResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveWebdavDirResponse>(create);
+  static ListDriveWebdavDirResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveWebdavDirResponse>(create);
   static ListDriveWebdavDirResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get dirs => $_getList(2);
+  $pb.PbList<$core.String> get dirs => $_getList(2);
 }
 
 class SetDriveNFSRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveNFSRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'addr')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'root')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveNFSRequest._() : super();
   factory SetDriveNFSRequest({
     $core.String? addr,
     $core.String? root,
   }) {
-    final _result = create();
-    if (addr != null) {
-      _result.addr = addr;
-    }
-    if (root != null) {
-      _result.root = root;
-    }
-    return _result;
+    final result = create();
+    if (addr != null) result.addr = addr;
+    if (root != null) result.root = root;
+    return result;
   }
-  factory SetDriveNFSRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveNFSRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveNFSRequest clone() => SetDriveNFSRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveNFSRequest copyWith(void Function(SetDriveNFSRequest) updates) => super.copyWith((message) => updates(message as SetDriveNFSRequest)) as SetDriveNFSRequest; // ignore: deprecated_member_use
+
+  SetDriveNFSRequest._();
+
+  factory SetDriveNFSRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveNFSRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveNFSRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'addr')
+    ..aOS(2, _omitFieldNames ? '' : 'root')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveNFSRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveNFSRequest copyWith(void Function(SetDriveNFSRequest) updates) =>
+      super.copyWith((message) => updates(message as SetDriveNFSRequest))
+          as SetDriveNFSRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveNFSRequest create() => SetDriveNFSRequest._();
+  @$core.override
   SetDriveNFSRequest createEmptyInstance() => create();
-  static $pb.PbList<SetDriveNFSRequest> createRepeated() => $pb.PbList<SetDriveNFSRequest>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveNFSRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveNFSRequest>(create);
+  static SetDriveNFSRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveNFSRequest>(create);
   static SetDriveNFSRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get addr => $_getSZ(0);
   @$pb.TagNumber(1)
-  set addr($core.String v) { $_setString(0, v); }
+  set addr($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasAddr() => $_has(0);
   @$pb.TagNumber(1)
-  void clearAddr() => clearField(1);
+  void clearAddr() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get root => $_getSZ(1);
   @$pb.TagNumber(2)
-  set root($core.String v) { $_setString(1, v); }
+  set root($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasRoot() => $_has(1);
   @$pb.TagNumber(2)
-  void clearRoot() => clearField(2);
+  void clearRoot() => $_clearField(2);
 }
 
 class SetDriveNFSResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveNFSResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveNFSResponse._() : super();
   factory SetDriveNFSResponse({
     $core.bool? success,
     $core.String? message,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
   }
-  factory SetDriveNFSResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveNFSResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveNFSResponse clone() => SetDriveNFSResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveNFSResponse copyWith(void Function(SetDriveNFSResponse) updates) => super.copyWith((message) => updates(message as SetDriveNFSResponse)) as SetDriveNFSResponse; // ignore: deprecated_member_use
+
+  SetDriveNFSResponse._();
+
+  factory SetDriveNFSResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveNFSResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveNFSResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveNFSResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveNFSResponse copyWith(void Function(SetDriveNFSResponse) updates) =>
+      super.copyWith((message) => updates(message as SetDriveNFSResponse))
+          as SetDriveNFSResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SetDriveNFSResponse create() => SetDriveNFSResponse._();
+  @$core.override
   SetDriveNFSResponse createEmptyInstance() => create();
-  static $pb.PbList<SetDriveNFSResponse> createRepeated() => $pb.PbList<SetDriveNFSResponse>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveNFSResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveNFSResponse>(create);
+  static SetDriveNFSResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveNFSResponse>(create);
   static SetDriveNFSResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 class ListDriveNFSDirRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveNFSDirRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dir')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveNFSDirRequest._() : super();
   factory ListDriveNFSDirRequest({
     $core.String? dir,
   }) {
-    final _result = create();
-    if (dir != null) {
-      _result.dir = dir;
-    }
-    return _result;
+    final result = create();
+    if (dir != null) result.dir = dir;
+    return result;
   }
-  factory ListDriveNFSDirRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveNFSDirRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveNFSDirRequest clone() => ListDriveNFSDirRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveNFSDirRequest copyWith(void Function(ListDriveNFSDirRequest) updates) => super.copyWith((message) => updates(message as ListDriveNFSDirRequest)) as ListDriveNFSDirRequest; // ignore: deprecated_member_use
+
+  ListDriveNFSDirRequest._();
+
+  factory ListDriveNFSDirRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveNFSDirRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveNFSDirRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'dir')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveNFSDirRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveNFSDirRequest copyWith(
+          void Function(ListDriveNFSDirRequest) updates) =>
+      super.copyWith((message) => updates(message as ListDriveNFSDirRequest))
+          as ListDriveNFSDirRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveNFSDirRequest create() => ListDriveNFSDirRequest._();
+  @$core.override
   ListDriveNFSDirRequest createEmptyInstance() => create();
-  static $pb.PbList<ListDriveNFSDirRequest> createRepeated() => $pb.PbList<ListDriveNFSDirRequest>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveNFSDirRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveNFSDirRequest>(create);
+  static ListDriveNFSDirRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveNFSDirRequest>(create);
   static ListDriveNFSDirRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get dir => $_getSZ(0);
   @$pb.TagNumber(1)
-  set dir($core.String v) { $_setString(0, v); }
+  set dir($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasDir() => $_has(0);
   @$pb.TagNumber(1)
-  void clearDir() => clearField(1);
+  void clearDir() => $_clearField(1);
 }
 
 class ListDriveNFSDirResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListDriveNFSDirResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dirs')
-    ..hasRequiredFields = false
-  ;
-
-  ListDriveNFSDirResponse._() : super();
   factory ListDriveNFSDirResponse({
     $core.bool? success,
     $core.String? message,
     $core.Iterable<$core.String>? dirs,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (dirs != null) {
-      _result.dirs.addAll(dirs);
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (dirs != null) result.dirs.addAll(dirs);
+    return result;
   }
-  factory ListDriveNFSDirResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ListDriveNFSDirResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ListDriveNFSDirResponse clone() => ListDriveNFSDirResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ListDriveNFSDirResponse copyWith(void Function(ListDriveNFSDirResponse) updates) => super.copyWith((message) => updates(message as ListDriveNFSDirResponse)) as ListDriveNFSDirResponse; // ignore: deprecated_member_use
+
+  ListDriveNFSDirResponse._();
+
+  factory ListDriveNFSDirResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveNFSDirResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveNFSDirResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'dirs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveNFSDirResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveNFSDirResponse copyWith(
+          void Function(ListDriveNFSDirResponse) updates) =>
+      super.copyWith((message) => updates(message as ListDriveNFSDirResponse))
+          as ListDriveNFSDirResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ListDriveNFSDirResponse create() => ListDriveNFSDirResponse._();
+  @$core.override
   ListDriveNFSDirResponse createEmptyInstance() => create();
-  static $pb.PbList<ListDriveNFSDirResponse> createRepeated() => $pb.PbList<ListDriveNFSDirResponse>();
   @$core.pragma('dart2js:noInline')
-  static ListDriveNFSDirResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDriveNFSDirResponse>(create);
+  static ListDriveNFSDirResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveNFSDirResponse>(create);
   static ListDriveNFSDirResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get dirs => $_getList(2);
+  $pb.PbList<$core.String> get dirs => $_getList(2);
 }
 
 class SetDriveBaiduNetDiskRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveBaiduNetDiskRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'refreshToken', protoName: 'refreshToken')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accessToken', protoName: 'accessToken')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tmpDir', protoName: 'tmpDir')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveBaiduNetDiskRequest._() : super();
   factory SetDriveBaiduNetDiskRequest({
     $core.String? refreshToken,
     $core.String? accessToken,
     $core.String? tmpDir,
   }) {
-    final _result = create();
-    if (refreshToken != null) {
-      _result.refreshToken = refreshToken;
-    }
-    if (accessToken != null) {
-      _result.accessToken = accessToken;
-    }
-    if (tmpDir != null) {
-      _result.tmpDir = tmpDir;
-    }
-    return _result;
+    final result = create();
+    if (refreshToken != null) result.refreshToken = refreshToken;
+    if (accessToken != null) result.accessToken = accessToken;
+    if (tmpDir != null) result.tmpDir = tmpDir;
+    return result;
   }
-  factory SetDriveBaiduNetDiskRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveBaiduNetDiskRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveBaiduNetDiskRequest clone() => SetDriveBaiduNetDiskRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveBaiduNetDiskRequest copyWith(void Function(SetDriveBaiduNetDiskRequest) updates) => super.copyWith((message) => updates(message as SetDriveBaiduNetDiskRequest)) as SetDriveBaiduNetDiskRequest; // ignore: deprecated_member_use
+
+  SetDriveBaiduNetDiskRequest._();
+
+  factory SetDriveBaiduNetDiskRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveBaiduNetDiskRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveBaiduNetDiskRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'refreshToken', protoName: 'refreshToken')
+    ..aOS(2, _omitFieldNames ? '' : 'accessToken', protoName: 'accessToken')
+    ..aOS(3, _omitFieldNames ? '' : 'tmpDir', protoName: 'tmpDir')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveBaiduNetDiskRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveBaiduNetDiskRequest copyWith(
+          void Function(SetDriveBaiduNetDiskRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as SetDriveBaiduNetDiskRequest))
+          as SetDriveBaiduNetDiskRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskRequest create() => SetDriveBaiduNetDiskRequest._();
+  static SetDriveBaiduNetDiskRequest create() =>
+      SetDriveBaiduNetDiskRequest._();
+  @$core.override
   SetDriveBaiduNetDiskRequest createEmptyInstance() => create();
-  static $pb.PbList<SetDriveBaiduNetDiskRequest> createRepeated() => $pb.PbList<SetDriveBaiduNetDiskRequest>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveBaiduNetDiskRequest>(create);
+  static SetDriveBaiduNetDiskRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveBaiduNetDiskRequest>(create);
   static SetDriveBaiduNetDiskRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get refreshToken => $_getSZ(0);
   @$pb.TagNumber(1)
-  set refreshToken($core.String v) { $_setString(0, v); }
+  set refreshToken($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasRefreshToken() => $_has(0);
   @$pb.TagNumber(1)
-  void clearRefreshToken() => clearField(1);
+  void clearRefreshToken() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get accessToken => $_getSZ(1);
   @$pb.TagNumber(2)
-  set accessToken($core.String v) { $_setString(1, v); }
+  set accessToken($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasAccessToken() => $_has(1);
   @$pb.TagNumber(2)
-  void clearAccessToken() => clearField(2);
+  void clearAccessToken() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get tmpDir => $_getSZ(2);
   @$pb.TagNumber(3)
-  set tmpDir($core.String v) { $_setString(2, v); }
+  set tmpDir($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
   $core.bool hasTmpDir() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTmpDir() => clearField(3);
+  void clearTmpDir() => $_clearField(3);
 }
 
 class SetDriveBaiduNetDiskResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetDriveBaiduNetDiskResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  SetDriveBaiduNetDiskResponse._() : super();
   factory SetDriveBaiduNetDiskResponse({
     $core.bool? success,
     $core.String? message,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
   }
-  factory SetDriveBaiduNetDiskResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SetDriveBaiduNetDiskResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  SetDriveBaiduNetDiskResponse clone() => SetDriveBaiduNetDiskResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SetDriveBaiduNetDiskResponse copyWith(void Function(SetDriveBaiduNetDiskResponse) updates) => super.copyWith((message) => updates(message as SetDriveBaiduNetDiskResponse)) as SetDriveBaiduNetDiskResponse; // ignore: deprecated_member_use
+
+  SetDriveBaiduNetDiskResponse._();
+
+  factory SetDriveBaiduNetDiskResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveBaiduNetDiskResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveBaiduNetDiskResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveBaiduNetDiskResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveBaiduNetDiskResponse copyWith(
+          void Function(SetDriveBaiduNetDiskResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as SetDriveBaiduNetDiskResponse))
+          as SetDriveBaiduNetDiskResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskResponse create() => SetDriveBaiduNetDiskResponse._();
+  static SetDriveBaiduNetDiskResponse create() =>
+      SetDriveBaiduNetDiskResponse._();
+  @$core.override
   SetDriveBaiduNetDiskResponse createEmptyInstance() => create();
-  static $pb.PbList<SetDriveBaiduNetDiskResponse> createRepeated() => $pb.PbList<SetDriveBaiduNetDiskResponse>();
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetDriveBaiduNetDiskResponse>(create);
+  static SetDriveBaiduNetDiskResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveBaiduNetDiskResponse>(create);
   static SetDriveBaiduNetDiskResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 class StartBaiduNetdiskLoginRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartBaiduNetdiskLoginRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tmpDir', protoName: 'tmpDir')
-    ..hasRequiredFields = false
-  ;
-
-  StartBaiduNetdiskLoginRequest._() : super();
   factory StartBaiduNetdiskLoginRequest({
     $core.String? tmpDir,
   }) {
-    final _result = create();
-    if (tmpDir != null) {
-      _result.tmpDir = tmpDir;
-    }
-    return _result;
+    final result = create();
+    if (tmpDir != null) result.tmpDir = tmpDir;
+    return result;
   }
-  factory StartBaiduNetdiskLoginRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StartBaiduNetdiskLoginRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  StartBaiduNetdiskLoginRequest clone() => StartBaiduNetdiskLoginRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  StartBaiduNetdiskLoginRequest copyWith(void Function(StartBaiduNetdiskLoginRequest) updates) => super.copyWith((message) => updates(message as StartBaiduNetdiskLoginRequest)) as StartBaiduNetdiskLoginRequest; // ignore: deprecated_member_use
+
+  StartBaiduNetdiskLoginRequest._();
+
+  factory StartBaiduNetdiskLoginRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory StartBaiduNetdiskLoginRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'StartBaiduNetdiskLoginRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'tmpDir', protoName: 'tmpDir')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StartBaiduNetdiskLoginRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StartBaiduNetdiskLoginRequest copyWith(
+          void Function(StartBaiduNetdiskLoginRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as StartBaiduNetdiskLoginRequest))
+          as StartBaiduNetdiskLoginRequest;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginRequest create() => StartBaiduNetdiskLoginRequest._();
+  static StartBaiduNetdiskLoginRequest create() =>
+      StartBaiduNetdiskLoginRequest._();
+  @$core.override
   StartBaiduNetdiskLoginRequest createEmptyInstance() => create();
-  static $pb.PbList<StartBaiduNetdiskLoginRequest> createRepeated() => $pb.PbList<StartBaiduNetdiskLoginRequest>();
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartBaiduNetdiskLoginRequest>(create);
+  static StartBaiduNetdiskLoginRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StartBaiduNetdiskLoginRequest>(create);
   static StartBaiduNetdiskLoginRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get tmpDir => $_getSZ(0);
   @$pb.TagNumber(1)
-  set tmpDir($core.String v) { $_setString(0, v); }
+  set tmpDir($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
   $core.bool hasTmpDir() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTmpDir() => clearField(1);
+  void clearTmpDir() => $_clearField(1);
 }
 
 class StartBaiduNetdiskLoginResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartBaiduNetdiskLoginResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'img_syncer'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'refreshToken', protoName: 'refreshToken')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accessToken', protoName: 'accessToken')
-    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'exiresAt', protoName: 'exiresAt')
-    ..hasRequiredFields = false
-  ;
-
-  StartBaiduNetdiskLoginResponse._() : super();
   factory StartBaiduNetdiskLoginResponse({
     $core.bool? success,
     $core.String? message,
@@ -1688,88 +1826,104 @@ class StartBaiduNetdiskLoginResponse extends $pb.GeneratedMessage {
     $core.String? accessToken,
     $fixnum.Int64? exiresAt,
   }) {
-    final _result = create();
-    if (success != null) {
-      _result.success = success;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    if (refreshToken != null) {
-      _result.refreshToken = refreshToken;
-    }
-    if (accessToken != null) {
-      _result.accessToken = accessToken;
-    }
-    if (exiresAt != null) {
-      _result.exiresAt = exiresAt;
-    }
-    return _result;
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (refreshToken != null) result.refreshToken = refreshToken;
+    if (accessToken != null) result.accessToken = accessToken;
+    if (exiresAt != null) result.exiresAt = exiresAt;
+    return result;
   }
-  factory StartBaiduNetdiskLoginResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StartBaiduNetdiskLoginResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  StartBaiduNetdiskLoginResponse clone() => StartBaiduNetdiskLoginResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  StartBaiduNetdiskLoginResponse copyWith(void Function(StartBaiduNetdiskLoginResponse) updates) => super.copyWith((message) => updates(message as StartBaiduNetdiskLoginResponse)) as StartBaiduNetdiskLoginResponse; // ignore: deprecated_member_use
+
+  StartBaiduNetdiskLoginResponse._();
+
+  factory StartBaiduNetdiskLoginResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory StartBaiduNetdiskLoginResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'StartBaiduNetdiskLoginResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aOS(3, _omitFieldNames ? '' : 'refreshToken', protoName: 'refreshToken')
+    ..aOS(4, _omitFieldNames ? '' : 'accessToken', protoName: 'accessToken')
+    ..aInt64(5, _omitFieldNames ? '' : 'exiresAt', protoName: 'exiresAt')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StartBaiduNetdiskLoginResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StartBaiduNetdiskLoginResponse copyWith(
+          void Function(StartBaiduNetdiskLoginResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as StartBaiduNetdiskLoginResponse))
+          as StartBaiduNetdiskLoginResponse;
+
+  @$core.override
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginResponse create() => StartBaiduNetdiskLoginResponse._();
+  static StartBaiduNetdiskLoginResponse create() =>
+      StartBaiduNetdiskLoginResponse._();
+  @$core.override
   StartBaiduNetdiskLoginResponse createEmptyInstance() => create();
-  static $pb.PbList<StartBaiduNetdiskLoginResponse> createRepeated() => $pb.PbList<StartBaiduNetdiskLoginResponse>();
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartBaiduNetdiskLoginResponse>(create);
+  static StartBaiduNetdiskLoginResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StartBaiduNetdiskLoginResponse>(create);
   static StartBaiduNetdiskLoginResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
-  set success($core.bool v) { $_setBool(0, v); }
+  set success($core.bool value) => $_setBool(0, value);
   @$pb.TagNumber(1)
   $core.bool hasSuccess() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSuccess() => clearField(1);
+  void clearSuccess() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get refreshToken => $_getSZ(2);
   @$pb.TagNumber(3)
-  set refreshToken($core.String v) { $_setString(2, v); }
+  set refreshToken($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
   $core.bool hasRefreshToken() => $_has(2);
   @$pb.TagNumber(3)
-  void clearRefreshToken() => clearField(3);
+  void clearRefreshToken() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.String get accessToken => $_getSZ(3);
   @$pb.TagNumber(4)
-  set accessToken($core.String v) { $_setString(3, v); }
+  set accessToken($core.String value) => $_setString(3, value);
   @$pb.TagNumber(4)
   $core.bool hasAccessToken() => $_has(3);
   @$pb.TagNumber(4)
-  void clearAccessToken() => clearField(4);
+  void clearAccessToken() => $_clearField(4);
 
   @$pb.TagNumber(5)
   $fixnum.Int64 get exiresAt => $_getI64(4);
   @$pb.TagNumber(5)
-  set exiresAt($fixnum.Int64 v) { $_setInt64(4, v); }
+  set exiresAt($fixnum.Int64 value) => $_setInt64(4, value);
   @$pb.TagNumber(5)
   $core.bool hasExiresAt() => $_has(4);
   @$pb.TagNumber(5)
-  void clearExiresAt() => clearField(5);
+  void clearExiresAt() => $_clearField(5);
 }
 
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

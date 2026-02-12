@@ -1,181 +1,203 @@
-///
-//  Generated code. Do not modify.
-//  source: proto/img_syncer.proto
+// This is a generated file - do not edit.
 //
-// @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+// Generated from proto/img_syncer.proto.
+
+// @dart = 3.3
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
 
 import 'dart:async' as $async;
-
 import 'dart:core' as $core;
 
 import 'package:grpc/service_api.dart' as $grpc;
+import 'package:protobuf/protobuf.dart' as $pb;
+
 import 'img_syncer.pb.dart' as $0;
+
 export 'img_syncer.pb.dart';
 
+@$pb.GrpcServiceName('img_syncer.ImgSyncer')
 class ImgSyncerClient extends $grpc.Client {
-  static final _$listByDate =
-      $grpc.ClientMethod<$0.ListByDateRequest, $0.ListByDateResponse>(
-          '/img_syncer.ImgSyncer/ListByDate',
-          ($0.ListByDateRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) =>
-              $0.ListByDateResponse.fromBuffer(value));
-  static final _$delete =
-      $grpc.ClientMethod<$0.DeleteRequest, $0.DeleteResponse>(
-          '/img_syncer.ImgSyncer/Delete',
-          ($0.DeleteRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) => $0.DeleteResponse.fromBuffer(value));
-  static final _$filterNotUploaded = $grpc.ClientMethod<
-          $0.FilterNotUploadedRequest, $0.FilterNotUploadedResponse>(
-      '/img_syncer.ImgSyncer/FilterNotUploaded',
-      ($0.FilterNotUploadedRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) =>
-          $0.FilterNotUploadedResponse.fromBuffer(value));
-  static final _$setDriveSMB =
-      $grpc.ClientMethod<$0.SetDriveSMBRequest, $0.SetDriveSMBResponse>(
-          '/img_syncer.ImgSyncer/SetDriveSMB',
-          ($0.SetDriveSMBRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) =>
-              $0.SetDriveSMBResponse.fromBuffer(value));
-  static final _$listDriveSMBShares = $grpc.ClientMethod<
-          $0.ListDriveSMBSharesRequest, $0.ListDriveSMBSharesResponse>(
-      '/img_syncer.ImgSyncer/ListDriveSMBShares',
-      ($0.ListDriveSMBSharesRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) =>
-          $0.ListDriveSMBSharesResponse.fromBuffer(value));
-  static final _$listDriveSMBDir =
-      $grpc.ClientMethod<$0.ListDriveSMBDirRequest, $0.ListDriveSMBDirResponse>(
-          '/img_syncer.ImgSyncer/ListDriveSMBDir',
-          ($0.ListDriveSMBDirRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) =>
-              $0.ListDriveSMBDirResponse.fromBuffer(value));
-  static final _$setDriveSMBShare = $grpc.ClientMethod<
-          $0.SetDriveSMBShareRequest, $0.SetDriveSMBShareResponse>(
-      '/img_syncer.ImgSyncer/SetDriveSMBShare',
-      ($0.SetDriveSMBShareRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) =>
-          $0.SetDriveSMBShareResponse.fromBuffer(value));
-  static final _$setDriveWebdav =
-      $grpc.ClientMethod<$0.SetDriveWebdavRequest, $0.SetDriveWebdavResponse>(
-          '/img_syncer.ImgSyncer/SetDriveWebdav',
-          ($0.SetDriveWebdavRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) =>
-              $0.SetDriveWebdavResponse.fromBuffer(value));
-  static final _$listDriveWebdavDir = $grpc.ClientMethod<
-          $0.ListDriveWebdavDirRequest, $0.ListDriveWebdavDirResponse>(
-      '/img_syncer.ImgSyncer/ListDriveWebdavDir',
-      ($0.ListDriveWebdavDirRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) =>
-          $0.ListDriveWebdavDirResponse.fromBuffer(value));
-  static final _$setDriveNFS =
-      $grpc.ClientMethod<$0.SetDriveNFSRequest, $0.SetDriveNFSResponse>(
-          '/img_syncer.ImgSyncer/SetDriveNFS',
-          ($0.SetDriveNFSRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) =>
-              $0.SetDriveNFSResponse.fromBuffer(value));
-  static final _$listDriveNFSDir =
-      $grpc.ClientMethod<$0.ListDriveNFSDirRequest, $0.ListDriveNFSDirResponse>(
-          '/img_syncer.ImgSyncer/ListDriveNFSDir',
-          ($0.ListDriveNFSDirRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) =>
-              $0.ListDriveNFSDirResponse.fromBuffer(value));
-  static final _$setDriveBaiduNetDisk = $grpc.ClientMethod<
-          $0.SetDriveBaiduNetDiskRequest, $0.SetDriveBaiduNetDiskResponse>(
-      '/img_syncer.ImgSyncer/SetDriveBaiduNetDisk',
-      ($0.SetDriveBaiduNetDiskRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) =>
-          $0.SetDriveBaiduNetDiskResponse.fromBuffer(value));
-  static final _$startBaiduNetdiskLogin = $grpc.ClientMethod<
-          $0.StartBaiduNetdiskLoginRequest, $0.StartBaiduNetdiskLoginResponse>(
-      '/img_syncer.ImgSyncer/StartBaiduNetdiskLogin',
-      ($0.StartBaiduNetdiskLoginRequest value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) =>
-          $0.StartBaiduNetdiskLoginResponse.fromBuffer(value));
+  /// The hostname for this service.
+  static const $core.String defaultHost = '';
 
-  ImgSyncerClient($grpc.ClientChannel channel,
-      {$grpc.CallOptions? options,
-      $core.Iterable<$grpc.ClientInterceptor>? interceptors})
-      : super(channel, options: options, interceptors: interceptors);
+  /// OAuth scopes needed for the client.
+  static const $core.List<$core.String> oauthScopes = [
+    '',
+  ];
+
+  ImgSyncerClient(super.channel, {super.options, super.interceptors});
 
   $grpc.ResponseFuture<$0.ListByDateResponse> listByDate(
-      $0.ListByDateRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.ListByDateRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$listByDate, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.DeleteResponse> delete($0.DeleteRequest request,
-      {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$0.DeleteResponse> delete(
+    $0.DeleteRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$delete, request, options: options);
   }
 
   $grpc.ResponseStream<$0.FilterNotUploadedResponse> filterNotUploaded(
-      $async.Stream<$0.FilterNotUploadedRequest> request,
-      {$grpc.CallOptions? options}) {
+    $async.Stream<$0.FilterNotUploadedRequest> request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createStreamingCall(_$filterNotUploaded, request, options: options);
   }
 
+  /// SAMBA Drive
   $grpc.ResponseFuture<$0.SetDriveSMBResponse> setDriveSMB(
-      $0.SetDriveSMBRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.SetDriveSMBRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$setDriveSMB, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.ListDriveSMBSharesResponse> listDriveSMBShares(
-      $0.ListDriveSMBSharesRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.ListDriveSMBSharesRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$listDriveSMBShares, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.ListDriveSMBDirResponse> listDriveSMBDir(
-      $0.ListDriveSMBDirRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.ListDriveSMBDirRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$listDriveSMBDir, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.SetDriveSMBShareResponse> setDriveSMBShare(
-      $0.SetDriveSMBShareRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.SetDriveSMBShareRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$setDriveSMBShare, request, options: options);
   }
 
+  /// Webdav Drive
   $grpc.ResponseFuture<$0.SetDriveWebdavResponse> setDriveWebdav(
-      $0.SetDriveWebdavRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.SetDriveWebdavRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$setDriveWebdav, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.ListDriveWebdavDirResponse> listDriveWebdavDir(
-      $0.ListDriveWebdavDirRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.ListDriveWebdavDirRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$listDriveWebdavDir, request, options: options);
   }
 
+  /// NFS Drive
   $grpc.ResponseFuture<$0.SetDriveNFSResponse> setDriveNFS(
-      $0.SetDriveNFSRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.SetDriveNFSRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$setDriveNFS, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.ListDriveNFSDirResponse> listDriveNFSDir(
-      $0.ListDriveNFSDirRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.ListDriveNFSDirRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$listDriveNFSDir, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk(
-      $0.SetDriveBaiduNetDiskRequest request,
-      {$grpc.CallOptions? options}) {
+    $0.SetDriveBaiduNetDiskRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$setDriveBaiduNetDisk, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.StartBaiduNetdiskLoginResponse>
-      startBaiduNetdiskLogin($0.StartBaiduNetdiskLoginRequest request,
-          {$grpc.CallOptions? options}) {
+      startBaiduNetdiskLogin(
+    $0.StartBaiduNetdiskLoginRequest request, {
+    $grpc.CallOptions? options,
+  }) {
     return $createUnaryCall(_$startBaiduNetdiskLogin, request,
         options: options);
   }
+
+  // method descriptors
+
+  static final _$listByDate =
+      $grpc.ClientMethod<$0.ListByDateRequest, $0.ListByDateResponse>(
+          '/img_syncer.ImgSyncer/ListByDate',
+          ($0.ListByDateRequest value) => value.writeToBuffer(),
+          $0.ListByDateResponse.fromBuffer);
+  static final _$delete =
+      $grpc.ClientMethod<$0.DeleteRequest, $0.DeleteResponse>(
+          '/img_syncer.ImgSyncer/Delete',
+          ($0.DeleteRequest value) => value.writeToBuffer(),
+          $0.DeleteResponse.fromBuffer);
+  static final _$filterNotUploaded = $grpc.ClientMethod<
+          $0.FilterNotUploadedRequest, $0.FilterNotUploadedResponse>(
+      '/img_syncer.ImgSyncer/FilterNotUploaded',
+      ($0.FilterNotUploadedRequest value) => value.writeToBuffer(),
+      $0.FilterNotUploadedResponse.fromBuffer);
+  static final _$setDriveSMB =
+      $grpc.ClientMethod<$0.SetDriveSMBRequest, $0.SetDriveSMBResponse>(
+          '/img_syncer.ImgSyncer/SetDriveSMB',
+          ($0.SetDriveSMBRequest value) => value.writeToBuffer(),
+          $0.SetDriveSMBResponse.fromBuffer);
+  static final _$listDriveSMBShares = $grpc.ClientMethod<
+          $0.ListDriveSMBSharesRequest, $0.ListDriveSMBSharesResponse>(
+      '/img_syncer.ImgSyncer/ListDriveSMBShares',
+      ($0.ListDriveSMBSharesRequest value) => value.writeToBuffer(),
+      $0.ListDriveSMBSharesResponse.fromBuffer);
+  static final _$listDriveSMBDir =
+      $grpc.ClientMethod<$0.ListDriveSMBDirRequest, $0.ListDriveSMBDirResponse>(
+          '/img_syncer.ImgSyncer/ListDriveSMBDir',
+          ($0.ListDriveSMBDirRequest value) => value.writeToBuffer(),
+          $0.ListDriveSMBDirResponse.fromBuffer);
+  static final _$setDriveSMBShare = $grpc.ClientMethod<
+          $0.SetDriveSMBShareRequest, $0.SetDriveSMBShareResponse>(
+      '/img_syncer.ImgSyncer/SetDriveSMBShare',
+      ($0.SetDriveSMBShareRequest value) => value.writeToBuffer(),
+      $0.SetDriveSMBShareResponse.fromBuffer);
+  static final _$setDriveWebdav =
+      $grpc.ClientMethod<$0.SetDriveWebdavRequest, $0.SetDriveWebdavResponse>(
+          '/img_syncer.ImgSyncer/SetDriveWebdav',
+          ($0.SetDriveWebdavRequest value) => value.writeToBuffer(),
+          $0.SetDriveWebdavResponse.fromBuffer);
+  static final _$listDriveWebdavDir = $grpc.ClientMethod<
+          $0.ListDriveWebdavDirRequest, $0.ListDriveWebdavDirResponse>(
+      '/img_syncer.ImgSyncer/ListDriveWebdavDir',
+      ($0.ListDriveWebdavDirRequest value) => value.writeToBuffer(),
+      $0.ListDriveWebdavDirResponse.fromBuffer);
+  static final _$setDriveNFS =
+      $grpc.ClientMethod<$0.SetDriveNFSRequest, $0.SetDriveNFSResponse>(
+          '/img_syncer.ImgSyncer/SetDriveNFS',
+          ($0.SetDriveNFSRequest value) => value.writeToBuffer(),
+          $0.SetDriveNFSResponse.fromBuffer);
+  static final _$listDriveNFSDir =
+      $grpc.ClientMethod<$0.ListDriveNFSDirRequest, $0.ListDriveNFSDirResponse>(
+          '/img_syncer.ImgSyncer/ListDriveNFSDir',
+          ($0.ListDriveNFSDirRequest value) => value.writeToBuffer(),
+          $0.ListDriveNFSDirResponse.fromBuffer);
+  static final _$setDriveBaiduNetDisk = $grpc.ClientMethod<
+          $0.SetDriveBaiduNetDiskRequest, $0.SetDriveBaiduNetDiskResponse>(
+      '/img_syncer.ImgSyncer/SetDriveBaiduNetDisk',
+      ($0.SetDriveBaiduNetDiskRequest value) => value.writeToBuffer(),
+      $0.SetDriveBaiduNetDiskResponse.fromBuffer);
+  static final _$startBaiduNetdiskLogin = $grpc.ClientMethod<
+          $0.StartBaiduNetdiskLoginRequest, $0.StartBaiduNetdiskLoginResponse>(
+      '/img_syncer.ImgSyncer/StartBaiduNetdiskLogin',
+      ($0.StartBaiduNetdiskLoginRequest value) => value.writeToBuffer(),
+      $0.StartBaiduNetdiskLoginResponse.fromBuffer);
 }
 
+@$pb.GrpcServiceName('img_syncer.ImgSyncer')
 abstract class ImgSyncerServiceBase extends $grpc.Service {
   $core.String get $name => 'img_syncer.ImgSyncer';
 
@@ -295,99 +317,111 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         ($0.StartBaiduNetdiskLoginResponse value) => value.writeToBuffer()));
   }
 
-  $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall call,
-      $async.Future<$0.ListByDateRequest> request) async {
-    return listByDate(call, await request);
-  }
-
-  $async.Future<$0.DeleteResponse> delete_Pre(
-      $grpc.ServiceCall call, $async.Future<$0.DeleteRequest> request) async {
-    return delete(call, await request);
-  }
-
-  $async.Future<$0.SetDriveSMBResponse> setDriveSMB_Pre($grpc.ServiceCall call,
-      $async.Future<$0.SetDriveSMBRequest> request) async {
-    return setDriveSMB(call, await request);
-  }
-
-  $async.Future<$0.ListDriveSMBSharesResponse> listDriveSMBShares_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.ListDriveSMBSharesRequest> request) async {
-    return listDriveSMBShares(call, await request);
-  }
-
-  $async.Future<$0.ListDriveSMBDirResponse> listDriveSMBDir_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.ListDriveSMBDirRequest> request) async {
-    return listDriveSMBDir(call, await request);
-  }
-
-  $async.Future<$0.SetDriveSMBShareResponse> setDriveSMBShare_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.SetDriveSMBShareRequest> request) async {
-    return setDriveSMBShare(call, await request);
-  }
-
-  $async.Future<$0.SetDriveWebdavResponse> setDriveWebdav_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.SetDriveWebdavRequest> request) async {
-    return setDriveWebdav(call, await request);
-  }
-
-  $async.Future<$0.ListDriveWebdavDirResponse> listDriveWebdavDir_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.ListDriveWebdavDirRequest> request) async {
-    return listDriveWebdavDir(call, await request);
-  }
-
-  $async.Future<$0.SetDriveNFSResponse> setDriveNFS_Pre($grpc.ServiceCall call,
-      $async.Future<$0.SetDriveNFSRequest> request) async {
-    return setDriveNFS(call, await request);
-  }
-
-  $async.Future<$0.ListDriveNFSDirResponse> listDriveNFSDir_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.ListDriveNFSDirRequest> request) async {
-    return listDriveNFSDir(call, await request);
-  }
-
-  $async.Future<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.SetDriveBaiduNetDiskRequest> request) async {
-    return setDriveBaiduNetDisk(call, await request);
-  }
-
-  $async.Future<$0.StartBaiduNetdiskLoginResponse> startBaiduNetdiskLogin_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.StartBaiduNetdiskLoginRequest> request) async {
-    return startBaiduNetdiskLogin(call, await request);
+  $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.ListByDateRequest> $request) async {
+    return listByDate($call, await $request);
   }
 
   $async.Future<$0.ListByDateResponse> listByDate(
       $grpc.ServiceCall call, $0.ListByDateRequest request);
+
+  $async.Future<$0.DeleteResponse> delete_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.DeleteRequest> $request) async {
+    return delete($call, await $request);
+  }
+
   $async.Future<$0.DeleteResponse> delete(
       $grpc.ServiceCall call, $0.DeleteRequest request);
+
   $async.Stream<$0.FilterNotUploadedResponse> filterNotUploaded(
       $grpc.ServiceCall call,
       $async.Stream<$0.FilterNotUploadedRequest> request);
+
+  $async.Future<$0.SetDriveSMBResponse> setDriveSMB_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveSMBRequest> $request) async {
+    return setDriveSMB($call, await $request);
+  }
+
   $async.Future<$0.SetDriveSMBResponse> setDriveSMB(
       $grpc.ServiceCall call, $0.SetDriveSMBRequest request);
+
+  $async.Future<$0.ListDriveSMBSharesResponse> listDriveSMBShares_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListDriveSMBSharesRequest> $request) async {
+    return listDriveSMBShares($call, await $request);
+  }
+
   $async.Future<$0.ListDriveSMBSharesResponse> listDriveSMBShares(
       $grpc.ServiceCall call, $0.ListDriveSMBSharesRequest request);
+
+  $async.Future<$0.ListDriveSMBDirResponse> listDriveSMBDir_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListDriveSMBDirRequest> $request) async {
+    return listDriveSMBDir($call, await $request);
+  }
+
   $async.Future<$0.ListDriveSMBDirResponse> listDriveSMBDir(
       $grpc.ServiceCall call, $0.ListDriveSMBDirRequest request);
+
+  $async.Future<$0.SetDriveSMBShareResponse> setDriveSMBShare_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveSMBShareRequest> $request) async {
+    return setDriveSMBShare($call, await $request);
+  }
+
   $async.Future<$0.SetDriveSMBShareResponse> setDriveSMBShare(
       $grpc.ServiceCall call, $0.SetDriveSMBShareRequest request);
+
+  $async.Future<$0.SetDriveWebdavResponse> setDriveWebdav_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveWebdavRequest> $request) async {
+    return setDriveWebdav($call, await $request);
+  }
+
   $async.Future<$0.SetDriveWebdavResponse> setDriveWebdav(
       $grpc.ServiceCall call, $0.SetDriveWebdavRequest request);
+
+  $async.Future<$0.ListDriveWebdavDirResponse> listDriveWebdavDir_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListDriveWebdavDirRequest> $request) async {
+    return listDriveWebdavDir($call, await $request);
+  }
+
   $async.Future<$0.ListDriveWebdavDirResponse> listDriveWebdavDir(
       $grpc.ServiceCall call, $0.ListDriveWebdavDirRequest request);
+
+  $async.Future<$0.SetDriveNFSResponse> setDriveNFS_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveNFSRequest> $request) async {
+    return setDriveNFS($call, await $request);
+  }
+
   $async.Future<$0.SetDriveNFSResponse> setDriveNFS(
       $grpc.ServiceCall call, $0.SetDriveNFSRequest request);
+
+  $async.Future<$0.ListDriveNFSDirResponse> listDriveNFSDir_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListDriveNFSDirRequest> $request) async {
+    return listDriveNFSDir($call, await $request);
+  }
+
   $async.Future<$0.ListDriveNFSDirResponse> listDriveNFSDir(
       $grpc.ServiceCall call, $0.ListDriveNFSDirRequest request);
+
+  $async.Future<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveBaiduNetDiskRequest> $request) async {
+    return setDriveBaiduNetDisk($call, await $request);
+  }
+
   $async.Future<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk(
       $grpc.ServiceCall call, $0.SetDriveBaiduNetDiskRequest request);
+
+  $async.Future<$0.StartBaiduNetdiskLoginResponse> startBaiduNetdiskLogin_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.StartBaiduNetdiskLoginRequest> $request) async {
+    return startBaiduNetdiskLogin($call, await $request);
+  }
+
   $async.Future<$0.StartBaiduNetdiskLoginResponse> startBaiduNetdiskLogin(
       $grpc.ServiceCall call, $0.StartBaiduNetdiskLoginRequest request);
 }

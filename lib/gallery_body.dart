@@ -16,7 +16,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:img_syncer/global.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:gal/gal.dart';
 import 'package:vibration/vibration.dart';
 import 'package:img_syncer/choose_album_route.dart';
 import 'package:img_syncer/setting_storage_route.dart';
@@ -235,7 +235,7 @@ class GalleryBodyState extends State<GalleryBody>
         mimeType: asset.mimeType(),
       ));
     }
-    Share.shareXFiles(xfiles);
+    SharePlus.instance.share(ShareParams(files: xfiles));
   }
 
   void downloadSelected() async {
@@ -278,7 +278,7 @@ class GalleryBodyState extends State<GalleryBody>
           final file = File(savePath);
           await file.writeAsBytes(data);
           await file.setLastModified(asset.dateCreated());
-          await GallerySaver.saveImage(savePath, toDcim: true);
+          await Gal.putImage(savePath);
         }
 
         count++;
@@ -649,7 +649,7 @@ class GalleryBodyState extends State<GalleryBody>
                         onChanged: (value) {
                           toggleSelection(i);
                         },
-                        fillColor: MaterialStateProperty.all(
+                        fillColor: WidgetStateProperty.all(
                             Theme.of(context).colorScheme.secondary),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),

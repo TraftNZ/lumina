@@ -7,8 +7,8 @@ VERSION_PACKAGE_NAME := github.com/fregie/PrintVersion
 DESCRIBE := img_syncer grpc server
 
 prebuild:
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1.0
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 protobuf:
 	protoc -I. --go_out . --go_opt paths=source_relative \
@@ -27,7 +27,7 @@ server:
     -o server/output/${BUILD_NAME} ./server
 
 server-aar: protobuf
-	CGO_ENABLED=0 gomobile bind -target=android -androidapi 21 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run
+	CGO_ENABLED=0 gomobile bind -target=android -androidapi 24 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run
 
 server-ios: protobuf
 	CGO_ENABLED=0 gomobile bind -target=ios -ldflags "-s -w" -o ios/Frameworks/RUN.xcframework ./server/run

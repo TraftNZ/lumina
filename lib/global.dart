@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/logger.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:img_syncer/l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
@@ -39,10 +39,17 @@ class Global {
         if (!re) return;
         final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
             type: RequestType.common, hasAll: true);
-        // ignore: deprecated_member_use
-        paths.sort((a, b) => b.assetCount.compareTo(a.assetCount));
-        if (paths.isNotEmpty) {
-          settingModel.setLocalFolder(paths[0].name);
+        int maxCount = 0;
+        String maxName = '';
+        for (var path in paths) {
+          final count = await path.assetCountAsync;
+          if (count > maxCount) {
+            maxCount = count;
+            maxName = path.name;
+          }
+        }
+        if (maxName.isNotEmpty) {
+          settingModel.setLocalFolder(maxName);
         }
       }
       await initDrive();
@@ -204,7 +211,7 @@ class SnackBarManager {
 late AppLocalizations l10n;
 
 void initI18n(BuildContext context) {
-  l10n = AppLocalizations.of(context);
+  l10n = AppLocalizations.of(context)!;
 }
 
 Completer<bool>? requesttingPermission;

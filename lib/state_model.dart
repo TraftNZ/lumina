@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'dart:io';
 import 'package:date_format/date_format.dart';
 import 'package:grpc/grpc.dart';
@@ -193,8 +192,9 @@ class AssetModel extends ChangeNotifier {
     if (settingModel.localFolder == "") {
       int max = 0;
       for (var path in paths) {
-        if (path.assetCount > max) {
-          max = path.assetCount;
+        final count = await path.assetCountAsync;
+        if (count > max) {
+          max = count;
           settingModel.localFolder = path.name;
         }
       }

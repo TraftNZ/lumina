@@ -9,7 +9,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:img_syncer/logger.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:img_syncer/l10n/app_localizations.dart';
 import 'package:img_syncer/theme.dart';
 
 const seedThemeColor = Color(0xFF02FED1);
