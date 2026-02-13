@@ -142,6 +142,8 @@ class AssetModel extends ChangeNotifier {
   }
   List<Asset> localAssets = [];
   List<Asset> remoteAssets = [];
+  List<Asset> _unifiedAssets = [];
+  bool _unifiedDirty = true;
   int columCount = 4;
   int pageSize = 500;
   bool localHasMore = true;
@@ -151,12 +153,46 @@ class AssetModel extends ChangeNotifier {
 
   String? remoteLastError;
 
+  bool get hasMore => localHasMore || remoteHasMore;
+
+  List<Asset> getUnifiedAssets() {
+    if (_unifiedDirty) _rebuildUnifiedList();
+    return _unifiedAssets;
+  }
+
+  void _rebuildUnifiedList() {
+    final localKeys = <String>{};
+    for (final a in localAssets) {
+      final key = a.dedupKey;
+      if (key != null) localKeys.add(key);
+    }
+    final cloudOnly = remoteAssets.where((a) {
+      final key = a.dedupKey;
+      return key == null || !localKeys.contains(key);
+    });
+    _unifiedAssets = [...localAssets, ...cloudOnly];
+    _unifiedAssets.sort((a, b) => b.dateCreated().compareTo(a.dateCreated()));
+    _unifiedDirty = false;
+  }
+
+  Future<void> getMorePhotos() async {
+    final futures = <Future>[];
+    if (localHasMore) futures.add(getLocalPhotos());
+    if (remoteHasMore) futures.add(getRemotePhotos());
+    await Future.wait(futures);
+  }
+
+  Future<void> refreshAll() async {
+    await Future.wait([refreshLocal(), refreshRemote()]);
+  }
+
   Future<void> refreshLocal() async {
     if (localGetting != null) {
       await localGetting!.future;
     }
     localHasMore = true;
     localAssets = [];
+    _unifiedDirty = true;
     notifyListeners();
     stateModel.setNotSyncedPhotos([]);
     await getLocalPhotos();
@@ -168,6 +204,7 @@ class AssetModel extends ChangeNotifier {
     }
     remoteHasMore = true;
     remoteAssets = [];
+    _unifiedDirty = true;
     notifyListeners();
     remoteGetting = null;
     stateModel.setNotSyncedPhotos([]);
@@ -224,6 +261,7 @@ class AssetModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+    _unifiedDirty = true;
     notifyListeners();
     if (stateModel.notSyncedIDs.isEmpty) {
       refreshUnsynchronizedPhotos();
@@ -256,6 +294,7 @@ class AssetModel extends ChangeNotifier {
           print(e);
         }
       }
+      _unifiedDirty = true;
       notifyListeners();
     } catch (e) {
       remoteLastError = e.toString();

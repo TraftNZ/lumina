@@ -18,11 +18,9 @@ import 'package:img_syncer/global.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:vibration/vibration.dart';
-import 'package:img_syncer/setting_storage_route.dart';
 
 class GalleryBody extends StatefulWidget {
-  const GalleryBody({Key? key, required this.useLocal}) : super(key: key);
-  final bool useLocal;
+  const GalleryBody({Key? key}) : super(key: key);
 
   @override
   GalleryBodyState createState() => GalleryBodyState();
@@ -101,20 +99,12 @@ class GalleryBodyState extends State<GalleryBody>
       return;
     }
     _isRefreshing = true;
-    if (widget.useLocal) {
-      assetModel.refreshLocal();
-    } else {
-      assetModel.refreshRemote();
-    }
+    await assetModel.refreshAll();
     _isRefreshing = false;
   }
 
   void getPhotos() {
-    if (widget.useLocal) {
-      assetModel.getLocalPhotos();
-    } else {
-      assetModel.getRemotePhotos();
-    }
+    assetModel.getMorePhotos();
   }
 
   void toggleSelection(int index) async {
@@ -168,22 +158,23 @@ class GalleryBodyState extends State<GalleryBody>
             onPressed: () {
               var toDelete = <Asset>[];
               try {
-                final all = widget.useLocal
-                    ? assetModel.localAssets
-                    : assetModel.remoteAssets;
+                final all = assetModel.getUnifiedAssets();
                 _selectedIndices.forEach((key, value) async {
                   if (value) {
                     toDelete.add(all[key]);
                   }
                 });
-                if (widget.useLocal) {
+                final localToDelete = toDelete.where((e) => e.hasLocal).toList();
+                final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
+                if (localToDelete.isNotEmpty) {
                   PhotoManager.editor
-                      .deleteWithIds(toDelete.map((e) => e.local!.id).toList())
+                      .deleteWithIds(localToDelete.map((e) => e.local!.id).toList())
                       .then((value) => eventBus.fire(LocalRefreshEvent()));
-                } else {
+                }
+                if (remoteToDelete.isNotEmpty) {
                   storage.cli
                       .delete(DeleteRequest(
-                        paths: toDelete.map((e) => e.remote!.path).toList(),
+                        paths: remoteToDelete.map((e) => e.remote!.path).toList(),
                       ))
                       .then((rsp) => eventBus.fire(RemoteRefreshEvent()));
                 }
@@ -211,8 +202,7 @@ class GalleryBodyState extends State<GalleryBody>
     if (!stateModel.isSelectionMode) {
       return;
     }
-    final all =
-        widget.useLocal ? assetModel.localAssets : assetModel.remoteAssets;
+    final all = assetModel.getUnifiedAssets();
     final assets = <Asset>[];
     _selectedIndices.forEach((key, isSelected) {
       if (isSelected) {
@@ -232,18 +222,17 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void downloadSelected() async {
-    if (widget.useLocal || !stateModel.isSelectionMode) {
+    if (!stateModel.isSelectionMode) {
       return;
     }
     if (settingModel.localFolderAbsPath == null) {
       SnackBarManager.showSnackBar(l10n.setLocalFirst);
       return;
     }
-    final all =
-        widget.useLocal ? assetModel.localAssets : assetModel.remoteAssets;
+    final all = assetModel.getUnifiedAssets();
     final assets = <Asset>[];
     _selectedIndices.forEach((key, isSelected) {
-      if (isSelected) {
+      if (isSelected && all[key].isCloudOnly) {
         assets.add(all[key]);
       }
     });
@@ -285,18 +274,17 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void uploadSelected() async {
-    if (!widget.useLocal || !stateModel.isSelectionMode) {
+    if (!stateModel.isSelectionMode) {
       return;
     }
     if (!settingModel.isRemoteStorageSetted) {
       SnackBarManager.showSnackBar(l10n.storageNotSetted);
       return;
     }
-    final all =
-        widget.useLocal ? assetModel.localAssets : assetModel.remoteAssets;
+    final all = assetModel.getUnifiedAssets();
     final assets = <Asset>[];
     _selectedIndices.forEach((key, isSelected) {
-      if (isSelected) {
+      if (isSelected && all[key].hasLocal) {
         assets.add(all[key]);
       }
     });
@@ -328,20 +316,18 @@ class GalleryBodyState extends State<GalleryBody>
                           Icons.share_outlined, l10n.share, _shareAsset),
                       _bottomSheetIconButton(Icons.delete_outline, l10n.delete,
                           () => _showDeleteDialog(context)),
-                      if (widget.useLocal)
-                        _bottomSheetIconButton(
-                            Icons.cloud_upload_outlined,
-                            l10n.upload,
-                            uploadSelected,
-                            isEnable: !model.isDownloading() &&
-                                !model.isUploading()),
-                      if (!widget.useLocal)
-                        _bottomSheetIconButton(
-                            Icons.cloud_download_outlined,
-                            l10n.download,
-                            downloadSelected,
-                            isEnable: !model.isDownloading() &&
-                                !model.isUploading()),
+                      _bottomSheetIconButton(
+                          Icons.cloud_upload_outlined,
+                          l10n.upload,
+                          uploadSelected,
+                          isEnable: !model.isDownloading() &&
+                              !model.isUploading()),
+                      _bottomSheetIconButton(
+                          Icons.cloud_download_outlined,
+                          l10n.download,
+                          downloadSelected,
+                          isEnable: !model.isDownloading() &&
+                              !model.isUploading()),
                     ],
                   )),
         );
@@ -395,9 +381,7 @@ class GalleryBodyState extends State<GalleryBody>
           expandedHeight: 70,
           toolbarHeight: 70,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          actions: [
-            if (!widget.useLocal) setRemoteStorageButton(context)
-          ],
+          actions: const [],
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: true,
             title: Text(
@@ -411,7 +395,7 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   Widget contentBuilder(BuildContext context, AssetModel model, Widget? child) {
-    final all = widget.useLocal ? model.localAssets : model.remoteAssets;
+    final all = model.getUnifiedAssets();
     var children = <Widget>[];
     final totalwidth = MediaQuery.of(context).size.width - columCount * 3;
     final totalHeight = MediaQuery.of(context).size.height;
@@ -482,7 +466,6 @@ class GalleryBodyState extends State<GalleryBody>
                   },
                   pageBuilder: (BuildContext context, _, __) =>
                       GalleryViewerRoute(
-                    useLocal: widget.useLocal,
                     originIndex: i,
                   ),
                 ),
@@ -503,7 +486,7 @@ class GalleryBodyState extends State<GalleryBody>
                     height: imgHeight,
                     child: Hero(
                       tag:
-                          "asset_${all[i].hasLocal ? "local" : "remote"}_${all[i].path()}",
+                          "asset_${all[i].dedupKey ?? all[i].path()}",
                       child:
                           needLoadThumbnail && all[i].loadThumbnailFinished()
                               ? Image(
@@ -535,60 +518,106 @@ class GalleryBodyState extends State<GalleryBody>
                     )),
               ),
               Consumer<StateModel>(builder: (context, stateModel, child) {
-                double percent = 0;
-                if (!widget.useLocal) {
-                  percent = stateModel.getDownloadPercent(all[i].name()!);
-                } else {
-                  percent = stateModel.getUploadPercent(all[i].local!.id);
+                final asset = all[i];
+                // Upload progress for local assets
+                if (asset.hasLocal) {
+                  final uploadPercent = stateModel.getUploadPercent(asset.local!.id);
+                  if (uploadPercent > 0) {
+                    return Positioned(
+                      bottom: 2,
+                      right: 4,
+                      width: 20,
+                      height: 20,
+                      child: Stack(
+                        children: [
+                          const Center(
+                            child: Icon(
+                                Icons.arrow_upward_outlined,
+                                color: Colors.white,
+                                size: 16),
+                          ),
+                          CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                            value: uploadPercent,
+                          )
+                        ],
+                      ),
+                    );
+                  }
                 }
-                if (percent > 0) {
+                // Download progress for cloud-only assets
+                if (asset.isCloudOnly) {
+                  final downloadPercent = stateModel.getDownloadPercent(asset.name()!);
+                  if (downloadPercent > 0) {
+                    return Positioned(
+                      bottom: 2,
+                      right: 4,
+                      width: 20,
+                      height: 20,
+                      child: Stack(
+                        children: [
+                          const Center(
+                            child: Icon(
+                                Icons.arrow_downward_outlined,
+                                color: Colors.white,
+                                size: 16),
+                          ),
+                          CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                            value: downloadPercent,
+                          )
+                        ],
+                      ),
+                    );
+                  }
+                }
+                // Sync status badge for local assets (always shown)
+                if (asset.hasLocal) {
+                  final isSynced = stateModel.notSyncedIDs.isNotEmpty &&
+                      !stateModel.notSyncedIDs.contains(asset.local!.id);
                   return Positioned(
                     bottom: 2,
                     right: 4,
-                    width: 20,
-                    height: 20,
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Icon(
-                              widget.useLocal
-                                  ? Icons.arrow_upward_outlined
-                                  : Icons.arrow_downward_outlined,
-                              color: Colors.white,
-                              size: 16),
-                        ),
-                        CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                          value: percent,
-                        )
-                      ],
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: isSynced
+                            ? colorScheme.primary.withAlpha(180)
+                            : colorScheme.onSurface.withAlpha(140),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        isSynced
+                            ? Icons.cloud_done_outlined
+                            : Icons.cloud_upload_outlined,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                     ),
                   );
                 }
-                var showCloudBadge = false;
-                if (widget.useLocal &&
-                    stateModel.notSyncedIDs.isNotEmpty &&
-                    !stateModel.notSyncedIDs.contains(all[i].local!.id)) {
-                  showCloudBadge = true;
+                // Cloud-only badge
+                if (asset.isCloudOnly) {
+                  return Positioned(
+                    bottom: 2,
+                    right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: colorScheme.tertiary.withAlpha(180),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.cloud_outlined,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ),
+                  );
                 }
-                if (!showCloudBadge) return const SizedBox.shrink();
-                return Positioned(
-                  bottom: 2,
-                  right: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withAlpha(180),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.cloud_done_outlined,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                  ),
-                );
+                return const SizedBox.shrink();
               }),
               if (all[i].isVideo())
                 const Positioned(
@@ -663,7 +692,7 @@ class GalleryBodyState extends State<GalleryBody>
               offstage: !_showToTopBtn,
               child: FloatingActionButton.small(
                 onPressed: _scrollToTop,
-                heroTag: 'gallery_body_${widget.useLocal}_toTop',
+                heroTag: 'gallery_body_toTop',
                 child: const Icon(Icons.arrow_upward),
               ),
             ),
@@ -672,17 +701,4 @@ class GalleryBodyState extends State<GalleryBody>
       ),
     );
   }
-}
-
-Widget setRemoteStorageButton(BuildContext context) {
-  return IconButton(
-    icon: const Icon(Icons.settings_outlined),
-    tooltip: 'Set remote storage',
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SettingStorageRoute()),
-      );
-    },
-  );
 }

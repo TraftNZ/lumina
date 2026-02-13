@@ -118,8 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: IndexedStack(
             index: _selectedIndex,
             children: [
-              const GalleryBody(useLocal: true),
-              const GalleryBody(useLocal: false),
+              const GalleryBody(),
               Consumer<SettingModel>(
                 builder: (context, model, child) {
                   return SyncBody(localFolder: model.localFolder);
@@ -138,12 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   NavigationDestination(
                     icon: const Icon(Icons.photo_library_outlined),
                     selectedIcon: const Icon(Icons.photo_library),
-                    label: l10n.local,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.cloud_outlined),
-                    selectedIcon: const Icon(Icons.cloud),
-                    label: l10n.cloud,
+                    label: l10n.library,
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.sync_outlined),

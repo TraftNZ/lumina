@@ -1,6 +1,5 @@
 {
-  "local": "Local",
-  "cloud": "Cloud",
+  "library": "Library",
   "sync": "Sync",
   "cloudSync": "Cloud sync",
   "localFolder": "Local folder",

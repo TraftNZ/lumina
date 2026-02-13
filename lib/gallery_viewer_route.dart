@@ -16,10 +16,8 @@ import 'package:gal/gal.dart';
 class GalleryViewerRoute extends StatefulWidget {
   const GalleryViewerRoute({
     Key? key,
-    required this.useLocal,
     required this.originIndex,
   }) : super(key: key);
-  final bool useLocal;
   final int originIndex;
 
   @override
@@ -40,7 +38,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
       initialPage: widget.originIndex,
       keepPage: true,
     );
-    all = widget.useLocal ? assetModel.localAssets : assetModel.remoteAssets;
+    all = assetModel.getUnifiedAssets();
     all[currentIndex].readInfoFromData();
     assetModel.addListener(() {
       if (mounted) {
@@ -181,15 +179,17 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
             child: Align(
               alignment: Alignment.center,
               child: Icon(
-                all[currentIndex].isLocal()
-                    ? Icons.phone_android
-                    : Icons.cloud_outlined,
+                all[currentIndex].hasLocal && all[currentIndex].hasRemote
+                    ? Icons.cloud_done
+                    : all[currentIndex].hasLocal
+                        ? Icons.phone_android
+                        : Icons.cloud_outlined,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           title: Text(
-              all[currentIndex].isLocal() ? l10n.local : l10n.cloud,
+              l10n.library,
               style: textTheme.bodyMedium),
           subtitle: RichText(
             text: TextSpan(
@@ -229,7 +229,8 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                 try {
                   if (all[currentIndex].hasLocal) {
                     eventBus.fire(LocalRefreshEvent());
-                  } else {
+                  }
+                  if (all[currentIndex].hasRemote) {
                     eventBus.fire(RemoteRefreshEvent());
                   }
                 } catch (e) {
@@ -380,7 +381,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                     ));
                   },
                 ),
-                if (!all[currentIndex].isLocal())
+                if (all[currentIndex].isCloudOnly)
                   Consumer<StateModel>(builder: (context, model, child) {
                     return IconButton(
                       icon: const Icon(Icons.cloud_download_outlined),
@@ -390,7 +391,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                               : download(all[currentIndex]),
                     );
                   }),
-                if (all[currentIndex].isLocal())
+                if (all[currentIndex].hasLocal)
                   Consumer<StateModel>(builder: (context, stateModel, child) {
                     return IconButton(
                       icon: stateModel.notSyncedIDs.isNotEmpty &&
@@ -417,7 +418,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
           : null,
       body: Hero(
         tag:
-            "asset_${widget.useLocal ? "local" : "remote"}_${all[currentIndex].path()}",
+            "asset_${all[currentIndex].dedupKey ?? all[currentIndex].path()}",
         flightShuttleBuilder: (BuildContext flightContext,
             Animation<double> animation,
             HeroFlightDirection flightDirection,
@@ -456,11 +457,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                 }
               });
               if (all.length - index < 5) {
-                if (widget.useLocal) {
-                  assetModel.getLocalPhotos();
-                } else {
-                  assetModel.getRemotePhotos();
-                }
+                assetModel.getMorePhotos();
               }
             },
             itemBuilder: (BuildContext context, int index) {

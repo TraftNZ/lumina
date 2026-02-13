@@ -51,6 +51,17 @@ class Asset extends ImageProvider<Asset> {
     return hasLocal;
   }
 
+  bool get isCloudOnly => hasRemote && !hasLocal;
+
+  String? get dedupKey {
+    final n = name();
+    if (n == null || n.isEmpty) return null;
+    final d = dateCreated();
+    return "${d.year.toString().padLeft(4, '0')}-"
+        "${d.month.toString().padLeft(2, '0')}-"
+        "${d.day.toString().padLeft(2, '0')}_$n";
+  }
+
   bool hasGotTitle() {
     return localTitle != null;
   }

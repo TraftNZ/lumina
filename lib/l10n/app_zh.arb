@@ -1,6 +1,5 @@
 {
-    "local": "本地",
-    "cloud": "云端",
+    "library": "照片库",
     "sync": "同步",
     "cloudSync": "云端同步",
     "localFolder": "本地相册",

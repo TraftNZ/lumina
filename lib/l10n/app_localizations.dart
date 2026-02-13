@@ -95,17 +95,11 @@ abstract class AppLocalizations {
     Locale('zh')
   ];
 
-  /// No description provided for @local.
+  /// No description provided for @library.
   ///
   /// In en, this message translates to:
-  /// **'Local'**
-  String get local;
-
-  /// No description provided for @cloud.
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud'**
-  String get cloud;
+  /// **'Library'**
+  String get library;
 
   /// No description provided for @sync.
   ///

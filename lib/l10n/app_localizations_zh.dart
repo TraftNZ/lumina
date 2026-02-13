@@ -9,10 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get local => '本地';
-
-  @override
-  String get cloud => '云端';
+  String get library => '照片库';
 
   @override
   String get sync => '同步';
