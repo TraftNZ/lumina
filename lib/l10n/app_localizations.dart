@@ -490,6 +490,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All photos synced!'**
   String get allSynced;
+
+  /// No description provided for @backingUpPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up {count} {count, plural, =1{photo} other{photos}}'**
+  String backingUpPhotos(int count);
+
+  /// No description provided for @nRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} remaining'**
+  String nRemaining(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

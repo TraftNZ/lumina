@@ -64,5 +64,7 @@
     "settings": "设置",
     "about": "关于",
     "version": "版本",
-    "allSynced": "所有照片已同步！"
+    "allSynced": "所有照片已同步！",
+    "backingUpPhotos": "正在备份 {count} 张照片",
+    "nRemaining": "剩余 {count} 张"
 }

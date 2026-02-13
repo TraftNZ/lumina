@@ -84,26 +84,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,32 +97,70 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context, model, child) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: IndexedStack(
-            index: _selectedIndex,
-            children: const [
-              GalleryBody(),
-              SettingBody(),
+          child: Stack(
+            children: [
+              const GalleryBody(),
+              if (!model.isSelectionMode)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 12,
+                  child: _FloatingBottomBar(),
+                ),
             ],
           ),
         ),
-        bottomNavigationBar: model.isSelectionMode
-            ? null
-            : NavigationBar(
-                onDestinationSelected: _onItemTapped,
-                selectedIndex: _selectedIndex,
-                destinations: <Widget>[
-                  NavigationDestination(
-                    icon: const Icon(Icons.photo_library_outlined),
-                    selectedIcon: const Icon(Icons.photo_library),
-                    label: l10n.library,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.settings_outlined),
-                    selectedIcon: const Icon(Icons.settings),
-                    label: l10n.settings,
-                  ),
-                ],
+      ),
+    );
+  }
+}
+
+class _FloatingBottomBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      elevation: 3,
+      shape: const StadiumBorder(),
+      color: colorScheme.surfaceContainerHigh,
+      child: SizedBox(
+        height: 56,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.photo_library, size: 20, color: colorScheme.onPrimaryContainer),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.library,
+                      style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimaryContainer),
+                    ),
+                  ],
+                ),
               ),
+              const Spacer(),
+              IconButton(
+                icon: Icon(Icons.settings_outlined, color: colorScheme.onSurfaceVariant),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingBody()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

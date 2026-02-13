@@ -22,21 +22,6 @@ ThemeData buildLightTheme(ColorScheme colorScheme) {
       foregroundColor: colorScheme.onSurface,
       iconTheme: IconThemeData(color: colorScheme.onSurface),
     ),
-    navigationBarTheme: NavigationBarThemeData(
-      height: 67,
-      indicatorColor: colorScheme.secondaryContainer,
-      iconTheme: WidgetStatePropertyAll(
-        IconThemeData(color: colorScheme.onSurface),
-      ),
-      labelTextStyle: WidgetStatePropertyAll(
-        TextStyle(
-          fontFamily: 'Ubuntu',
-          fontSize: 14,
-          color: colorScheme.onSurface,
-          height: 1,
-        ),
-      ),
-    ),
     iconTheme: IconThemeData(color: colorScheme.onSurface),
     cardTheme: CardThemeData(
       elevation: 1,
@@ -136,21 +121,6 @@ ThemeData buildDarkTheme(ColorScheme colorScheme) {
       backgroundColor: colorScheme.surface,
       foregroundColor: colorScheme.onSurface,
       iconTheme: IconThemeData(color: colorScheme.onSurface),
-    ),
-    navigationBarTheme: NavigationBarThemeData(
-      height: 67,
-      indicatorColor: colorScheme.secondaryContainer,
-      iconTheme: WidgetStatePropertyAll(
-        IconThemeData(color: colorScheme.onSurface),
-      ),
-      labelTextStyle: WidgetStatePropertyAll(
-        TextStyle(
-          fontFamily: 'Ubuntu',
-          fontSize: 14,
-          color: colorScheme.onSurface,
-          height: 1,
-        ),
-      ),
     ),
     iconTheme: IconThemeData(color: colorScheme.onSurface),
     cardTheme: CardThemeData(

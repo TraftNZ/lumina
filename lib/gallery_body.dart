@@ -29,11 +29,12 @@ class GalleryBody extends StatefulWidget {
 class GalleryBodyState extends State<GalleryBody>
     with AutomaticKeepAliveClientMixin {
   bool _showToTopBtn = false;
+  bool _syncPanelExpanded = false;
   @override
   bool get wantKeepAlive => true;
   final ScrollController _scrollController = ScrollController();
   final _scrollSubject = PublishSubject<double>();
-  int columCount = 4;
+  int columCount = 3;
   double scrollOffset = 0;
 
   final Map<int, bool> _selectedIndices = {};
@@ -197,79 +198,10 @@ class GalleryBodyState extends State<GalleryBody>
     eventBus.fire(RemoteRefreshEvent());
   }
 
-  void _showSyncProgress() {
-    final colorScheme = Theme.of(context).colorScheme;
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return Consumer<StateModel>(
-          builder: (context, model, child) {
-            final progress = model.syncTotal > 0
-                ? model.syncDone / model.syncTotal
-                : 0.0;
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.cloud_upload_outlined,
-                          color: colorScheme.primary),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          model.isSyncing
-                              ? '${l10n.uploading} ${model.syncDone}/${model.syncTotal}'
-                              : l10n.allSynced,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (model.isSyncing) ...[
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 6,
-                        color: colorScheme.primary,
-                        backgroundColor: colorScheme.surfaceContainerHighest,
-                      ),
-                    ),
-                    if (model.syncCurrentFile != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        model.syncCurrentFile!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          stateModel.cancelSync();
-                          Navigator.pop(context);
-                        },
-                        child: Text(l10n.stop),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+  void _toggleSyncPanel() {
+    setState(() {
+      _syncPanelExpanded = !_syncPanelExpanded;
+    });
   }
 
   void _showDeleteDialog(BuildContext context) {
@@ -496,62 +428,132 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
-  Widget appBar() {
-    return Consumer<StateModel>(
-      builder: (context, model, child) {
-        return SliverAppBar(
-          pinned: false,
-          snap: false,
-          floating: true,
-          expandedHeight: 70,
-          toolbarHeight: 70,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          actions: [
-            if (model.isSyncing)
-              GestureDetector(
-                onTap: _showSyncProgress,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          value: model.syncTotal > 0
-                              ? model.syncDone / model.syncTotal
-                              : null,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+  Widget _buildToolbar() {
+    return SliverToBoxAdapter(
+      child: Consumer<StateModel>(
+        builder: (context, model, child) {
+          final colorScheme = Theme.of(context).colorScheme;
+          return Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  'Lumina',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w400,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${model.syncDone}/${model.syncTotal}',
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-          ],
-          flexibleSpace: FlexibleSpaceBar(
-            centerTitle: true,
-            title: Text(
-              'Lumina',
-              style: Theme.of(context).textTheme.headlineMedium,
+                const Spacer(),
+                if (model.isSyncing)
+                  GestureDetector(
+                    onTap: _toggleSyncPanel,
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: CircularProgressIndicator(
+                              value: model.syncTotal > 0
+                                  ? model.syncDone / model.syncTotal
+                                  : null,
+                              strokeWidth: 3,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          Icon(Icons.cloud_sync, size: 18, color: colorScheme.primary),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Icon(
+                    Icons.cloud_done,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
+              ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSyncPanel() {
+    return SliverToBoxAdapter(
+      child: Consumer<StateModel>(
+        builder: (context, model, child) {
+          final colorScheme = Theme.of(context).colorScheme;
+          final textTheme = Theme.of(context).textTheme;
+          final remaining = model.syncTotal - model.syncDone;
+          final progress = model.syncTotal > 0
+              ? model.syncDone / model.syncTotal
+              : 0.0;
+          return AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            child: _syncPanelExpanded && model.isSyncing
+                ? Container(
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.backingUpPhotos(remaining),
+                          style: textTheme.bodyLarge,
+                        ),
+                        const SizedBox(height: 12),
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: CircularProgressIndicator(
+                                    value: progress,
+                                    strokeWidth: 3,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Text(
+                                  l10n.nRemaining(remaining),
+                                  style: textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              stateModel.cancelSync();
+                            },
+                            child: Text(l10n.stop),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          );
+        },
+      ),
     );
   }
 
   Widget contentBuilder(BuildContext context, AssetModel model, Widget? child) {
     final all = model.getUnifiedAssets();
     var children = <Widget>[];
-    final totalwidth = MediaQuery.of(context).size.width - columCount * 3;
+    final totalwidth = MediaQuery.of(context).size.width - (columCount - 1) * 2;
     final totalHeight = MediaQuery.of(context).size.height;
     final imgWidth = totalwidth / columCount;
     final imgHeight = imgWidth;
@@ -570,20 +572,20 @@ class GalleryBodyState extends State<GalleryBody>
           date.month != currentDateTime.month ||
           date.day != currentDateTime.day) {
         children.add(Wrap(
-          spacing: 3,
-          runSpacing: 3.0,
+          spacing: 2,
+          runSpacing: 2.0,
           alignment: WrapAlignment.start,
           children: currentChildren,
         ));
-        currentScrollOffset -= 3;
+        currentScrollOffset -= 2;
         currentChildren = <Widget>[];
         DateFormat format = DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE',
             Localizations.localeOf(context).languageCode);
         children.add(Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
           child: Text(
             format.format(date),
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
           ),
@@ -633,9 +635,7 @@ class GalleryBodyState extends State<GalleryBody>
           },
           child: Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(2),
-                child: SizedBox(
+              SizedBox(
                     width: imgWidth,
                     height: imgHeight,
                     child: Hero(
@@ -670,7 +670,6 @@ class GalleryBodyState extends State<GalleryBody>
                         );
                       },
                     )),
-              ),
               Consumer<StateModel>(builder: (context, stateModel, child) {
                 final asset = all[i];
                 // Active upload progress
@@ -781,19 +780,20 @@ class GalleryBodyState extends State<GalleryBody>
           ));
       currentChildren.add(child);
       if (currentChildren.length % columCount == 1) {
-        currentScrollOffset += imgHeight + 3;
+        currentScrollOffset += imgHeight + 2;
       }
       currentDateTime = all[i].dateCreated();
 
       if (i == all.length - 1) {
         children.add(Wrap(
-          spacing: 3,
-          runSpacing: 3.0,
+          spacing: 2,
+          runSpacing: 2.0,
           alignment: WrapAlignment.start,
           children: currentChildren,
         ));
       }
     }
+    children.add(const SizedBox(height: 80));
     return SliverList.list(
       children: children,
     );
@@ -811,11 +811,12 @@ class GalleryBodyState extends State<GalleryBody>
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                appBar(),
+                _buildToolbar(),
+                _buildSyncPanel(),
                 Consumer<AssetModel>(builder: contentBuilder),
               ]),
           Positioned(
-            bottom: 20,
+            bottom: 80,
             right: 20,
             child: Offstage(
               offstage: !_showToTopBtn,

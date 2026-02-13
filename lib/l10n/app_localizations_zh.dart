@@ -205,4 +205,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get allSynced => '所有照片已同步！';
+
+  @override
+  String backingUpPhotos(int count) {
+    return '正在备份 $count 张照片';
+  }
+
+  @override
+  String nRemaining(int count) {
+    return '剩余 $count 张';
+  }
 }

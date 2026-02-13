@@ -205,4 +205,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allSynced => 'All photos synced!';
+
+  @override
+  String backingUpPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'photos',
+      one: 'photo',
+    );
+    return 'Backing up $count $_temp0';
+  }
+
+  @override
+  String nRemaining(int count) {
+    return '$count remaining';
+  }
 }

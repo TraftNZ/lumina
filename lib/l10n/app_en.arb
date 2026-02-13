@@ -64,5 +64,21 @@
   "settings": "Settings",
   "about": "About",
   "version": "Version",
-  "allSynced": "All photos synced!"
+  "allSynced": "All photos synced!",
+  "backingUpPhotos": "Backing up {count} {count, plural, =1{photo} other{photos}}",
+  "@backingUpPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nRemaining": "{count} remaining",
+  "@nRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
