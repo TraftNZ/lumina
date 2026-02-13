@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:img_syncer/state_model.dart';
 import 'gallery_body.dart';
 import 'setting_body.dart';
-import 'sync_body.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:img_syncer/logger.dart';
@@ -117,14 +116,9 @@ class _MyHomePageState extends State<MyHomePage> {
         body: SafeArea(
           child: IndexedStack(
             index: _selectedIndex,
-            children: [
-              const GalleryBody(),
-              Consumer<SettingModel>(
-                builder: (context, model, child) {
-                  return SyncBody(localFolder: model.localFolder);
-                },
-              ),
-              const SettingBody(),
+            children: const [
+              GalleryBody(),
+              SettingBody(),
             ],
           ),
         ),
@@ -138,11 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: const Icon(Icons.photo_library_outlined),
                     selectedIcon: const Icon(Icons.photo_library),
                     label: l10n.library,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.sync_outlined),
-                    selectedIcon: const Icon(Icons.sync),
-                    label: l10n.sync,
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.settings_outlined),

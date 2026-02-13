@@ -16,6 +16,7 @@ import 'dart:io';
 late String httpBaseUrl;
 late int grpcPort;
 late int httpPort;
+bool isServerReady = false;
 
 class Global {
   static Future init() async {
@@ -53,6 +54,7 @@ class Global {
           settingModel.setLocalFolder(maxName);
         }
       }
+      isServerReady = true;
       await resolveLocalFolderAbsPath();
       await initDrive();
       reloadAutoSyncTimer();
@@ -62,6 +64,7 @@ class Global {
 
 DateTime? lastAliveTime;
 Future<void> checkServer() async {
+  if (!isServerReady) return;
   if (lastAliveTime != null &&
       DateTime.now().difference(lastAliveTime!) < const Duration(seconds: 60)) {
     return;

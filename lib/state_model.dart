@@ -133,6 +133,40 @@ class StateModel extends ChangeNotifier {
     refreshingUnsynchronized = refreshing;
     notifyListeners();
   }
+
+  int syncTotal = 0;
+  int syncDone = 0;
+  String? syncCurrentFile;
+  bool syncCancelled = false;
+
+  bool get isSyncing => syncTotal > 0 && syncDone < syncTotal;
+
+  void startSync(int total) {
+    syncDone = 0;
+    syncTotal = total;
+    syncCurrentFile = null;
+    syncCancelled = false;
+    notifyListeners();
+  }
+
+  void advanceSync(String? fileName) {
+    syncDone++;
+    syncCurrentFile = fileName;
+    notifyListeners();
+  }
+
+  void finishSync() {
+    syncTotal = 0;
+    syncDone = 0;
+    syncCurrentFile = null;
+    syncCancelled = false;
+    notifyListeners();
+  }
+
+  void cancelSync() {
+    syncCancelled = true;
+    notifyListeners();
+  }
 }
 
 class AssetModel extends ChangeNotifier {
@@ -161,15 +195,33 @@ class AssetModel extends ChangeNotifier {
   }
 
   void _rebuildUnifiedList() {
-    final localKeys = <String>{};
+    // Index remote assets by dedup key
+    final remoteByKey = <String, Asset>{};
+    for (final a in remoteAssets) {
+      final key = a.dedupKey;
+      if (key != null) remoteByKey[key] = a;
+    }
+
+    // Merge: local assets gain remote info when a match exists
+    final matchedRemoteKeys = <String>{};
     for (final a in localAssets) {
       final key = a.dedupKey;
-      if (key != null) localKeys.add(key);
+      if (key != null && remoteByKey.containsKey(key)) {
+        a.hasRemote = true;
+        a.remote = remoteByKey[key]!.remote;
+        matchedRemoteKeys.add(key);
+      } else {
+        a.hasRemote = false;
+        a.remote = null;
+      }
     }
+
+    // Cloud-only: remote assets with no local match
     final cloudOnly = remoteAssets.where((a) {
       final key = a.dedupKey;
-      return key == null || !localKeys.contains(key);
+      return key == null || !matchedRemoteKeys.contains(key);
     });
+
     _unifiedAssets = [...localAssets, ...cloudOnly];
     _unifiedAssets.sort((a, b) => b.dateCreated().compareTo(a.dateCreated()));
     _unifiedDirty = false;
@@ -272,6 +324,7 @@ class AssetModel extends ChangeNotifier {
   }
 
   Future<void> getRemotePhotos() async {
+    if (!isServerReady) return;
     await checkServer();
     if (remoteGetting != null) {
       await remoteGetting!.future;
@@ -281,7 +334,7 @@ class AssetModel extends ChangeNotifier {
     final offset = remoteAssets.length;
     try {
       final List<RemoteImage> images =
-          await storage.listImages("", offset, pageSize);
+          await storage.listImages("9999:12:31", offset, pageSize);
       if (images.length < pageSize) {
         remoteHasMore = false;
       }
@@ -349,6 +402,7 @@ Future<void> scanFile(String filePath) async {
 }
 
 Future<void> refreshUnsynchronizedPhotos() async {
+  if (!isServerReady) return;
   await checkServer();
   if (!settingModel.isRemoteStorageSetted) {
     stateModel.setNotSyncedPhotos([]);

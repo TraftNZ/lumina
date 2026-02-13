@@ -394,9 +394,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                 if (all[currentIndex].hasLocal)
                   Consumer<StateModel>(builder: (context, stateModel, child) {
                     return IconButton(
-                      icon: stateModel.notSyncedIDs.isNotEmpty &&
-                              !stateModel.notSyncedIDs
-                                  .contains(all[currentIndex].local!.id)
+                      icon: all[currentIndex].hasRemote
                           ? const Icon(Icons.cloud_done_outlined)
                           : const Icon(Icons.cloud_upload_outlined),
                       onPressed: () =>

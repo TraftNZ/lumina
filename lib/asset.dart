@@ -53,8 +53,21 @@ class Asset extends ImageProvider<Asset> {
 
   bool get isCloudOnly => hasRemote && !hasLocal;
 
+  static final _timestampPrefixRe = RegExp(r'^\d{14}_');
+
+  /// Returns the original filename, stripping the server-added timestamp prefix
+  /// from remote filenames (e.g., `20260213090431_IMG.jpg` → `IMG.jpg`).
+  String? get originalName {
+    if (hasLocal) return name();
+    if (hasRemote) {
+      final remoteName = basename(remote!.path);
+      return remoteName.replaceFirst(_timestampPrefixRe, '');
+    }
+    return null;
+  }
+
   String? get dedupKey {
-    final n = name();
+    final n = originalName;
     if (n == null || n.isEmpty) return null;
     final d = dateCreated();
     return "${d.year.toString().padLeft(4, '0')}-"

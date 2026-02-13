@@ -42,9 +42,15 @@ class GalleryBodyState extends State<GalleryBody>
       GlobalKey<RefreshIndicatorState>();
   PersistentBottomSheetController? _bottomSheetController;
 
+  Timer? _autoSyncTimer;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getPhotos();
+    });
+    assetModel.addListener(_scheduleAutoSync);
     _scrollSubject.stream
         .debounceTime(const Duration(milliseconds: 150))
         .listen((scrollPosition) {
@@ -77,9 +83,11 @@ class GalleryBodyState extends State<GalleryBody>
 
   @override
   void dispose() {
-    super.dispose();
+    assetModel.removeListener(_scheduleAutoSync);
+    _autoSyncTimer?.cancel();
     _scrollController.dispose();
     _scrollSubject.close();
+    super.dispose();
   }
 
   void _scrollToTop() {
@@ -145,6 +153,123 @@ class GalleryBodyState extends State<GalleryBody>
       _bottomSheetController = null;
     }
     setState(() {});
+  }
+
+  void _scheduleAutoSync() {
+    _autoSyncTimer?.cancel();
+    _autoSyncTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      if (stateModel.isSyncing) return;
+      if (!settingModel.isRemoteStorageSetted) return;
+      if (!isServerReady) return;
+      if (assetModel.localGetting != null) return;
+      if (assetModel.remoteGetting != null) return;
+      // Wait until remote photos have been fetched at least once
+      if (assetModel.remoteAssets.isEmpty && assetModel.remoteHasMore) return;
+      final unsynced = assetModel.getUnifiedAssets()
+          .where((a) => a.hasLocal && !a.hasRemote)
+          .toList();
+      if (unsynced.isEmpty) return;
+      _runAutoSync(unsynced);
+    });
+  }
+
+  void _runAutoSync(List<Asset> toSync) async {
+    stateModel.startSync(toSync.length);
+    for (final asset in toSync) {
+      if (stateModel.syncCancelled) break;
+      if (!asset.hasLocal || asset.hasRemote) {
+        stateModel.advanceSync(asset.name());
+        continue;
+      }
+      stateModel.syncCurrentFile = asset.name();
+      stateModel.notifyListeners();
+      try {
+        await storage.uploadAssetEntity(asset.local!);
+        asset.hasRemote = true;
+        stateModel.advanceSync(asset.name());
+      } catch (e) {
+        stateModel.advanceSync(asset.name());
+        continue;
+      }
+    }
+    stateModel.finishSync();
+    eventBus.fire(RemoteRefreshEvent());
+  }
+
+  void _showSyncProgress() {
+    final colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return Consumer<StateModel>(
+          builder: (context, model, child) {
+            final progress = model.syncTotal > 0
+                ? model.syncDone / model.syncTotal
+                : 0.0;
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.cloud_upload_outlined,
+                          color: colorScheme.primary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          model.isSyncing
+                              ? '${l10n.uploading} ${model.syncDone}/${model.syncTotal}'
+                              : l10n.allSynced,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (model.isSyncing) ...[
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 6,
+                        color: colorScheme.primary,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
+                      ),
+                    ),
+                    if (model.syncCurrentFile != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        model.syncCurrentFile!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          stateModel.cancelSync();
+                          Navigator.pop(context);
+                        },
+                        child: Text(l10n.stop),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showDeleteDialog(BuildContext context) {
@@ -381,7 +506,36 @@ class GalleryBodyState extends State<GalleryBody>
           expandedHeight: 70,
           toolbarHeight: 70,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          actions: const [],
+          actions: [
+            if (model.isSyncing)
+              GestureDetector(
+                onTap: _showSyncProgress,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          value: model.syncTotal > 0
+                              ? model.syncDone / model.syncTotal
+                              : null,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${model.syncDone}/${model.syncTotal}',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: true,
             title: Text(
@@ -519,101 +673,76 @@ class GalleryBodyState extends State<GalleryBody>
               ),
               Consumer<StateModel>(builder: (context, stateModel, child) {
                 final asset = all[i];
-                // Upload progress for local assets
+                // Active upload progress
                 if (asset.hasLocal) {
                   final uploadPercent = stateModel.getUploadPercent(asset.local!.id);
                   if (uploadPercent > 0) {
                     return Positioned(
-                      bottom: 2,
+                      bottom: 4,
                       right: 4,
-                      width: 20,
-                      height: 20,
-                      child: Stack(
-                        children: [
-                          const Center(
-                            child: Icon(
-                                Icons.arrow_upward_outlined,
-                                color: Colors.white,
-                                size: 16),
-                          ),
-                          CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                            value: uploadPercent,
-                          )
-                        ],
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                        value: uploadPercent,
                       ),
                     );
                   }
                 }
-                // Download progress for cloud-only assets
+                // Active download progress
                 if (asset.isCloudOnly) {
                   final downloadPercent = stateModel.getDownloadPercent(asset.name()!);
                   if (downloadPercent > 0) {
                     return Positioned(
-                      bottom: 2,
+                      bottom: 4,
                       right: 4,
-                      width: 20,
-                      height: 20,
-                      child: Stack(
-                        children: [
-                          const Center(
-                            child: Icon(
-                                Icons.arrow_downward_outlined,
-                                color: Colors.white,
-                                size: 16),
-                          ),
-                          CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                            value: downloadPercent,
-                          )
-                        ],
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                        value: downloadPercent,
                       ),
                     );
                   }
                 }
-                // Sync status badge for local assets (always shown)
-                if (asset.hasLocal) {
-                  final isSynced = stateModel.notSyncedIDs.isNotEmpty &&
-                      !stateModel.notSyncedIDs.contains(asset.local!.id);
-                  return Positioned(
-                    bottom: 2,
+                // Synced: subtle cloud-done icon
+                if (asset.hasLocal && asset.hasRemote) {
+                  return const Positioned(
+                    bottom: 4,
                     right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: isSynced
-                            ? colorScheme.primary.withAlpha(180)
-                            : colorScheme.onSurface.withAlpha(140),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        isSynced
-                            ? Icons.cloud_done_outlined
-                            : Icons.cloud_upload_outlined,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                    child: Icon(
+                      Icons.cloud_done_outlined,
+                      color: Colors.white,
+                      size: 16,
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
                     ),
                   );
                 }
-                // Cloud-only badge
-                if (asset.isCloudOnly) {
-                  return Positioned(
-                    bottom: 2,
+                // Local only: not yet uploaded
+                if (asset.hasLocal && !asset.hasRemote) {
+                  return const Positioned(
+                    bottom: 4,
                     right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: colorScheme.tertiary.withAlpha(180),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.cloud_outlined,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                    child: Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Colors.white,
+                      size: 16,
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                    ),
+                  );
+                }
+                // Cloud only: not on device
+                if (asset.isCloudOnly) {
+                  return const Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Icon(
+                      Icons.cloud_outlined,
+                      color: Colors.white,
+                      size: 16,
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
                     ),
                   );
                 }
