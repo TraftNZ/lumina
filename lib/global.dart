@@ -42,6 +42,7 @@ class Global {
         int maxCount = 0;
         String maxName = '';
         for (var path in paths) {
+          if (path.isAll) continue;
           final count = await path.assetCountAsync;
           if (count > maxCount) {
             maxCount = count;
@@ -52,6 +53,7 @@ class Global {
           settingModel.setLocalFolder(maxName);
         }
       }
+      await resolveLocalFolderAbsPath();
       await initDrive();
       reloadAutoSyncTimer();
     });

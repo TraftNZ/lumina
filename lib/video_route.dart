@@ -74,17 +74,13 @@ class _VideoRouteState extends State<VideoRoute> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
           children: [
             Center(
               child: isInitialized
-                  ? Container(
-                      // padding: const EdgeInsets.fromLTRB(0, 80, 0, 20),
-                      child: Chewie(
-                        controller: chewieController,
-                      ),
-                    )
+                  ? Chewie(controller: chewieController)
                   : const CircularProgressIndicator(),
             ),
             Positioned(
@@ -92,11 +88,26 @@ class _VideoRouteState extends State<VideoRoute> {
               left: 0,
               right: 0,
               child: AppBar(
-                backgroundColor: const Color(0x00000000),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                flexibleSpace: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x80000000),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
                 iconTheme: const IconThemeData(color: Colors.white),
               ),
             ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }

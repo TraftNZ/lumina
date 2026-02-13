@@ -18,7 +18,6 @@ import 'package:img_syncer/global.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:vibration/vibration.dart';
-import 'package:img_syncer/choose_album_route.dart';
 import 'package:img_syncer/setting_storage_route.dart';
 
 class GalleryBody extends StatefulWidget {
@@ -107,12 +106,6 @@ class GalleryBodyState extends State<GalleryBody>
     } else {
       assetModel.refreshRemote();
     }
-    // if (mounted &&
-    //     !widget.useLocal &&
-    //     assetModel.remoteAssets.isEmpty &&
-    //     assetModel.remoteLastError != null) {
-    //   SnackBarManager.showSnackBar(assetModel.remoteLastError!);
-    // }
     _isRefreshing = false;
   }
 
@@ -143,11 +136,11 @@ class GalleryBodyState extends State<GalleryBody>
     stateModel.setSelectionMode(hasSelected);
 
     if (!hasSelected && _bottomSheetController != null) {
-      _bottomSheetController?.close(); // 关闭BottomSheet
+      _bottomSheetController?.close();
       _bottomSheetController = null;
     } else {
       if (hasSelected && _bottomSheetController == null) {
-        _showBottomSheet(context); // 显示BottomSheet
+        _showBottomSheet(context);
       }
     }
 
@@ -158,7 +151,7 @@ class GalleryBodyState extends State<GalleryBody>
     _selectedIndices.clear();
     stateModel.setSelectionMode(false);
     if (_bottomSheetController != null) {
-      _bottomSheetController?.close(); // 关闭BottomSheet
+      _bottomSheetController?.close();
       _bottomSheetController = null;
     }
     setState(() {});
@@ -326,58 +319,75 @@ class GalleryBodyState extends State<GalleryBody>
     _bottomSheetController = Scaffold.of(context).showBottomSheet(
       (BuildContext context) {
         return SizedBox(
-          height: 100,
-          child: Column(
-            children: [
-              // 抓手
-              Container(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-                height: 4.0,
-                width: 40.0,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2.0),
-                ),
-              ),
-              Consumer<StateModel>(
-                  builder: (context, model, child) => SizedBox(
-                        height: 80,
-                        child: Row(
-                          children: [
-                            _bottomSheetIconButtun(
-                                Icons.share_outlined, l10n.share, _shareAsset),
-                            _bottomSheetIconButtun(Icons.delete_outline,
-                                l10n.delete, () => _showDeleteDialog(context)),
-                            if (widget.useLocal)
-                              _bottomSheetIconButtun(
-                                  Icons.cloud_upload_outlined,
-                                  l10n.upload,
-                                  uploadSelected,
-                                  isEnable: !model.isDownloading() &&
-                                      !model.isUploading()),
-                            if (!widget.useLocal)
-                              _bottomSheetIconButtun(
-                                  Icons.cloud_download_outlined,
-                                  l10n.download,
-                                  downloadSelected,
-                                  isEnable: !model.isDownloading() &&
-                                      !model.isUploading()),
-                          ],
-                        ),
-                      )),
-            ],
-          ),
+          height: 80,
+          child: Consumer<StateModel>(
+              builder: (context, model, child) => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _bottomSheetIconButton(
+                          Icons.share_outlined, l10n.share, _shareAsset),
+                      _bottomSheetIconButton(Icons.delete_outline, l10n.delete,
+                          () => _showDeleteDialog(context)),
+                      if (widget.useLocal)
+                        _bottomSheetIconButton(
+                            Icons.cloud_upload_outlined,
+                            l10n.upload,
+                            uploadSelected,
+                            isEnable: !model.isDownloading() &&
+                                !model.isUploading()),
+                      if (!widget.useLocal)
+                        _bottomSheetIconButton(
+                            Icons.cloud_download_outlined,
+                            l10n.download,
+                            downloadSelected,
+                            isEnable: !model.isDownloading() &&
+                                !model.isUploading()),
+                    ],
+                  )),
         );
       },
     );
     _bottomSheetController!.closed.then((value) => clearSelection());
   }
 
+  Widget _bottomSheetIconButton(
+      IconData icon, String text, Function()? onTap,
+      {bool isEnable = true}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkResponse(
+      containedInkWell: true,
+      radius: 40,
+      onTap: isEnable ? onTap : null,
+      borderRadius: BorderRadius.circular(40),
+      child: SizedBox(
+        width: 72,
+        height: 72,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isEnable
+                  ? colorScheme.onSurface
+                  : colorScheme.onSurface.withAlpha(97),
+            ),
+            const SizedBox(height: 4),
+            Text(text,
+                style: TextStyle(
+                    color: isEnable
+                        ? colorScheme.onSurface
+                        : colorScheme.onSurface.withAlpha(97),
+                    fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget appBar() {
     return Consumer<StateModel>(
       builder: (context, model, child) {
-        String text = 'Pho';
         return SliverAppBar(
           pinned: false,
           snap: false,
@@ -386,29 +396,13 @@ class GalleryBodyState extends State<GalleryBody>
           toolbarHeight: 70,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           actions: [
-            widget.useLocal
-                ? chooseAlbumButtun(context)
-                : setRemoteStorageButtun(context)
+            if (!widget.useLocal) setRemoteStorageButton(context)
           ],
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: true,
-            // titlePadding: const EdgeInsets.all(5),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-                  child: Image.asset(
-                    'assets/icon/pho_icon.png',
-                    width: 40,
-                    height: 40,
-                  ),
-                ),
-                Text(
-                  text,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ],
+            title: Text(
+              'Lumina',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
         );
@@ -416,48 +410,14 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
-  Widget _bottomSheetIconButtun(IconData icon, String text, Function()? onTap,
-      {bool isEnable = true}) {
-    return Container(
-      width: 80,
-      height: 80,
-      alignment: Alignment.center,
-      // padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-      child: InkResponse(
-        containedInkWell: true,
-        radius: 40,
-        onTap: isEnable ? onTap : null,
-        borderRadius: BorderRadius.circular(40),
-        child: Container(
-          width: 80,
-          height: 80,
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 24,
-                color: isEnable ? Colors.black : Colors.grey,
-              ),
-              Text(text,
-                  style: TextStyle(
-                      color: isEnable ? Colors.black : Colors.grey,
-                      fontSize: 12)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget contentBuilder(BuildContext context, AssetModel model, Widget? child) {
     final all = widget.useLocal ? model.localAssets : model.remoteAssets;
     var children = <Widget>[];
-    final totalwidth = MediaQuery.of(context).size.width - columCount * 2;
+    final totalwidth = MediaQuery.of(context).size.width - columCount * 3;
     final totalHeight = MediaQuery.of(context).size.height;
     final imgWidth = totalwidth / columCount;
     final imgHeight = imgWidth;
+    final colorScheme = Theme.of(context).colorScheme;
 
     var currentChildren = <Widget>[];
     DateTime? currentDateTime;
@@ -472,31 +432,29 @@ class GalleryBodyState extends State<GalleryBody>
           date.month != currentDateTime.month ||
           date.day != currentDateTime.day) {
         children.add(Wrap(
-          spacing: 2, // 主轴(水平)方向间距
-          runSpacing: 2.0, // 纵轴（垂直）方向间距
+          spacing: 3,
+          runSpacing: 3.0,
           alignment: WrapAlignment.start,
           children: currentChildren,
         ));
-        currentScrollOffset -= 2;
+        currentScrollOffset -= 3;
         currentChildren = <Widget>[];
         DateFormat format = DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE',
             Localizations.localeOf(context).languageCode);
-        children.add(Container(
-          height: 55,
-          padding: const EdgeInsets.all(15),
+        children.add(Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: Text(
             format.format(date),
-            style: const TextStyle(
-                color: Color.fromARGB(255, 87, 87, 87), fontSize: 16),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
           ),
         ));
-        currentScrollOffset += 55;
+        currentScrollOffset += 40;
       }
       bool needLoadThumbnail = false;
       if (currentScrollOffset > scrollOffset - (2 * totalHeight) &&
           currentScrollOffset < scrollOffset + (3 * totalHeight)) {
-        // print("current offset: $currentScrollOffset");
-        // print("scrollOffset: $scrollOffset");
         needLoadThumbnail = true;
         if (!all[i].loadThumbnailFinished()) {
           all[i].thumbnailDataAsync().then((value) => setState(() {}));
@@ -538,40 +496,44 @@ class GalleryBodyState extends State<GalleryBody>
           },
           child: Stack(
             children: [
-              // image
-              Container(
-                  width: imgWidth,
-                  height: imgHeight,
-                  padding: const EdgeInsets.all(0),
-                  child: Hero(
-                    tag:
-                        "asset_${all[i].hasLocal ? "local" : "remote"}_${all[i].path()}",
-                    child: needLoadThumbnail && all[i].loadThumbnailFinished()
-                        ? Image(
-                            image: all[i].thumbnailProvider(),
-                            fit: BoxFit.cover)
-                        : Container(color: Colors.grey),
-                    flightShuttleBuilder: (BuildContext flightContext,
-                        Animation<double> animation,
-                        HeroFlightDirection flightDirection,
-                        BuildContext fromHeroContext,
-                        BuildContext toHeroContext) {
-                      // 自定义过渡动画小部件
-                      return AnimatedBuilder(
-                        animation: animation,
-                        builder: (BuildContext context, Widget? child) {
-                          return Opacity(
-                              opacity: animation.value,
-                              child: all[i].loadThumbnailFinished()
-                                  ? Image(
-                                      image: all[i].thumbnailProvider(),
-                                      fit: BoxFit.contain,
-                                    )
-                                  : Container(color: Colors.grey));
-                        },
-                      );
-                    },
-                  )),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: SizedBox(
+                    width: imgWidth,
+                    height: imgHeight,
+                    child: Hero(
+                      tag:
+                          "asset_${all[i].hasLocal ? "local" : "remote"}_${all[i].path()}",
+                      child:
+                          needLoadThumbnail && all[i].loadThumbnailFinished()
+                              ? Image(
+                                  image: all[i].thumbnailProvider(),
+                                  fit: BoxFit.cover)
+                              : Container(
+                                  color: colorScheme.surfaceContainerHighest),
+                      flightShuttleBuilder: (BuildContext flightContext,
+                          Animation<double> animation,
+                          HeroFlightDirection flightDirection,
+                          BuildContext fromHeroContext,
+                          BuildContext toHeroContext) {
+                        return AnimatedBuilder(
+                          animation: animation,
+                          builder: (BuildContext context, Widget? child) {
+                            return Opacity(
+                                opacity: animation.value,
+                                child: all[i].loadThumbnailFinished()
+                                    ? Image(
+                                        image: all[i].thumbnailProvider(),
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Container(
+                                        color: colorScheme
+                                            .surfaceContainerHighest));
+                          },
+                        );
+                      },
+                    )),
+              ),
               Consumer<StateModel>(builder: (context, stateModel, child) {
                 double percent = 0;
                 if (!widget.useLocal) {
@@ -604,23 +566,30 @@ class GalleryBodyState extends State<GalleryBody>
                     ),
                   );
                 }
-                var color = Colors.transparent;
+                var showCloudBadge = false;
                 if (widget.useLocal &&
                     stateModel.notSyncedIDs.isNotEmpty &&
                     !stateModel.notSyncedIDs.contains(all[i].local!.id)) {
-                  color = Colors.white;
+                  showCloudBadge = true;
                 }
+                if (!showCloudBadge) return const SizedBox.shrink();
                 return Positioned(
                   bottom: 2,
                   right: 4,
-                  child: Icon(
-                    Icons.cloud_done_outlined,
-                    color: color,
-                    size: 16,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withAlpha(180),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.cloud_done_outlined,
+                      color: Colors.white,
+                      size: 14,
+                    ),
                   ),
                 );
               }),
-              // video icon
               if (all[i].isVideo())
                 const Positioned(
                   top: 4,
@@ -631,29 +600,22 @@ class GalleryBodyState extends State<GalleryBody>
                     size: 20,
                   ),
                 ),
-              // selection
               if (stateModel.isSelectionMode)
                 Positioned(
                   top: 2,
                   left: 2,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Checkbox(
-                        value: _selectedIndices[i] ?? false,
-                        onChanged: (value) {
-                          toggleSelection(i);
-                        },
-                        fillColor: WidgetStateProperty.all(
-                            Theme.of(context).colorScheme.secondary),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: _selectedIndices[i] ?? false,
+                      onChanged: (value) {
+                        toggleSelection(i);
+                      },
+                      fillColor: WidgetStateProperty.all(
+                          colorScheme.primary),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ),
@@ -661,14 +623,14 @@ class GalleryBodyState extends State<GalleryBody>
           ));
       currentChildren.add(child);
       if (currentChildren.length % columCount == 1) {
-        currentScrollOffset += imgHeight + 2;
+        currentScrollOffset += imgHeight + 3;
       }
       currentDateTime = all[i].dateCreated();
 
       if (i == all.length - 1) {
         children.add(Wrap(
-          spacing: 2, // 主轴(水平)方向间距
-          runSpacing: 2.0, // 纵轴（垂直）方向间距
+          spacing: 3,
+          runSpacing: 3.0,
           alignment: WrapAlignment.start,
           children: currentChildren,
         ));
@@ -694,46 +656,16 @@ class GalleryBodyState extends State<GalleryBody>
                 appBar(),
                 Consumer<AssetModel>(builder: contentBuilder),
               ]),
-
-          // 回到顶部按钮
           Positioned(
             bottom: 20,
             right: 20,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // if (!widget.useLocal)
-                //   FloatingActionButton(
-                //     heroTag: "upload",
-                //     onPressed: () async {
-                //       final ImagePicker picker = ImagePicker();
-                //       final XFile? image =
-                //           await picker.pickImage(source: ImageSource.gallery);
-                //       if (image == null) {
-                //         return;
-                //       } else {
-                //         try {
-                //           await storage.uploadXFile(image);
-                //         } catch (e) {
-                //           SnackBarManager.showSnackBar(e.toString());
-                //         }
-                //       }
-                //     },
-                //     tooltip: 'Upload',
-                //     child: const Icon(Icons.add),
-                //   ),
-                Offstage(
-                  offstage: !_showToTopBtn,
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10),
-                    child: FloatingActionButton(
-                      onPressed: _scrollToTop,
-                      heroTag: 'gallery_body_${widget.useLocal}_toTop',
-                      child: const Icon(Icons.arrow_upward),
-                    ),
-                  ),
-                ),
-              ],
+            child: Offstage(
+              offstage: !_showToTopBtn,
+              child: FloatingActionButton.small(
+                onPressed: _scrollToTop,
+                heroTag: 'gallery_body_${widget.useLocal}_toTop',
+                child: const Icon(Icons.arrow_upward),
+              ),
             ),
           ),
         ],
@@ -742,24 +674,9 @@ class GalleryBodyState extends State<GalleryBody>
   }
 }
 
-Widget chooseAlbumButtun(BuildContext context) {
+Widget setRemoteStorageButton(BuildContext context) {
   return IconButton(
-    icon: const Icon(Icons.photo_album),
-    color: Theme.of(context).iconTheme.color,
-    tooltip: 'Choose album',
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ChooseAlbumRoute()),
-      );
-    },
-  );
-}
-
-Widget setRemoteStorageButtun(BuildContext context) {
-  return IconButton(
-    icon: const Icon(Icons.settings),
-    color: Theme.of(context).iconTheme.color,
+    icon: const Icon(Icons.settings_outlined),
     tooltip: 'Set remote storage',
     onPressed: () {
       Navigator.push(

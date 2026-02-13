@@ -1,5 +1,5 @@
 <br/><br/><p align="center">
-<img src="assets/icon/pho_icon.png" width="150">
+<img src="assets/icon/lumina_icon.png" width="150">
 </p>
 <h3 align="center">
 Lumina - A serverless photo sync and viewing app

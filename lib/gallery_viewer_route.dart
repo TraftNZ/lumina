@@ -27,7 +27,6 @@ class GalleryViewerRoute extends StatefulWidget {
 }
 
 class GalleryViewerRouteState extends State<GalleryViewerRoute> {
-  // late final PageController _pageController;
   late final ExtendedPageController _pageController;
   late List<Asset> all;
   late int currentIndex;
@@ -71,8 +70,11 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
       return;
     }
     _isShowingImageInfo = true;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     showModalBottomSheet(
       context: context,
+      showDragHandle: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -80,33 +82,33 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
       builder: (BuildContext context) {
         List<Widget> columns = [];
         columns.add(
-          // 抓手
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-            height: 4.0,
-            width: 40.0,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              all[currentIndex].name() ?? '',
+              style: textTheme.titleMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         );
+        columns.add(const Divider(indent: 16, endIndent: 16));
         if (currentAsset.date != null) {
           columns.add(ListTile(
-              leading: const SizedBox(
-                width: 40, // 设置宽度
+              leading: SizedBox(
+                width: 40,
                 child: Align(
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.calendar_today_outlined,
-                    color: Color.fromARGB(255, 120, 120, 120),
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-              title: const Text("Date", style: TextStyle(fontSize: 15)),
+              title: Text(l10n.date, style: textTheme.bodyMedium),
               subtitle: Text(
                 currentAsset.date!,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: textTheme.bodySmall,
               )));
         }
         if (currentAsset.make != null && currentAsset.model != null) {
@@ -120,43 +122,43 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
           ];
           columns.add(
             ListTile(
-              leading: const SizedBox(
-                width: 40, // 设置宽度
+              leading: SizedBox(
+                width: 40,
                 child: Align(
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.camera_outlined,
-                    color: Color.fromARGB(255, 120, 120, 120),
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
               title: Text("${currentAsset.make} ${currentAsset.model}",
-                  style: const TextStyle(fontSize: 15)),
+                  style: textTheme.bodyMedium),
               subtitle: Text(
                 children.join("  \u2022  "),
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: textTheme.bodySmall,
               ),
             ),
           );
         }
         columns.add(ListTile(
-          leading: const SizedBox(
-            width: 40, // 设置宽度
+          leading: SizedBox(
+            width: 40,
             child: Align(
               alignment: Alignment.center,
               child: Icon(
                 Icons.photo_size_select_actual_outlined,
-                color: Color.fromARGB(255, 120, 120, 120),
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           title: Text(all[currentIndex].name()!,
-              style: const TextStyle(fontSize: 15)),
+              style: textTheme.bodyMedium),
           subtitle: currentAsset.isVideo()
               ? null
               : RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    style: textTheme.bodySmall,
                     children: [
                       TextSpan(
                         text: currentAsset.imageWidth != null &&
@@ -174,22 +176,24 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
         ));
 
         columns.add(ListTile(
-          leading: const SizedBox(
-            width: 40, // 设置宽度
+          leading: SizedBox(
+            width: 40,
             child: Align(
               alignment: Alignment.center,
               child: Icon(
-                Icons.phone_android,
-                color: Color.fromARGB(255, 120, 120, 120),
+                all[currentIndex].isLocal()
+                    ? Icons.phone_android
+                    : Icons.cloud_outlined,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-          title: all[currentIndex].isLocal()
-              ? const Text("Local", style: TextStyle(fontSize: 15))
-              : const Text("Cloud", style: TextStyle(fontSize: 15)),
+          title: Text(
+              all[currentIndex].isLocal() ? l10n.local : l10n.cloud,
+              style: textTheme.bodyMedium),
           subtitle: RichText(
             text: TextSpan(
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: textTheme.bodySmall,
               children: [
                 if (!currentAsset.isVideo())
                   TextSpan(
@@ -216,8 +220,8 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Delete this photo?'),
-        content: const Text("This action can't be undone."),
+        title: Text('${l10n.deleteThisPhoto}?'),
+        content: Text(l10n.cantBeUndone),
         actions: <Widget>[
           TextButton(
             onPressed: () {
@@ -235,11 +239,11 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                 Navigator.of(context).pop();
               });
             },
-            child: const Text('Yes'),
+            child: Text(l10n.yes),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -261,7 +265,6 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
       ),
     );
 
-    // 将加载对话框添加到Overlay中
     Overlay.of(context).insert(loadingDialog);
     try {
       if (asset.name() != null) {
@@ -287,7 +290,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
           await Gal.putImage(savePath);
         }
       }
-      SnackBarManager.showSnackBar("Download ${asset.name()} success");
+      SnackBarManager.showSnackBar("${l10n.download} ${asset.name()} ${l10n.success}");
       eventBus.fire(LocalRefreshEvent());
     } catch (e) {
       SnackBarManager.showSnackBar(e.toString());
@@ -317,18 +320,16 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
       ),
     );
 
-    // 将加载对话框添加到Overlay中
     Overlay.of(context).insert(loadingDialog);
     if (!settingModel.isRemoteStorageSetted) {
-      SnackBarManager.showSnackBar(
-          "Remote storage is not setted,please set it first");
+      SnackBarManager.showSnackBar(l10n.storageNotSetted);
       return;
     }
     final entity = asset.local!;
     try {
       await storage.uploadAssetEntity(entity);
       if (mounted) {
-        SnackBarManager.showSnackBar("Upload ${asset.name()} success");
+        SnackBarManager.showSnackBar("${l10n.upload} ${asset.name()} ${l10n.success}");
       }
       eventBus.fire(RemoteRefreshEvent());
     } catch (e) {
@@ -346,8 +347,20 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
       backgroundColor: Colors.black,
       appBar: showAppBar
           ? AppBar(
-              backgroundColor: const Color.fromARGB(64, 0, 0, 0),
+              backgroundColor: Colors.transparent,
               elevation: 0,
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x80000000),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
               iconTheme: const IconThemeData(color: Colors.white),
               actions: [
                 IconButton(
@@ -410,7 +423,6 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
             HeroFlightDirection flightDirection,
             BuildContext fromHeroContext,
             BuildContext toHeroContext) {
-          // 自定义过渡动画小部件
           return AnimatedBuilder(
             animation: animation,
             builder: (BuildContext context, Widget? child) {
@@ -469,7 +481,6 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                           if (details == null) {
                             return;
                           }
-                          // 如果是下拉手势则弹出ImageInfo
                           if (details.totalScale == 1.0 &&
                               details.offset!.dy < -100) {
                             showImageInfo(context);
@@ -485,7 +496,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                             fit: BoxFit.contain,
                           );
                         case LoadState.completed:
-                          return null; // Use the high-resolution image.
+                          return null;
                         case LoadState.failed:
                           return null;
                         default:

@@ -1,59 +1,313 @@
 import 'package:flutter/material.dart';
 
-const textThemeLight = TextTheme(
-  headlineMedium:
-      TextStyle(fontFamily: 'Ubuntu', color: Color.fromARGB(255, 0, 44, 36)),
-  bodySmall: TextStyle(fontFamily: 'Ubuntu'),
-  bodyLarge: TextStyle(fontFamily: 'Ubuntu'),
-  bodyMedium: TextStyle(fontFamily: 'Ubuntu'),
-  labelSmall: TextStyle(fontFamily: 'Ubuntu'),
-  labelLarge: TextStyle(fontFamily: 'Ubuntu'),
-  labelMedium: TextStyle(fontFamily: 'Ubuntu'),
-);
+class AppSpacing {
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 16;
+  static const double lg = 24;
+  static const double xl = 32;
+}
 
-const textThemeDark = TextTheme(
-  headlineMedium: TextStyle(
-      fontFamily: 'Ubuntu', color: Color.fromARGB(255, 172, 196, 192)),
-  bodySmall: TextStyle(fontFamily: 'Ubuntu'),
-  bodyLarge: TextStyle(fontFamily: 'Ubuntu'),
-  bodyMedium: TextStyle(fontFamily: 'Ubuntu'),
-  labelSmall: TextStyle(fontFamily: 'Ubuntu'),
-  labelLarge: TextStyle(fontFamily: 'Ubuntu'),
-  labelMedium: TextStyle(fontFamily: 'Ubuntu'),
-);
+ThemeData buildLightTheme(ColorScheme colorScheme) {
+  final textTheme = _buildTextTheme(colorScheme);
+  return ThemeData(
+    colorScheme: colorScheme,
+    useMaterial3: true,
+    textTheme: textTheme,
+    appBarTheme: AppBarTheme(
+      elevation: 0,
+      scrolledUnderElevation: 1,
+      surfaceTintColor: colorScheme.surfaceTint,
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      iconTheme: IconThemeData(color: colorScheme.onSurface),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 67,
+      indicatorColor: colorScheme.secondaryContainer,
+      iconTheme: WidgetStatePropertyAll(
+        IconThemeData(color: colorScheme.onSurface),
+      ),
+      labelTextStyle: WidgetStatePropertyAll(
+        TextStyle(
+          fontFamily: 'Ubuntu',
+          fontSize: 14,
+          color: colorScheme.onSurface,
+          height: 1,
+        ),
+      ),
+    ),
+    iconTheme: IconThemeData(color: colorScheme.onSurface),
+    cardTheme: CardThemeData(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      surfaceTintColor: colorScheme.surfaceTint,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: colorScheme.surfaceContainerHighest.withAlpha(80),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.outline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: 14,
+      ),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      surfaceTintColor: colorScheme.surfaceTint,
+      showDragHandle: true,
+    ),
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      surfaceTintColor: colorScheme.surfaceTint,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 14,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 14,
+        ),
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: colorScheme.primaryContainer,
+      foregroundColor: colorScheme.onPrimaryContainer,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    listTileTheme: ListTileThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+    ),
+    dividerTheme: DividerThemeData(
+      color: colorScheme.outlineVariant,
+      thickness: 1,
+      space: 1,
+    ),
+  );
+}
 
-const navigationBarThemeLight = NavigationBarThemeData(
-  height: 67,
-  iconTheme: WidgetStatePropertyAll(
-    IconThemeData(color: Color.fromARGB(255, 0, 37, 30)),
-  ),
-  labelTextStyle: WidgetStatePropertyAll(
-    TextStyle(
+ThemeData buildDarkTheme(ColorScheme colorScheme) {
+  final textTheme = _buildTextTheme(colorScheme);
+  return ThemeData(
+    colorScheme: colorScheme,
+    useMaterial3: true,
+    textTheme: textTheme,
+    appBarTheme: AppBarTheme(
+      elevation: 0,
+      scrolledUnderElevation: 1,
+      surfaceTintColor: colorScheme.surfaceTint,
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      iconTheme: IconThemeData(color: colorScheme.onSurface),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 67,
+      indicatorColor: colorScheme.secondaryContainer,
+      iconTheme: WidgetStatePropertyAll(
+        IconThemeData(color: colorScheme.onSurface),
+      ),
+      labelTextStyle: WidgetStatePropertyAll(
+        TextStyle(
+          fontFamily: 'Ubuntu',
+          fontSize: 14,
+          color: colorScheme.onSurface,
+          height: 1,
+        ),
+      ),
+    ),
+    iconTheme: IconThemeData(color: colorScheme.onSurface),
+    cardTheme: CardThemeData(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      surfaceTintColor: colorScheme.surfaceTint,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: colorScheme.surfaceContainerHighest.withAlpha(80),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.outline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: 14,
+      ),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      surfaceTintColor: colorScheme.surfaceTint,
+      showDragHandle: true,
+    ),
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      surfaceTintColor: colorScheme.surfaceTint,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 14,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 14,
+        ),
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: colorScheme.primaryContainer,
+      foregroundColor: colorScheme.onPrimaryContainer,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    listTileTheme: ListTileThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+    ),
+    dividerTheme: DividerThemeData(
+      color: colorScheme.outlineVariant,
+      thickness: 1,
+      space: 1,
+    ),
+  );
+}
+
+TextTheme _buildTextTheme(ColorScheme colorScheme) {
+  return TextTheme(
+    headlineLarge: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 32,
+      fontWeight: FontWeight.w400,
+      color: colorScheme.onSurface,
+    ),
+    headlineMedium: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 28,
+      fontWeight: FontWeight.w400,
+      color: colorScheme.onSurface,
+    ),
+    headlineSmall: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 24,
+      fontWeight: FontWeight.w400,
+      color: colorScheme.onSurface,
+    ),
+    titleLarge: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 22,
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurface,
+    ),
+    titleMedium: TextStyle(
       fontFamily: 'Ubuntu',
       fontSize: 16,
-      color: Color.fromARGB(255, 0, 37, 30),
-      height: 1,
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurface,
     ),
-  ),
-);
-
-const navigationBarThemeDark = NavigationBarThemeData(
-  height: 67,
-  iconTheme: WidgetStatePropertyAll(
-    IconThemeData(color: Color.fromARGB(255, 172, 196, 192)),
-  ),
-  labelTextStyle: WidgetStatePropertyAll(
-    TextStyle(
+    titleSmall: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurface,
+    ),
+    bodyLarge: TextStyle(
       fontFamily: 'Ubuntu',
       fontSize: 16,
-      color: Color.fromARGB(255, 172, 196, 192),
-      height: 1,
+      color: colorScheme.onSurface,
     ),
-  ),
-);
-
-const iconThemeLight = IconThemeData(color: Color.fromARGB(255, 0, 44, 36));
-const iconThemeDark = IconThemeData(color: Color.fromARGB(255, 172, 196, 192));
-
-const floatingActionButtonThemeLight = FloatingActionButtonThemeData(
-    backgroundColor: Color.fromARGB(255, 180, 227, 219));
+    bodyMedium: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 14,
+      color: colorScheme.onSurface,
+    ),
+    bodySmall: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 12,
+      color: colorScheme.onSurfaceVariant,
+    ),
+    labelLarge: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurface,
+    ),
+    labelMedium: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurface,
+    ),
+    labelSmall: TextStyle(
+      fontFamily: 'Ubuntu',
+      fontSize: 11,
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurfaceVariant,
+    ),
+  );
+}

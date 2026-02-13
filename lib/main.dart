@@ -12,8 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:img_syncer/l10n/app_localizations.dart';
 import 'package:img_syncer/theme.dart';
 
-const seedThemeColor = Color(0xFF02FED1);
-const darkSeedThemeColor = Color(0xFF02FED1);
+const seedThemeColor = Color(0xFFFFAB40);
 
 void main() {
   Global.init().then((e) => runApp(
@@ -30,15 +29,14 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-  static const String _title = 'PHO';
-  // This widget is the root of your application.
+  static const String _title = 'Lumina';
 
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, // 设置状态栏颜色为透明
-      systemNavigationBarColor: Colors.transparent, // 设置导航栏颜色为透明
-      systemNavigationBarDividerColor: Colors.transparent, // 设置导航栏分隔线颜色为透明
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
     ));
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
@@ -58,26 +56,13 @@ class MyApp extends StatelessWidget {
         } else {
           logger.i("darkDynamic is null");
           darkColorScheme = ColorScheme.fromSeed(
-            seedColor: darkSeedThemeColor,
+            seedColor: seedThemeColor,
             brightness: Brightness.dark,
           );
         }
 
-        var lightTheme = ThemeData(
-          colorScheme: lightColorScheme,
-          useMaterial3: true,
-          textTheme: textThemeLight,
-          navigationBarTheme: navigationBarThemeLight,
-          iconTheme: iconThemeLight,
-          floatingActionButtonTheme: floatingActionButtonThemeLight,
-        );
-        var darkTheme = ThemeData(
-          colorScheme: darkColorScheme,
-          useMaterial3: true,
-          textTheme: textThemeDark,
-          navigationBarTheme: navigationBarThemeDark,
-          iconTheme: iconThemeDark,
-        );
+        final lightTheme = buildLightTheme(lightColorScheme);
+        final darkTheme = buildDarkTheme(darkColorScheme);
 
         return AdaptiveTheme(
             light: lightTheme,
@@ -123,38 +108,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    PreferredSizeWidget? appBar;
-    // switch (_selectedIndex) {
-    //   case 0:
-    //     break;
-    //   case 1:
-    //     break;
-    //   case 2:
-    //     break;
-    // }
     SnackBarManager.init(context);
     initI18n(context);
     initRequestPermission(context);
     return Consumer<StateModel>(
       builder: (context, model, child) => Scaffold(
-        appBar: appBar,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            const GalleryBody(
-              useLocal: true,
-            ),
-            const GalleryBody(useLocal: false),
-            Consumer<SettingModel>(
-              builder: (context, model, child) {
-                return SyncBody(
-                  localFolder: model.localFolder,
-                );
-              },
-            ),
-            const SettingBody(),
-          ],
+        body: SafeArea(
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              const GalleryBody(useLocal: true),
+              const GalleryBody(useLocal: false),
+              Consumer<SettingModel>(
+                builder: (context, model, child) {
+                  return SyncBody(localFolder: model.localFolder);
+                },
+              ),
+              const SettingBody(),
+            ],
+          ),
         ),
         bottomNavigationBar: model.isSelectionMode
             ? null
@@ -163,16 +136,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 selectedIndex: _selectedIndex,
                 destinations: <Widget>[
                   NavigationDestination(
-                    icon: const Icon(Icons.phone_android),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    selectedIcon: const Icon(Icons.photo_library),
                     label: l10n.local,
                   ),
                   NavigationDestination(
-                    icon: const Icon(Icons.cloud),
+                    icon: const Icon(Icons.cloud_outlined),
+                    selectedIcon: const Icon(Icons.cloud),
                     label: l10n.cloud,
                   ),
                   NavigationDestination(
-                    icon: const Icon(Icons.cloud_sync),
+                    icon: const Icon(Icons.sync_outlined),
+                    selectedIcon: const Icon(Icons.sync),
                     label: l10n.sync,
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.settings_outlined),
+                    selectedIcon: const Icon(Icons.settings),
+                    label: l10n.settings,
                   ),
                 ],
               ),

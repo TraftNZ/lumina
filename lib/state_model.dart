@@ -188,54 +188,45 @@ class AssetModel extends ChangeNotifier {
       hasAll: true,
     );
 
-    // choose the folder has most photos
-    if (settingModel.localFolder == "") {
-      int max = 0;
-      for (var path in paths) {
-        final count = await path.assetCountAsync;
-        if (count > max) {
-          max = count;
-          settingModel.localFolder = path.name;
-        }
+    // Use the "all" path to show all photos on the device
+    AssetPathEntity? allPath;
+    for (var path in paths) {
+      if (path.isAll) {
+        allPath = path;
+        break;
       }
     }
+    if (allPath == null) {
+      localGetting?.complete(true);
+      localGetting = null;
+      return;
+    }
 
-    for (var path in paths) {
-      if (settingModel.localFolder == path.name) {
-        final newpath = await path.fetchPathProperties(
-            filterOptionGroup: FilterOptionGroup(
-          orders: [
-            const OrderOption(
-              type: OrderOptionType.createDate,
-              asc: false,
-            ),
-          ],
-        ));
-        final List<AssetEntity> entities = await newpath!
-            .getAssetListRange(start: offset, end: offset + pageSize);
-        if (entities.length < pageSize) {
-          localHasMore = false;
-        }
-        for (var i = 0; i < entities.length; i++) {
-          final asset = Asset(local: entities[i]);
-          if (settingModel.localFolderAbsPath == null) {
-            final file = await entities[i].originFile;
-            if (file != null) {
-              settingModel.localFolderAbsPath = file.parent.path;
-            }
-          }
-          await asset.getLocalFile();
-          localAssets.add(asset);
-          // asset.thumbnailDataAsync().then((value) => notifyListeners());
-          if (i % 100 == 0) {
-            notifyListeners();
-          }
-        }
+    final newpath = await allPath.fetchPathProperties(
+        filterOptionGroup: FilterOptionGroup(
+      orders: [
+        const OrderOption(
+          type: OrderOptionType.createDate,
+          asc: false,
+        ),
+      ],
+    ));
+    final List<AssetEntity> entities = await newpath!
+        .getAssetListRange(start: offset, end: offset + pageSize);
+    if (entities.length < pageSize) {
+      localHasMore = false;
+    }
+    for (var i = 0; i < entities.length; i++) {
+      final asset = Asset(local: entities[i]);
+      await asset.getLocalFile();
+      localAssets.add(asset);
+      if (i % 100 == 0) {
         notifyListeners();
-        if (stateModel.notSyncedIDs.isEmpty) {
-          refreshUnsynchronizedPhotos();
-        }
       }
+    }
+    notifyListeners();
+    if (stateModel.notSyncedIDs.isEmpty) {
+      refreshUnsynchronizedPhotos();
     }
 
     localGetting?.complete(true);
@@ -272,6 +263,28 @@ class AssetModel extends ChangeNotifier {
 
     remoteGetting?.complete(true);
     remoteGetting = null;
+  }
+}
+
+Future<void> resolveLocalFolderAbsPath() async {
+  if (settingModel.localFolder.isEmpty) return;
+  if (settingModel.localFolderAbsPath != null) return;
+  final re = await requestPermission();
+  if (!re) return;
+  final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
+    type: RequestType.common,
+  );
+  for (var path in paths) {
+    if (path.name == settingModel.localFolder) {
+      final assets = await path.getAssetListRange(start: 0, end: 1);
+      if (assets.isNotEmpty) {
+        final file = await assets[0].originFile;
+        if (file != null) {
+          settingModel.localFolderAbsPath = file.parent.path;
+        }
+      }
+      break;
+    }
   }
 }
 

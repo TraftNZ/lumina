@@ -1,6 +1,6 @@
 {
-    "name": "img_syncer",
-    "short_name": "img_syncer",
+    "name": "Lumina",
+    "short_name": "Lumina",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

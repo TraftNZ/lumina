@@ -196,4 +196,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get openSetting => '打开设置';
+
+  @override
+  String get settings => '设置';
+
+  @override
+  String get about => '关于';
+
+  @override
+  String get version => '版本';
+
+  @override
+  String get allSynced => '所有照片已同步！';
 }

@@ -54,14 +54,14 @@ android {
             signingConfig signingConfigs.debug
             applicationVariants.all { variant ->
                 variant.outputs.all {
-                    outputFileName = "pho-${variant.name}-${variant.versionCode}-${variant.versionName}.apk"
+                    outputFileName = "lumina-${variant.name}-${variant.versionCode}-${variant.versionName}.apk"
                 }
             }
         }
         debug {
             applicationVariants.all { variant ->
                 variant.outputs.all {
-                    outputFileName = "pho-${variant.name}-${variant.versionCode}-${variant.versionName}.apk"
+                    outputFileName = "lumina-${variant.name}-${variant.versionCode}-${variant.versionName}.apk"
                 }
             }
         }

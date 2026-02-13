@@ -68,6 +68,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.6
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -91,7 +92,7 @@ flutter:
   assets:
     - assets/images/broken.png
     - assets/images/gray.jpg
-    - assets/icon/pho_icon.png
+    - assets/icon/lumina_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -112,5 +113,18 @@ flutter:
 
 flutter_icons:
   android: "launcher_icon"
+  min_sdk_android: 21
   ios: true
-  image_path: "assets/icon/pho_icon.png"
+  image_path: "assets/icon/lumina_icon.png"
+  adaptive_icon_foreground: "assets/icon/lumina_icon_foreground.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_monochrome: "assets/icon/lumina_icon.png"
+
+flutter_native_splash:
+  image: "assets/icon/lumina_icon.png"
+  color: "#ffffff"
+  color_dark: "#1a1a1a"
+  android_12:
+    image: "assets/icon/lumina_icon.png"
+    color: "#ffffff"
+    color_dark: "#1a1a1a"

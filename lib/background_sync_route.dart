@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/sync_timer.dart';
-import 'package:img_syncer/state_model.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/theme.dart';
 
 class BackgroundSyncSettingRoute extends StatefulWidget {
   const BackgroundSyncSettingRoute({Key? key}) : super(key: key);
@@ -48,95 +48,102 @@ class _BackgroundSyncSettingRouteState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        iconTheme: Theme.of(context).iconTheme,
         elevation: 0,
         title: Text(l10n.backgroundSync,
             style: Theme.of(context).textTheme.titleLarge),
       ),
       body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.md),
         children: [
-          ListTile(
-            title: Text(l10n.enableBackgroundSync),
-            trailing: Switch(
-              value: _backgroundSyncEnabled,
-              onChanged: (value) async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('backgroundSyncEnabled', value);
-                setState(() {
-                  _backgroundSyncEnabled = value;
-                });
-                reloadAutoSyncTimer();
-              },
-            ),
-          ),
-          ListTile(
-            title: Text(l10n.syncOnlyOnWifi),
-            trailing: Switch(
-              value: _backgroundSyncWifiOnly,
-              onChanged: (value) async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('backgroundSyncWifiOnly', value);
-                setState(() {
-                  _backgroundSyncWifiOnly = value;
-                });
-                reloadAutoSyncTimer();
-              },
-            ),
-          ),
-          ListTile(
-            title: Text(l10n.syncInterval),
-            trailing: DropdownButton<Duration>(
-              value: _backgroundSyncInterval,
-              items: [
-                // DropdownMenuItem(
-                //   value: Duration(minutes: 1),
-                //   child: Text('1 minute'),
-                // ),
-                DropdownMenuItem(
-                  value: const Duration(minutes: 10),
-                  child: Text('10 ${l10n.minite}'),
+          Card(
+            child: Column(
+              children: [
+                SwitchListTile(
+                  secondary:
+                      Icon(Icons.sync_outlined, color: colorScheme.primary),
+                  title: Text(l10n.enableBackgroundSync),
+                  value: _backgroundSyncEnabled,
+                  onChanged: (value) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('backgroundSyncEnabled', value);
+                    setState(() {
+                      _backgroundSyncEnabled = value;
+                    });
+                    reloadAutoSyncTimer();
+                  },
                 ),
-                DropdownMenuItem(
-                  value: const Duration(hours: 1),
-                  child: Text('1 ${l10n.hour}'),
+                const Divider(height: 1, indent: 56),
+                SwitchListTile(
+                  secondary:
+                      Icon(Icons.wifi_outlined, color: colorScheme.primary),
+                  title: Text(l10n.syncOnlyOnWifi),
+                  value: _backgroundSyncWifiOnly,
+                  onChanged: (value) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('backgroundSyncWifiOnly', value);
+                    setState(() {
+                      _backgroundSyncWifiOnly = value;
+                    });
+                    reloadAutoSyncTimer();
+                  },
                 ),
-                DropdownMenuItem(
-                  value: const Duration(hours: 3),
-                  child: Text('3 ${l10n.hour}'),
-                ),
-                DropdownMenuItem(
-                  value: const Duration(hours: 6),
-                  child: Text('6 ${l10n.hour}'),
-                ),
-                DropdownMenuItem(
-                  value: const Duration(hours: 12),
-                  child: Text('12 ${l10n.hour}'),
-                ),
-                DropdownMenuItem(
-                  value: const Duration(days: 1),
-                  child: Text('1 ${l10n.day}'),
-                ),
-                DropdownMenuItem(
-                  value: const Duration(days: 3),
-                  child: Text('3 ${l10n.day}'),
-                ),
-                DropdownMenuItem(
-                  value: const Duration(days: 7),
-                  child: Text('1 ${l10n.week}'),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: Icon(Icons.timer_outlined,
+                      color: colorScheme.primary),
+                  title: Text(l10n.syncInterval),
+                  trailing: DropdownButton<Duration>(
+                    value: _backgroundSyncInterval,
+                    underline: const SizedBox.shrink(),
+                    items: [
+                      DropdownMenuItem(
+                        value: const Duration(minutes: 10),
+                        child: Text('10 ${l10n.minite}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(hours: 1),
+                        child: Text('1 ${l10n.hour}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(hours: 3),
+                        child: Text('3 ${l10n.hour}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(hours: 6),
+                        child: Text('6 ${l10n.hour}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(hours: 12),
+                        child: Text('12 ${l10n.hour}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(days: 1),
+                        child: Text('1 ${l10n.day}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(days: 3),
+                        child: Text('3 ${l10n.day}'),
+                      ),
+                      DropdownMenuItem(
+                        value: const Duration(days: 7),
+                        child: Text('1 ${l10n.week}'),
+                      ),
+                    ],
+                    onChanged: (value) async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setInt(
+                          'backgroundSyncInterval', value!.inMinutes);
+                      setState(() {
+                        _backgroundSyncInterval = value;
+                      });
+                      reloadAutoSyncTimer();
+                    },
+                  ),
                 ),
               ],
-              onChanged: (value) async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setInt('backgroundSyncInterval', value!.inMinutes);
-                setState(() {
-                  _backgroundSyncInterval = value;
-                });
-                reloadAutoSyncTimer();
-              },
             ),
           ),
         ],

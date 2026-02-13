@@ -6,6 +6,7 @@ import 'package:img_syncer/storage/storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/theme.dart';
 
 class NFSForm extends StatefulWidget {
   const NFSForm({Key? key}) : super(key: key);
@@ -42,7 +43,6 @@ class NFSFormState extends State<NFSForm> {
 
   Future<bool> checkNFS() async {
     final url = urlController!.text;
-    final rootPath = rootPathController!.text;
     if (url.isEmpty) {
       return false;
     }
@@ -127,78 +127,32 @@ class NFSFormState extends State<NFSForm> {
     );
   }
 
-  Widget testStorageButtun() {
-    return Container(
-      width: 180,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-      child: FilledButton.tonal(
-        onPressed: () {
-          testStorage().then((value) {
-            if (testSuccess) {
-              SnackBarManager.showSnackBar(l10n.testSuccess);
-            } else {
-              showErrorDialog(errormsg!);
-            }
-          });
-        },
-        child: Text(l10n.testStorage),
-      ),
-    );
-  }
-
-  Widget saveButtun() {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-      child: FilledButton(
-        onPressed: testSuccess
-            ? () {
-                final url = urlController!.text;
-                final rootPath = rootPathController!.text;
-                SharedPreferences.getInstance().then((prefs) {
-                  prefs.setString("nfs_url", url);
-                  prefs.setString("nfs_root_path", rootPath);
-                  prefs.setString("drive", driveName[Drive.nfs]!);
-                });
-                settingModel.setRemoteStorageSetted(true);
-                assetModel.remoteLastError = null;
-                eventBus.fire(RemoteRefreshEvent());
-                Navigator.pop(context);
-              }
-            : null,
-        child: Text(l10n.save),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: TextFormField(
               controller: urlController,
               obscureText: false,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
                 labelText: "URL",
                 helperText: "eg: nfs.domain.or.ip:/nfs/path",
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: TextFormField(
               controller: rootPathController,
               obscureText: false,
               enableInteractiveSelection: true,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
                 labelText: l10n.rootPath,
                 helperText: "eg: /path/photo",
                 suffixIcon: IconButton(
@@ -219,13 +173,43 @@ class NFSFormState extends State<NFSForm> {
               ),
             ),
           ),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              testStorageButtun(),
-              saveButtun(),
+              OutlinedButton(
+                onPressed: () {
+                  testStorage().then((value) {
+                    if (testSuccess) {
+                      SnackBarManager.showSnackBar(l10n.testSuccess);
+                    } else {
+                      showErrorDialog(errormsg!);
+                    }
+                  });
+                },
+                child: Text(l10n.testStorage),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              FilledButton(
+                onPressed: testSuccess
+                    ? () {
+                        final url = urlController!.text;
+                        final rootPath = rootPathController!.text;
+                        SharedPreferences.getInstance().then((prefs) {
+                          prefs.setString("nfs_url", url);
+                          prefs.setString("nfs_root_path", rootPath);
+                          prefs.setString("drive", driveName[Drive.nfs]!);
+                        });
+                        settingModel.setRemoteStorageSetted(true);
+                        assetModel.remoteLastError = null;
+                        eventBus.fire(RemoteRefreshEvent());
+                        Navigator.pop(context);
+                      }
+                    : null,
+                child: Text(l10n.save),
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -240,26 +224,24 @@ class NFSFormState extends State<NFSForm> {
             height: 500,
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
                   child: Text(
                     l10n.selectRoot,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                Container(
+                Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "${l10n.currentPath}: $currentPath",
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "${l10n.currentPath}: $currentPath",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
                 ),
-                const Divider(
-                  indent: 20,
-                  endIndent: 20,
-                  color: Colors.grey,
-                ),
+                const Divider(indent: 20, endIndent: 20),
                 FutureBuilder(
                   future: getRootPath(currentPath),
                   builder: (context, AsyncSnapshot<List<String>> snapshot) {
@@ -269,11 +251,9 @@ class NFSFormState extends State<NFSForm> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             return InkWell(
-                              child: Container(
+                              child: Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                                height: 35,
-                                alignment: Alignment.centerLeft,
+                                    const EdgeInsets.fromLTRB(25, 8, 25, 8),
                                 child: Text(
                                   snapshot.data![index],
                                   style: Theme.of(context).textTheme.bodyMedium,
@@ -302,41 +282,28 @@ class NFSFormState extends State<NFSForm> {
                     }
                   },
                 ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                  child: const Divider(
-                    indent: 20,
-                    endIndent: 20,
-                    color: Colors.grey,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-                      width: 120,
-                      height: 55,
-                      child: OutlinedButton(
+                const Divider(indent: 20, endIndent: 20),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton(
                         child: Text(l10n.cancel),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-                      width: 120,
-                      height: 55,
-                      child: FilledButton(
+                      const SizedBox(width: AppSpacing.md),
+                      FilledButton(
                         child: Text(l10n.save),
                         onPressed: () {
                           rootPathController!.text = currentPath;
                           Navigator.of(context).pop();
                         },
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

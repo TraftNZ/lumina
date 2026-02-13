@@ -5,6 +5,7 @@ import 'package:img_syncer/state_model.dart';
 import 'package:img_syncer/storage/storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/theme.dart';
 
 class SMBForm extends StatefulWidget {
   const SMBForm({Key? key}) : super(key: key);
@@ -108,15 +109,14 @@ class _SMBFormState extends State<SMBForm> {
 
   Widget input(
       String label, TextEditingController? c, void Function(String?)? onSaved) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: TextFormField(
         controller: c,
         obscureText: false,
         onSaved: onSaved,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
-          border: const OutlineInputBorder(),
           labelText: label,
         ),
       ),
@@ -128,8 +128,8 @@ class _SMBFormState extends State<SMBForm> {
       input(l10n.samvbaServerAddress, smbAddrController, null),
       input(l10n.username, smbUsernameController, null),
       input(l10n.password, smbPasswordController, null),
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
         child: TextFormField(
           controller: smbShareController,
           obscureText: false,
@@ -137,7 +137,6 @@ class _SMBFormState extends State<SMBForm> {
           onSaved: null,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
-            border: const OutlineInputBorder(),
             labelText: l10n.share,
             suffixIcon: IconButton(
               icon: const Icon(Icons.open_in_browser),
@@ -155,8 +154,8 @@ class _SMBFormState extends State<SMBForm> {
           ),
         ),
       ),
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
         child: TextFormField(
           controller: smbRootPathController,
           obscureText: false,
@@ -164,7 +163,6 @@ class _SMBFormState extends State<SMBForm> {
           onSaved: null,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
-            border: const OutlineInputBorder(),
             labelText: l10n.rootPath,
             helperText: "eg: storage/photos (no '/' or '\\' at the start)",
             suffixIcon: smbShareController!.text == ""
@@ -179,11 +177,42 @@ class _SMBFormState extends State<SMBForm> {
           ),
         ),
       ),
+      const SizedBox(height: AppSpacing.sm),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          testStorageButtun(),
-          saveButtun(),
+          OutlinedButton(
+            onPressed: () {
+              testStorage().then((value) {
+                if (testSuccess) {
+                  SnackBarManager.showSnackBar(l10n.testSuccess);
+                } else {
+                  showErrorDialog(errormsg!);
+                }
+              });
+            },
+            child: Text(l10n.testStorage),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          FilledButton(
+            onPressed: testSuccess
+                ? () {
+                    SharedPreferences.getInstance().then((value) {
+                      value.setString('addr', smbAddrController!.text);
+                      value.setString('username', smbUsernameController!.text);
+                      value.setString('password', smbPasswordController!.text);
+                      value.setString('share', smbShareController!.text);
+                      value.setString('rootPath', smbRootPathController!.text);
+                      value.setString('drive', driveName[Drive.smb]!);
+                    });
+                    settingModel.setRemoteStorageSetted(true);
+                    assetModel.remoteLastError = null;
+                    eventBus.fire(RemoteRefreshEvent());
+                    Navigator.pop(context);
+                  }
+                : null,
+            child: Text(l10n.save),
+          ),
         ],
       ),
     ];
@@ -201,18 +230,14 @@ class _SMBFormState extends State<SMBForm> {
         height: 500,
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
               child: Text(
                 "Select share",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            const Divider(
-              indent: 20,
-              endIndent: 20,
-              color: Colors.grey,
-            ),
+            const Divider(indent: 20, endIndent: 20),
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
@@ -233,14 +258,6 @@ class _SMBFormState extends State<SMBForm> {
                 },
               ),
             ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: const Divider(
-                indent: 20,
-                endIndent: 20,
-                color: Colors.grey,
-              ),
-            ),
           ],
         ),
       ),
@@ -257,26 +274,24 @@ class _SMBFormState extends State<SMBForm> {
             height: 500,
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
                   child: Text(
                     "Select root path",
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                Container(
+                Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Current path: $currentPath",
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Current path: $currentPath",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
                 ),
-                const Divider(
-                  indent: 20,
-                  endIndent: 20,
-                  color: Colors.grey,
-                ),
+                const Divider(indent: 20, endIndent: 20),
                 FutureBuilder(
                   future: getRootPath(currentPath),
                   builder: (context, AsyncSnapshot<List<String>> snapshot) {
@@ -286,11 +301,9 @@ class _SMBFormState extends State<SMBForm> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             return InkWell(
-                              child: Container(
+                              child: Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                                height: 35,
-                                alignment: Alignment.centerLeft,
+                                    const EdgeInsets.fromLTRB(25, 8, 25, 8),
                                 child: Text(
                                   snapshot.data![index],
                                   style: Theme.of(context).textTheme.bodyMedium,
@@ -317,41 +330,28 @@ class _SMBFormState extends State<SMBForm> {
                     }
                   },
                 ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                  child: const Divider(
-                    indent: 20,
-                    endIndent: 20,
-                    color: Colors.grey,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-                      width: 120,
-                      height: 55,
-                      child: OutlinedButton(
-                        child: const Text("Cancel"),
+                const Divider(indent: 20, endIndent: 20),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton(
+                        child: Text(l10n.cancel),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-                      width: 120,
-                      height: 55,
-                      child: FilledButton(
-                        child: const Text("Save"),
+                      const SizedBox(width: AppSpacing.md),
+                      FilledButton(
+                        child: Text(l10n.save),
                         onPressed: () {
                           smbRootPathController!.text = currentPath;
                           Navigator.of(context).pop();
                         },
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -397,51 +397,6 @@ class _SMBFormState extends State<SMBForm> {
         });
       }
     }
-  }
-
-  Widget testStorageButtun() {
-    return Container(
-      width: 180,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-      child: FilledButton.tonal(
-        onPressed: () {
-          testStorage().then((value) {
-            if (testSuccess) {
-              SnackBarManager.showSnackBar(l10n.testSuccess);
-            } else {
-              showErrorDialog(errormsg!);
-            }
-          });
-        },
-        child: Text(l10n.testStorage),
-      ),
-    );
-  }
-
-  Widget saveButtun() {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-      child: FilledButton(
-        onPressed: testSuccess
-            ? () {
-                SharedPreferences.getInstance().then((value) {
-                  value.setString('addr', smbAddrController!.text);
-                  value.setString('username', smbUsernameController!.text);
-                  value.setString('password', smbPasswordController!.text);
-                  value.setString('share', smbShareController!.text);
-                  value.setString('rootPath', smbRootPathController!.text);
-                  value.setString('drive', driveName[Drive.smb]!);
-                });
-                settingModel.setRemoteStorageSetted(true);
-                assetModel.remoteLastError = null;
-                eventBus.fire(RemoteRefreshEvent());
-                Navigator.pop(context);
-              }
-            : null,
-        child: Text(l10n.save),
-      ),
-    );
   }
 
   void showErrorDialog(String msg) {

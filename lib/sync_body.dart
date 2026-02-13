@@ -13,7 +13,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:img_syncer/choose_album_route.dart';
 import 'package:img_syncer/setting_storage_route.dart';
 import 'package:img_syncer/global.dart';
-import 'package:path/path.dart';
+import 'package:img_syncer/theme.dart';
 
 class SyncBody extends StatefulWidget {
   const SyncBody({
@@ -34,7 +34,6 @@ class SyncBodyState extends State<SyncBody> {
   @protected
   int pageSize = 20;
   List<Asset> all = [];
-  // List<Asset> toShow = [];
   bool syncing = false;
   bool _needStopSync = false;
 
@@ -48,9 +47,7 @@ class SyncBodyState extends State<SyncBody> {
         .debounceTime(const Duration(milliseconds: 150))
         .listen((scrollPosition) {
       if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 1500) {
-        // loadMore();
-      }
+          _scrollController.position.maxScrollExtent - 1500) {}
       setState(() {
         scrollOffset = scrollPosition;
       });
@@ -58,9 +55,6 @@ class SyncBodyState extends State<SyncBody> {
     _scrollController.addListener(() {
       _scrollSubject.add(_scrollController.position.pixels);
     });
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   refreshUnsynchronized();
-    // });
   }
 
   @override
@@ -78,47 +72,7 @@ class SyncBodyState extends State<SyncBody> {
     _scrollSubject.close();
   }
 
-  // bool _isLoadingMore = false;
-  // Future<void> loadMore() async {
-  //   if (_isGettingPhotos != null) {
-  //     await _isGettingPhotos!.future;
-  //   }
-  //   if (syncing) {
-  //     return;
-  //   }
-  //   if (_isLoadingMore) {
-  //     return;
-  //   }
-  //   _isLoadingMore = true;
-  //   toUpload = stateModel.notSyncedIDs.length;
-  //   Map ids = {};
-  //   for (final id in stateModel.notSyncedIDs) {
-  //     ids[id] = true;
-  //   }
-  //   int count = 0;
-  //   int originLength = toShow.length;
-  //   for (var asset in all) {
-  //     final id = asset.id;
-  //     if (ids[id] == true) {
-  //       count++;
-  //       if (count <= originLength) {
-  //         continue;
-  //       }
-  //       final a = Asset(local: asset);
-  //       await a.getLocalFile();
-  //       toShow.add(a);
-  //       if (count >= originLength + 2000) {
-  //         break;
-  //       }
-  //     }
-  //   }
-
-  //   setState(() {
-  //     _isLoadingMore = false;
-  //   });
-  // }
-
-  Completer<bool>? _isGettingPhotos = null;
+  Completer<bool>? _isGettingPhotos;
   Future<void> getPhotos() async {
     if (_isGettingPhotos != null) {
       await _isGettingPhotos!.future;
@@ -163,105 +117,58 @@ class SyncBodyState extends State<SyncBody> {
   }
 
   Widget settingRows() {
-    final ButtonStyle style = FilledButton.styleFrom(
-        shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ));
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  height: 60,
-                  width: constraints.maxWidth * 0.5,
-                  padding: const EdgeInsets.fromLTRB(15, 8, 10, 8),
-                  child: FilledButton.tonal(
-                    style: style,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ChooseAlbumRoute()),
-                      );
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.folder_outlined,
-                          // color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(l10n.localFolder),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 60,
-                  width: constraints.maxWidth * 0.5,
-                  padding: const EdgeInsets.fromLTRB(10, 8, 15, 8),
-                  child: FilledButton.tonal(
-                    style: style,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingStorageRoute(),
-                          ));
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.cloud_outlined,
-                          // color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(l10n.cloudStorage),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(Icons.folder_outlined, color: colorScheme.primary),
+            title: Text(l10n.localFolder),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ChooseAlbumRoute()),
+              );
+            },
+          ),
+          const Divider(height: 1, indent: 56),
+          ListTile(
+            leading: Icon(Icons.cloud_outlined, color: colorScheme.primary),
+            title: Text(l10n.cloudStorage),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingStorageRoute(),
+                  ));
+            },
+          ),
+          if (Platform.isAndroid) ...[
+            const Divider(height: 1, indent: 56),
+            ListTile(
+              leading:
+                  Icon(Icons.cloud_sync_outlined, color: colorScheme.primary),
+              title: Text(l10n.backgroundSync),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const BackgroundSyncSettingRoute()),
+                );
+              },
             ),
-            if (Platform.isAndroid)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    height: 60,
-                    width: constraints.maxWidth * 0.5,
-                    padding: const EdgeInsets.fromLTRB(15, 8, 10, 8),
-                    child: FilledButton.tonal(
-                      style: style,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const BackgroundSyncSettingRoute()),
-                        );
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.cloud_sync_outlined,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(l10n.backgroundSync),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
           ],
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -303,7 +210,20 @@ class SyncBodyState extends State<SyncBody> {
     _needStopSync = true;
   }
 
+  Widget _buildSyncProgressIndicator() {
+    return SizedBox(
+      height: 20,
+      width: 20,
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).colorScheme.onPrimaryContainer),
+        strokeWidth: 2,
+      ),
+    );
+  }
+
   Widget columnBuilder(BuildContext context, StateModel model, Widget? child) {
+    final colorScheme = Theme.of(context).colorScheme;
     Map notUploadedIds = {};
     for (final id in stateModel.notSyncedIDs) {
       notUploadedIds[id] = true;
@@ -327,44 +247,63 @@ class SyncBodyState extends State<SyncBody> {
           asset.getLocalFile().then((value) => setState(() {}));
         }
       }
-      Widget child = ListTile(
-        leading: SizedBox(
-          width: 60,
-          height: 60,
-          child: needLoadThumbnail && asset.loadThumbnailFinished()
-              ? Image(image: asset.thumbnailProvider(), fit: BoxFit.cover)
-              : Container(color: Colors.grey),
+      Widget child = Card(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
         ),
-        title: Text(
-          asset.name()!,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: needLoadThumbnail
-            ? Consumer<StateModel>(
-                builder: (context, stateModel, child) {
-                  final percent = stateModel.getUploadPercent(asset.local!.id);
-                  if (percent > 0) {
-                    return Container(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                      child: LinearProgressIndicator(value: percent),
+        child: ListTile(
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 56,
+              height: 56,
+              child: needLoadThumbnail && asset.loadThumbnailFinished()
+                  ? Image(image: asset.thumbnailProvider(), fit: BoxFit.cover)
+                  : Container(color: colorScheme.surfaceContainerHighest),
+            ),
+          ),
+          title: Text(
+            asset.name()!,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: needLoadThumbnail
+              ? Consumer<StateModel>(
+                  builder: (context, stateModel, child) {
+                    final percent =
+                        stateModel.getUploadPercent(asset.local!.id);
+                    if (percent > 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: LinearProgressIndicator(
+                          value: percent,
+                          color: colorScheme.primary,
+                        ),
+                      );
+                    }
+                    if (stateModel.notSyncedIDs.contains(asset.local!.id)) {
+                      return Text(l10n.notUploaded,
+                          style: TextStyle(
+                              color: colorScheme.onSurfaceVariant));
+                    }
+                    return Text(
+                      l10n.uploaded,
+                      style: TextStyle(color: colorScheme.primary),
                     );
-                  }
-                  if (stateModel.notSyncedIDs.contains(asset.local!.id)) {
-                    return Text(l10n.notUploaded,
-                        style: const TextStyle(color: Colors.grey));
-                  }
-                  return Text(
-                    l10n.uploaded,
-                    style:
-                        const TextStyle(color: Color.fromARGB(255, 75, 154, 0)),
-                  );
-                },
-              )
-            : Container(),
+                  },
+                )
+              : const SizedBox.shrink(),
+        ),
       );
       listChildren.add(child);
-      currentScrollOffset += 72; // ListTile's height
+      currentScrollOffset += 80;
     }
+
+    final bool isBusy = syncing ||
+        model.refreshingUnsynchronized ||
+        model.isDownloading() ||
+        model.isUploading();
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -373,116 +312,119 @@ class SyncBodyState extends State<SyncBody> {
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         actions: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
-            alignment: Alignment.bottomRight,
-            child: Text(
-              "${listChildren.length} ${l10n.notSync}",
-              style: const TextStyle(color: Colors.grey),
-            ),
+          IconButton(
+            icon: model.refreshingUnsynchronized
+                ? _buildSyncProgressIndicator()
+                : const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: isBusy ? null : () => refreshUnsynchronized(),
           ),
+          const SizedBox(width: 8),
         ],
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: "refresh",
-            tooltip: 'Refresh unsynchronized photos',
-            // label: const Text('Refresh'),
-            elevation: 2,
-            onPressed: () => syncing ||
-                    model.refreshingUnsynchronized ||
-                    model.isDownloading() ||
-                    model.isUploading()
-                ? null
-                : refreshUnsynchronized(),
-            child: model.refreshingUnsynchronized
-                ? CircularProgress()
-                : const Icon(Icons.refresh),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
-            child: FloatingActionButton.extended(
-                heroTag: "sync",
-                elevation: 2,
-                onPressed: () {
-                  if (!settingModel.isRemoteStorageSetted) {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingStorageRoute(),
-                        ));
-                    return;
-                  }
-                  if (syncing ||
-                      model.refreshingUnsynchronized ||
-                      model.isDownloading() ||
-                      model.isUploading()) {
-                    stopSync();
-                  } else {
-                    syncPhotos();
-                  }
-                },
-                icon: syncing ? CircularProgress() : const Icon(Icons.sync),
-                label: Text(syncing ? l10n.stop : l10n.sync)),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: "sync",
+        onPressed: () {
+          if (!settingModel.isRemoteStorageSetted) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingStorageRoute(),
+                ));
+            return;
+          }
+          if (syncing) {
+            stopSync();
+          } else if (!isBusy) {
+            syncPhotos();
+          }
+        },
+        icon: syncing
+            ? _buildSyncProgressIndicator()
+            : Icon(syncing ? Icons.stop : Icons.sync),
+        label: Text(syncing ? l10n.stop : l10n.sync),
       ),
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           settingRows(),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
-                child: Text(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.sm),
+            child: Row(
+              children: [
+                Text(
                   l10n.unsynchronizedPhotos,
-                  style: const TextStyle(
-                    fontSize: 13,
-                  ),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
-              ),
-              const Flexible(
-                child: Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 15,
+                const SizedBox(width: 8),
+                Text(
+                  "(${listChildren.length})",
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           if (!settingModel.isRemoteStorageSetted)
-            Container(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+            Expanded(
               child: Center(
-                heightFactor: 10,
-                child: Text(l10n.setRemoteStroage,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    )),
-              ),
-            ),
-          model.refreshingUnsynchronized && listChildren.isEmpty
-              ? Container(
-                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-                  child: Center(
-                    heightFactor: 10,
-                    child: Text(l10n.refreshingPleaseWait,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_off_outlined,
+                        size: 48,
+                        color: colorScheme.onSurfaceVariant),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(l10n.setRemoteStroage,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
                         )),
-                  ),
-                )
-              : Flexible(
-                  child: ListView(
-                  controller: _scrollController,
-                  children: listChildren,
-                )),
+                  ],
+                ),
+              ),
+            )
+          else if (model.refreshingUnsynchronized && listChildren.isEmpty)
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: colorScheme.primary),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(l10n.refreshingPleaseWait,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                        )),
+                  ],
+                ),
+              ),
+            )
+          else if (listChildren.isEmpty && settingModel.isRemoteStorageSetted)
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_done_outlined,
+                        size: 48, color: colorScheme.primary),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(l10n.allSynced,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                        )),
+                  ],
+                ),
+              ),
+            )
+          else
+            Flexible(
+                child: ListView(
+              controller: _scrollController,
+              children: listChildren,
+            )),
         ],
       ),
     );
@@ -495,17 +437,6 @@ class SyncBodyState extends State<SyncBody> {
     });
     return Consumer<StateModel>(
       builder: columnBuilder,
-    );
-  }
-
-  Widget CircularProgress() {
-    return const SizedBox(
-      height: 20,
-      width: 20,
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        strokeWidth: 2,
-      ),
     );
   }
 

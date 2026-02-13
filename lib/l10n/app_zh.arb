@@ -61,5 +61,9 @@
     "setRemoteStroage": "请先点击云端设置设置网络储存",
     "needPermision": "需要访问相册的权限",
     "gotoSystemSetting": "请转至系统设置授予相册的权限",
-    "openSetting": "打开设置"
+    "openSetting": "打开设置",
+    "settings": "设置",
+    "about": "关于",
+    "version": "版本",
+    "allSynced": "所有照片已同步！"
 }

@@ -196,4 +196,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openSetting => 'Open settings';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get allSynced => 'All photos synced!';
 }

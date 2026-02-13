@@ -61,5 +61,9 @@
   "setRemoteStroage": "Please set cloud storage first",
   "needPermision": "Need permission to access photos",
   "gotoSystemSetting": "You can go to system settings to change the permission",
-  "openSetting": "Open settings"
+  "openSetting": "Open settings",
+  "settings": "Settings",
+  "about": "About",
+  "version": "Version",
+  "allSynced": "All photos synced!"
 }

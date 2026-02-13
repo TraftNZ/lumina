@@ -33,19 +33,16 @@ class ChooseAlbumRouteState extends State<ChooseAlbumRoute> {
     if (!re) return [];
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
         type: RequestType.common, hasAll: true);
-    // sort by asset count by assetCountAsync
-    // 使用Future.wait来获取所有异步值并保存到Map中
     final Map<AssetPathEntity, int> assetCountMap = {};
     await Future.wait(paths.map((path) async {
       int assetCount = await path.assetCountAsync;
       assetCountMap[path] = assetCount;
     }));
 
-    // 使用sort方法对paths进行排序
     paths.sort((a, b) {
       int countA = assetCountMap[a] ?? 0;
       int countB = assetCountMap[b] ?? 0;
-      return countB.compareTo(countA); // 从大到小排序
+      return countB.compareTo(countA);
     });
     return paths;
   }
@@ -78,10 +75,7 @@ class ChooseAlbumRouteState extends State<ChooseAlbumRoute> {
       );
     }
     return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          iconTheme: Theme.of(context).iconTheme,
           elevation: 0,
           title: Text(l10n.chooseAlbum,
               style: Theme.of(context).textTheme.titleLarge),
@@ -90,10 +84,10 @@ class ChooseAlbumRouteState extends State<ChooseAlbumRoute> {
           primary: false,
           slivers: <Widget>[
             SliverPadding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               sliver: SliverGrid.count(
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
                 crossAxisCount: 2,
                 childAspectRatio: 0.75,
                 children: children,
@@ -115,17 +109,9 @@ class AlbumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Card(
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          width: 1.5,
-          color: Theme.of(context).primaryColor.withOpacity(0.5),
-        ),
-        borderRadius: const BorderRadius.all(Radius.circular(15)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      // elevation: Theme.of(context).cardTheme.elevation,
-      color: Theme.of(context).cardColor,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Column(
@@ -137,48 +123,36 @@ class AlbumCard extends StatelessWidget {
                   child: thumbnail != null
                       ? Image.memory(thumbnail!, fit: BoxFit.cover)
                       : Image.asset("assets/images/gray.jpg")),
-              Container(
-                  alignment: Alignment.centerLeft,
-                  height: 40,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                        child: Text(path.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Ubuntu-condensed',
-                            )),
-                      ),
-                    ],
+              Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(path.name,
+                        style: textTheme.titleSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
                   )),
-              Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                height: 40,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4),
                         child: FutureBuilder(
                           future: path.assetCountAsync,
                           builder: (context, snapshot) => Text(
                               snapshot.hasData
                                   ? "${snapshot.data} ${l10n.pics}"
-                                  : 'unknown count pics',
-                              style: Theme.of(context).textTheme.bodySmall),
+                                  : '',
+                              style: textTheme.bodySmall),
                         ),
                       ),
                     ),
-                    Container(
-                      alignment: Alignment.centerRight,
-                      width: 120,
-                      padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
-                      child: FilledButton(
-                        style: Theme.of(context).textButtonTheme.style,
+                    Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: FilledButton.tonal(
                         onPressed: () {
                           settingModel.setLocalFolder(path.name);
                           SharedPreferences.getInstance().then((prefs) {

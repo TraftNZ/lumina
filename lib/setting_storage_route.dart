@@ -6,6 +6,7 @@ import 'package:img_syncer/storageform/baidu_netdisk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/state_model.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/theme.dart';
 
 class SettingStorageRoute extends StatefulWidget {
   const SettingStorageRoute({Key? key}) : super(key: key);
@@ -21,9 +22,20 @@ Drive getDrive(String drive) {
       .key;
 }
 
-class SettingStorageRouteState extends State<SettingStorageRoute> {
-  final GlobalKey _formKey = GlobalKey<FormState>();
+IconData _driveIcon(Drive drive) {
+  switch (drive) {
+    case Drive.smb:
+      return Icons.storage;
+    case Drive.webDav:
+      return Icons.cloud_outlined;
+    case Drive.nfs:
+      return Icons.dns_outlined;
+    case Drive.baiduNetdisk:
+      return Icons.cloud_circle_outlined;
+  }
+}
 
+class SettingStorageRouteState extends State<SettingStorageRoute> {
   @protected
   Drive currentDrive = Drive.smb;
 
@@ -56,54 +68,45 @@ class SettingStorageRouteState extends State<SettingStorageRoute> {
       case Drive.baiduNetdisk:
         form = const BaiduNetdiskForm();
         break;
-      default:
-        form = const Text('Not implemented');
     }
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          iconTheme: Theme.of(context).iconTheme,
           elevation: 0,
           title: Text(l10n.storageSetting,
               style: Theme.of(context).textTheme.titleLarge),
         ),
-        body: Center(
+        body: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-              child: TextField(
-                readOnly: true,
-                controller: TextEditingController(
-                    text: driveName[currentDrive] == "BaiduNetdisk"
-                        ? l10n.baiduNetdisk
-                        : driveName[currentDrive]),
-                decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: l10n.remoteStorageType,
-                    suffixIcon: PopupMenuButton<String>(
-                      icon: const Icon(Icons.arrow_drop_down),
-                      itemBuilder: (BuildContext context) {
-                        return driveName.values
-                            .map((String value) => PopupMenuItem<String>(
-                                  value: value,
-                                  child: Text(value == "BaiduNetdisk"
-                                      ? l10n.baiduNetdisk
-                                      : value),
-                                ))
-                            .toList();
-                      },
-                      onSelected: (String value) => setState(() {
-                        currentDrive = getDrive(value);
-                        SharedPreferences.getInstance().then((prefs) {
-                          prefs.setString("drive", value);
-                        });
-                      }),
-                    )),
-              ),
-            ),
-            form,
-          ],
-        )));
+              children: [
+                DropdownMenu<Drive>(
+                  expandedInsets: EdgeInsets.zero,
+                  initialSelection: currentDrive,
+                  label: Text(l10n.remoteStorageType),
+                  leadingIcon: Icon(_driveIcon(currentDrive)),
+                  onSelected: (Drive? value) {
+                    if (value != null) {
+                      setState(() {
+                        currentDrive = value;
+                      });
+                      SharedPreferences.getInstance().then((prefs) {
+                        prefs.setString('drive', driveName[value]!);
+                      });
+                    }
+                  },
+                  dropdownMenuEntries: driveName.entries
+                      .map((entry) => DropdownMenuEntry<Drive>(
+                            value: entry.key,
+                            label: entry.key == Drive.baiduNetdisk
+                                ? l10n.baiduNetdisk
+                                : entry.value,
+                            leadingIcon: Icon(_driveIcon(entry.key)),
+                          ))
+                      .toList(),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                form,
+              ],
+            )));
   }
 }
