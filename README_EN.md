@@ -2,73 +2,91 @@
 <img src="assets/icon/pho_icon.png" width="150">
 </p>
 <h3 align="center">
-Pho - A serverless application for viewing and uploading photos
+Lumina - A serverless photo sync and viewing app
 </h3>
 <p align="center">
-  <img src="https://github.com/fregie/pho/actions/workflows/go_test.yml/badge.svg">
+  <img src="https://github.com/zhupengjia/pho/actions/workflows/go_test.yml/badge.svg">
 </p>
 <p align="center">
   <a href="README.md">中文</a> | <a href="README_EN.md">English</a>
 </p>
 
-### Installation
-
-[Download APK](https://github.com/fregie/pho/releases) 
-
-[Google Play](https://play.google.com/store/apps/details?id=com.fregie.pho)  
-
-[App store](https://apps.apple.com/cn/app/pho-%E5%90%8C%E6%AD%A5%E7%85%A7%E7%89%87%E5%88%B0nas-%E7%BD%91%E7%9B%98/id6451428709)
-
-
 ### Introduction
-The primary objective of this application is to serve as a replacement for the native photo gallery application on smartphones. It also offers the capability to synchronize photos with online storage.  
-Pho is a simple app designed for viewing and synchronizing photos to cloud storage. It aims to provide an excellent user experience.
+
+Lumina is a serverless photo sync and viewing app. It uses a Flutter frontend with an embedded Go gRPC server compiled via gomobile (AAR for Android, xcframework for iOS). The server runs on localhost with no external server or database required.
+
+The app is designed to replace the native photo gallery on your phone while providing incremental photo sync to network storage, with a focus on simplicity and great user experience.
 
 ### Features
-* Local photo browsing
-* Cloud photo browsing
-* Incremental photo synchronization to the cloud
-* Background periodic synchronization
-* No database, no server-side
-* Organizing cloud storage directory structure by date
 
-### Supported Cloud Storage
-- [x] Samba
-- [x] Webdav
+- Local photo browsing
+- Cloud photo browsing
+- Incremental photo synchronization to the cloud
+- Background periodic synchronization
+- No database, no server-side dependencies
+- Date-based cloud storage directory structure
+- Video upload and browsing support
+
+### Supported Storage Backends
+
+- [x] Samba (SMB)
+- [x] WebDAV
 - [x] NFS
+- [x] Baidu Netdisk
 - [ ] Alibaba Cloud Drive
-- [ ] baidu netdisk
-- [ ] oneDrive
-- [ ] google drive
-- [ ] google photo
+- [ ] OneDrive
+- [ ] Google Drive
+- [ ] Google Photos
+
+### Installation
+
+[Download APK](https://github.com/zhupengjia/pho/releases)
 
 ### Screenshots
+
 <p align="left">
 <img src="assets/screenshot/Screenshots.png" >
 </p>
 
-### Roadmap
-- [x] Support zooming in/out of images
-- [x] Support uploading/browsing videos
-- [x] Support NFS
-- [x] Support Baidu net disk
-- [x] Support iOS
-- [ ] Support web version
-- [x] Add Chinese
+### Build
 
-### Contribute
-Thank you all for your positive feedback.
+```bash
+# Install protobuf code generators
+make prebuild
 
-There have been quite a few people who have provided requirements for this project, but as an individual, my resources are limited. If you are interested, you are welcome to join.
+# Generate gRPC code from proto definitions (both Go and Dart)
+make protobuf
 
-You can communicate by replying in the issue section and help in developing some features by submitting your pull request.
+# Build standalone Go server binary
+make server
+
+# Build mobile libraries (gomobile)
+make server-aar    # Android AAR
+make server-ios    # iOS xcframework
+
+# Build apps
+make apk           # Android
+make ipa           # iOS
+```
+
+### Testing
+
+Tests are Go integration tests requiring Docker Compose services (SMB, WebDAV, NFS containers):
+
+```bash
+make test                                          # Full: start services, test, teardown
+go test -v ./server/api -p 1 -failfast            # API tests only (services must be running)
+go test -v ./server/drive -p 1 -failfast           # Drive tests only
+docker compose -f test/docker-compose.yml up -d    # Start test services manually
+```
 
 ### File Storage Logic
-The application stores files based on a straightforward principle of utilizing the time as the directory structure, and the source file name as the filename for storage. A .thumbnail directory is created in the root directory to store the generated thumbnails, and the directory structure for these thumbnails aligns with that of the source files.
 
-You can access and utilize your backed-up photos in any other manner at any time, without dependence on this application.
+Files are stored using a straightforward time-based directory structure, with the original filename preserved. A `.thumbnail` directory is created at the root to store generated thumbnails, mirroring the same directory structure as the source files.
 
-Directory Structure Diagram:
+You can access and use your backed-up photos in any other manner at any time, without depending on this app.
+
+Directory structure:
 ```bash
 ├── 2022
 │   ├── 07
@@ -99,9 +117,24 @@ Directory Structure Diagram:
                  └── 20220703_112338.DNG
 ```
 
-### Star History
+### Roadmap
 
-[![Star History Chart](https://api.star-history.com/svg?repos=fregie/pho&type=Date)](https://star-history.com/#fregie/pho&Date)
+- [x] Support zooming in/out of images
+- [x] Support uploading/browsing videos
+- [x] Support NFS
+- [x] Support Baidu Netdisk
+- [x] Support iOS
+- [ ] Support Desktop
+- [x] Support Chinese and English
 
-### Join QQ group
-<img src="assets/pho-qq-group.jpg" width="400">
+### Contributing
+
+Feel free to communicate via issues and submit your pull requests.
+
+### Acknowledgments
+
+This project is based on [fregie/pho](https://github.com/fregie/pho). Thanks to [fregie](https://github.com/fregie) for the excellent work and open-source contribution.
+
+### License
+
+[MIT](LICENSE)
