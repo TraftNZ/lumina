@@ -32,6 +32,10 @@ const (
 	ImgSyncer_ListDriveNFSDir_FullMethodName        = "/img_syncer.ImgSyncer/ListDriveNFSDir"
 	ImgSyncer_SetDriveBaiduNetDisk_FullMethodName   = "/img_syncer.ImgSyncer/SetDriveBaiduNetDisk"
 	ImgSyncer_StartBaiduNetdiskLogin_FullMethodName = "/img_syncer.ImgSyncer/StartBaiduNetdiskLogin"
+	ImgSyncer_MoveToTrash_FullMethodName            = "/img_syncer.ImgSyncer/MoveToTrash"
+	ImgSyncer_ListTrash_FullMethodName              = "/img_syncer.ImgSyncer/ListTrash"
+	ImgSyncer_RestoreFromTrash_FullMethodName       = "/img_syncer.ImgSyncer/RestoreFromTrash"
+	ImgSyncer_EmptyTrash_FullMethodName             = "/img_syncer.ImgSyncer/EmptyTrash"
 )
 
 // ImgSyncerClient is the client API for ImgSyncer service.
@@ -54,6 +58,11 @@ type ImgSyncerClient interface {
 	ListDriveNFSDir(ctx context.Context, in *ListDriveNFSDirRequest, opts ...grpc.CallOption) (*ListDriveNFSDirResponse, error)
 	SetDriveBaiduNetDisk(ctx context.Context, in *SetDriveBaiduNetDiskRequest, opts ...grpc.CallOption) (*SetDriveBaiduNetDiskResponse, error)
 	StartBaiduNetdiskLogin(ctx context.Context, in *StartBaiduNetdiskLoginRequest, opts ...grpc.CallOption) (*StartBaiduNetdiskLoginResponse, error)
+	// Trash
+	MoveToTrash(ctx context.Context, in *MoveToTrashRequest, opts ...grpc.CallOption) (*MoveToTrashResponse, error)
+	ListTrash(ctx context.Context, in *ListTrashRequest, opts ...grpc.CallOption) (*ListTrashResponse, error)
+	RestoreFromTrash(ctx context.Context, in *RestoreFromTrashRequest, opts ...grpc.CallOption) (*RestoreFromTrashResponse, error)
+	EmptyTrash(ctx context.Context, in *EmptyTrashRequest, opts ...grpc.CallOption) (*EmptyTrashResponse, error)
 }
 
 type imgSyncerClient struct {
@@ -197,6 +206,46 @@ func (c *imgSyncerClient) StartBaiduNetdiskLogin(ctx context.Context, in *StartB
 	return out, nil
 }
 
+func (c *imgSyncerClient) MoveToTrash(ctx context.Context, in *MoveToTrashRequest, opts ...grpc.CallOption) (*MoveToTrashResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MoveToTrashResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_MoveToTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) ListTrash(ctx context.Context, in *ListTrashRequest, opts ...grpc.CallOption) (*ListTrashResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTrashResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_ListTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) RestoreFromTrash(ctx context.Context, in *RestoreFromTrashRequest, opts ...grpc.CallOption) (*RestoreFromTrashResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RestoreFromTrashResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_RestoreFromTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) EmptyTrash(ctx context.Context, in *EmptyTrashRequest, opts ...grpc.CallOption) (*EmptyTrashResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyTrashResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_EmptyTrash_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImgSyncerServer is the server API for ImgSyncer service.
 // All implementations must embed UnimplementedImgSyncerServer
 // for forward compatibility.
@@ -217,6 +266,11 @@ type ImgSyncerServer interface {
 	ListDriveNFSDir(context.Context, *ListDriveNFSDirRequest) (*ListDriveNFSDirResponse, error)
 	SetDriveBaiduNetDisk(context.Context, *SetDriveBaiduNetDiskRequest) (*SetDriveBaiduNetDiskResponse, error)
 	StartBaiduNetdiskLogin(context.Context, *StartBaiduNetdiskLoginRequest) (*StartBaiduNetdiskLoginResponse, error)
+	// Trash
+	MoveToTrash(context.Context, *MoveToTrashRequest) (*MoveToTrashResponse, error)
+	ListTrash(context.Context, *ListTrashRequest) (*ListTrashResponse, error)
+	RestoreFromTrash(context.Context, *RestoreFromTrashRequest) (*RestoreFromTrashResponse, error)
+	EmptyTrash(context.Context, *EmptyTrashRequest) (*EmptyTrashResponse, error)
 	mustEmbedUnimplementedImgSyncerServer()
 }
 
@@ -265,6 +319,18 @@ func (UnimplementedImgSyncerServer) SetDriveBaiduNetDisk(context.Context, *SetDr
 }
 func (UnimplementedImgSyncerServer) StartBaiduNetdiskLogin(context.Context, *StartBaiduNetdiskLoginRequest) (*StartBaiduNetdiskLoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method StartBaiduNetdiskLogin not implemented")
+}
+func (UnimplementedImgSyncerServer) MoveToTrash(context.Context, *MoveToTrashRequest) (*MoveToTrashResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MoveToTrash not implemented")
+}
+func (UnimplementedImgSyncerServer) ListTrash(context.Context, *ListTrashRequest) (*ListTrashResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTrash not implemented")
+}
+func (UnimplementedImgSyncerServer) RestoreFromTrash(context.Context, *RestoreFromTrashRequest) (*RestoreFromTrashResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RestoreFromTrash not implemented")
+}
+func (UnimplementedImgSyncerServer) EmptyTrash(context.Context, *EmptyTrashRequest) (*EmptyTrashResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EmptyTrash not implemented")
 }
 func (UnimplementedImgSyncerServer) mustEmbedUnimplementedImgSyncerServer() {}
 func (UnimplementedImgSyncerServer) testEmbeddedByValue()                   {}
@@ -510,6 +576,78 @@ func _ImgSyncer_StartBaiduNetdiskLogin_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImgSyncer_MoveToTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveToTrashRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).MoveToTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_MoveToTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).MoveToTrash(ctx, req.(*MoveToTrashRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_ListTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTrashRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).ListTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_ListTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).ListTrash(ctx, req.(*ListTrashRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_RestoreFromTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RestoreFromTrashRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).RestoreFromTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_RestoreFromTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).RestoreFromTrash(ctx, req.(*RestoreFromTrashRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_EmptyTrash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyTrashRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).EmptyTrash(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_EmptyTrash_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).EmptyTrash(ctx, req.(*EmptyTrashRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ImgSyncer_ServiceDesc is the grpc.ServiceDesc for ImgSyncer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -564,6 +702,22 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StartBaiduNetdiskLogin",
 			Handler:    _ImgSyncer_StartBaiduNetdiskLogin_Handler,
+		},
+		{
+			MethodName: "MoveToTrash",
+			Handler:    _ImgSyncer_MoveToTrash_Handler,
+		},
+		{
+			MethodName: "ListTrash",
+			Handler:    _ImgSyncer_ListTrash_Handler,
+		},
+		{
+			MethodName: "RestoreFromTrash",
+			Handler:    _ImgSyncer_RestoreFromTrash_Handler,
+		},
+		{
+			MethodName: "EmptyTrash",
+			Handler:    _ImgSyncer_EmptyTrash_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

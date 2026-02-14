@@ -3,7 +3,7 @@ import 'package:img_syncer/global.dart';
 import 'package:provider/provider.dart';
 import 'package:img_syncer/state_model.dart';
 import 'gallery_body.dart';
-import 'setting_body.dart';
+import 'collections_body.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:img_syncer/logger.dart';
@@ -84,9 +84,16 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _selectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -99,13 +106,26 @@ class MyHomePage extends StatelessWidget {
         body: SafeArea(
           child: Stack(
             children: [
-              const GalleryBody(),
+              IndexedStack(
+                index: _selectedTab,
+                children: const [
+                  GalleryBody(),
+                  CollectionsBody(),
+                ],
+              ),
               if (!model.isSelectionMode)
                 Positioned(
                   left: 16,
                   right: 16,
                   bottom: 12,
-                  child: _FloatingBottomBar(),
+                  child: _FloatingBottomBar(
+                    selectedTab: _selectedTab,
+                    onTabChanged: (index) {
+                      setState(() {
+                        _selectedTab = index;
+                      });
+                    },
+                  ),
                 ),
             ],
           ),
@@ -116,6 +136,14 @@ class MyHomePage extends StatelessWidget {
 }
 
 class _FloatingBottomBar extends StatelessWidget {
+  final int selectedTab;
+  final ValueChanged<int> onTabChanged;
+
+  const _FloatingBottomBar({
+    required this.selectedTab,
+    required this.onTabChanged,
+  });
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -130,38 +158,68 @@ class _FloatingBottomBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.photo_library, size: 20, color: colorScheme.onPrimaryContainer),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.library,
-                      style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimaryContainer),
-                    ),
-                  ],
-                ),
+              _buildTabChip(
+                context: context,
+                icon: Icons.photo_library,
+                label: l10n.photos,
+                isSelected: selectedTab == 0,
+                onTap: () => onTabChanged(0),
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
+              const SizedBox(width: 8),
+              _buildTabChip(
+                context: context,
+                icon: Icons.collections_bookmark,
+                label: l10n.collections,
+                isSelected: selectedTab == 1,
+                onTap: () => onTabChanged(1),
+                colorScheme: colorScheme,
+                textTheme: textTheme,
               ),
               const Spacer(),
-              IconButton(
-                icon: Icon(Icons.settings_outlined, color: colorScheme.onSurfaceVariant),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SettingBody()),
-                  );
-                },
-              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTabChip({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+  }) {
+    if (isSelected) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: colorScheme.onPrimaryContainer),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimaryContainer),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return IconButton(
+      icon: Icon(icon, color: colorScheme.onSurfaceVariant),
+      onPressed: onTap,
     );
   }
 }

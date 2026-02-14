@@ -215,4 +215,60 @@ class AppLocalizationsZh extends AppLocalizations {
   String nRemaining(int count) {
     return '剩余 $count 张';
   }
+
+  @override
+  String get collections => '合集';
+
+  @override
+  String get trash => '回收站';
+
+  @override
+  String get lockedFolder => '已锁定的文件夹';
+
+  @override
+  String get deleteUploadedPhotos => '删除已上传的照片';
+
+  @override
+  String deleteUploadedPhotosConfirm(int count) {
+    return '删除 $count 张本地副本？云端副本将保留。';
+  }
+
+  @override
+  String get noUploadedPhotosToDelete => '没有已上传的照片可删除';
+
+  @override
+  String get movedToTrash => '已移至回收站';
+
+  @override
+  String get restore => '恢复';
+
+  @override
+  String get emptyTrash => '清空回收站';
+
+  @override
+  String get emptyTrashConfirm => '永久删除回收站中的所有项目？';
+
+  @override
+  String get trashEmpty => '回收站为空';
+
+  @override
+  String get permanentlyDelete => '永久删除';
+
+  @override
+  String get trashAutoDeleteNote => '回收站中的项目将在30天后自动删除';
+
+  @override
+  String get lockedFolderDescription => '移至此处的照片将被隐藏，需要验证身份才能查看';
+
+  @override
+  String get authenticate => '验证身份';
+
+  @override
+  String get authenticationFailed => '身份验证失败';
+
+  @override
+  String get moveToLockedFolder => '移至已锁定的文件夹';
+
+  @override
+  String get removeFromLockedFolder => '从已锁定的文件夹移除';
 }

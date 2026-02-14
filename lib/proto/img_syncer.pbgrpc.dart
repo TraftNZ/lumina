@@ -128,6 +128,35 @@ class ImgSyncerClient extends $grpc.Client {
         options: options);
   }
 
+  /// Trash
+  $grpc.ResponseFuture<$0.MoveToTrashResponse> moveToTrash(
+    $0.MoveToTrashRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$moveToTrash, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ListTrashResponse> listTrash(
+    $0.ListTrashRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listTrash, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.RestoreFromTrashResponse> restoreFromTrash(
+    $0.RestoreFromTrashRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$restoreFromTrash, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.EmptyTrashResponse> emptyTrash(
+    $0.EmptyTrashRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$emptyTrash, request, options: options);
+  }
+
   // method descriptors
 
   static final _$listByDate =
@@ -195,6 +224,26 @@ class ImgSyncerClient extends $grpc.Client {
       '/img_syncer.ImgSyncer/StartBaiduNetdiskLogin',
       ($0.StartBaiduNetdiskLoginRequest value) => value.writeToBuffer(),
       $0.StartBaiduNetdiskLoginResponse.fromBuffer);
+  static final _$moveToTrash =
+      $grpc.ClientMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
+          '/img_syncer.ImgSyncer/MoveToTrash',
+          ($0.MoveToTrashRequest value) => value.writeToBuffer(),
+          $0.MoveToTrashResponse.fromBuffer);
+  static final _$listTrash =
+      $grpc.ClientMethod<$0.ListTrashRequest, $0.ListTrashResponse>(
+          '/img_syncer.ImgSyncer/ListTrash',
+          ($0.ListTrashRequest value) => value.writeToBuffer(),
+          $0.ListTrashResponse.fromBuffer);
+  static final _$restoreFromTrash = $grpc.ClientMethod<
+          $0.RestoreFromTrashRequest, $0.RestoreFromTrashResponse>(
+      '/img_syncer.ImgSyncer/RestoreFromTrash',
+      ($0.RestoreFromTrashRequest value) => value.writeToBuffer(),
+      $0.RestoreFromTrashResponse.fromBuffer);
+  static final _$emptyTrash =
+      $grpc.ClientMethod<$0.EmptyTrashRequest, $0.EmptyTrashResponse>(
+          '/img_syncer.ImgSyncer/EmptyTrash',
+          ($0.EmptyTrashRequest value) => value.writeToBuffer(),
+          $0.EmptyTrashResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('img_syncer.ImgSyncer')
@@ -315,6 +364,38 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.StartBaiduNetdiskLoginRequest.fromBuffer(value),
         ($0.StartBaiduNetdiskLoginResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
+            'MoveToTrash',
+            moveToTrash_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.MoveToTrashRequest.fromBuffer(value),
+            ($0.MoveToTrashResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ListTrashRequest, $0.ListTrashResponse>(
+        'ListTrash',
+        listTrash_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.ListTrashRequest.fromBuffer(value),
+        ($0.ListTrashResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.RestoreFromTrashRequest,
+            $0.RestoreFromTrashResponse>(
+        'RestoreFromTrash',
+        restoreFromTrash_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.RestoreFromTrashRequest.fromBuffer(value),
+        ($0.RestoreFromTrashResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.EmptyTrashRequest, $0.EmptyTrashResponse>(
+        'EmptyTrash',
+        emptyTrash_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.EmptyTrashRequest.fromBuffer(value),
+        ($0.EmptyTrashResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall $call,
@@ -424,4 +505,37 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
 
   $async.Future<$0.StartBaiduNetdiskLoginResponse> startBaiduNetdiskLogin(
       $grpc.ServiceCall call, $0.StartBaiduNetdiskLoginRequest request);
+
+  $async.Future<$0.MoveToTrashResponse> moveToTrash_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.MoveToTrashRequest> $request) async {
+    return moveToTrash($call, await $request);
+  }
+
+  $async.Future<$0.MoveToTrashResponse> moveToTrash(
+      $grpc.ServiceCall call, $0.MoveToTrashRequest request);
+
+  $async.Future<$0.ListTrashResponse> listTrash_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.ListTrashRequest> $request) async {
+    return listTrash($call, await $request);
+  }
+
+  $async.Future<$0.ListTrashResponse> listTrash(
+      $grpc.ServiceCall call, $0.ListTrashRequest request);
+
+  $async.Future<$0.RestoreFromTrashResponse> restoreFromTrash_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.RestoreFromTrashRequest> $request) async {
+    return restoreFromTrash($call, await $request);
+  }
+
+  $async.Future<$0.RestoreFromTrashResponse> restoreFromTrash(
+      $grpc.ServiceCall call, $0.RestoreFromTrashRequest request);
+
+  $async.Future<$0.EmptyTrashResponse> emptyTrash_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.EmptyTrashRequest> $request) async {
+    return emptyTrash($call, await $request);
+  }
+
+  $async.Future<$0.EmptyTrashResponse> emptyTrash(
+      $grpc.ServiceCall call, $0.EmptyTrashRequest request);
 }

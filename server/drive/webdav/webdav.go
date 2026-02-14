@@ -161,6 +161,18 @@ func (d *Webdav) Upload(path string, reader io.ReadCloser, size int64, lastModif
 	return nil
 }
 
+func (d *Webdav) Rename(oldPath, newPath string) error {
+	if d.rootPath == "" {
+		return fmt.Errorf("root path is empty")
+	}
+	fullOld := filepath.Join(d.rootPath, oldPath)
+	fullNew := filepath.Join(d.rootPath, newPath)
+	if err := d.cli.MkdirAll(filepath.Dir(fullNew), 0755); err != nil {
+		return err
+	}
+	return d.cli.Rename(fullOld, fullNew, true)
+}
+
 func (d *Webdav) Range(dir string, deal func(fs.FileInfo) bool) error {
 	if d.rootPath == "" {
 		return fmt.Errorf("root path is empty")

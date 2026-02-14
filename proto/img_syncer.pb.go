@@ -1521,6 +1521,466 @@ func (x *StartBaiduNetdiskLoginResponse) GetExiresAt() int64 {
 	return 0
 }
 
+type MoveToTrashRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Paths         []string               `protobuf:"bytes,1,rep,name=paths,proto3" json:"paths,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MoveToTrashRequest) Reset() {
+	*x = MoveToTrashRequest{}
+	mi := &file_proto_img_syncer_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MoveToTrashRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MoveToTrashRequest) ProtoMessage() {}
+
+func (x *MoveToTrashRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MoveToTrashRequest.ProtoReflect.Descriptor instead.
+func (*MoveToTrashRequest) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *MoveToTrashRequest) GetPaths() []string {
+	if x != nil {
+		return x.Paths
+	}
+	return nil
+}
+
+type MoveToTrashResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MoveToTrashResponse) Reset() {
+	*x = MoveToTrashResponse{}
+	mi := &file_proto_img_syncer_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MoveToTrashResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MoveToTrashResponse) ProtoMessage() {}
+
+func (x *MoveToTrashResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MoveToTrashResponse.ProtoReflect.Descriptor instead.
+func (*MoveToTrashResponse) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *MoveToTrashResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *MoveToTrashResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type TrashItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OriginalPath  string                 `protobuf:"bytes,1,opt,name=originalPath,proto3" json:"originalPath,omitempty"`
+	TrashPath     string                 `protobuf:"bytes,2,opt,name=trashPath,proto3" json:"trashPath,omitempty"`
+	TrashedAt     int64                  `protobuf:"varint,3,opt,name=trashedAt,proto3" json:"trashedAt,omitempty"`
+	Size          int64                  `protobuf:"varint,4,opt,name=size,proto3" json:"size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TrashItem) Reset() {
+	*x = TrashItem{}
+	mi := &file_proto_img_syncer_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TrashItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TrashItem) ProtoMessage() {}
+
+func (x *TrashItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TrashItem.ProtoReflect.Descriptor instead.
+func (*TrashItem) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *TrashItem) GetOriginalPath() string {
+	if x != nil {
+		return x.OriginalPath
+	}
+	return ""
+}
+
+func (x *TrashItem) GetTrashPath() string {
+	if x != nil {
+		return x.TrashPath
+	}
+	return ""
+}
+
+func (x *TrashItem) GetTrashedAt() int64 {
+	if x != nil {
+		return x.TrashedAt
+	}
+	return 0
+}
+
+func (x *TrashItem) GetSize() int64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
+type ListTrashRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Offset        int32                  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	MaxReturn     int32                  `protobuf:"varint,2,opt,name=maxReturn,proto3" json:"maxReturn,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTrashRequest) Reset() {
+	*x = ListTrashRequest{}
+	mi := &file_proto_img_syncer_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTrashRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTrashRequest) ProtoMessage() {}
+
+func (x *ListTrashRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTrashRequest.ProtoReflect.Descriptor instead.
+func (*ListTrashRequest) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ListTrashRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *ListTrashRequest) GetMaxReturn() int32 {
+	if x != nil {
+		return x.MaxReturn
+	}
+	return 0
+}
+
+type ListTrashResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Items         []*TrashItem           `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTrashResponse) Reset() {
+	*x = ListTrashResponse{}
+	mi := &file_proto_img_syncer_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTrashResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTrashResponse) ProtoMessage() {}
+
+func (x *ListTrashResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTrashResponse.ProtoReflect.Descriptor instead.
+func (*ListTrashResponse) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ListTrashResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListTrashResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListTrashResponse) GetItems() []*TrashItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type RestoreFromTrashRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TrashPaths    []string               `protobuf:"bytes,1,rep,name=trashPaths,proto3" json:"trashPaths,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RestoreFromTrashRequest) Reset() {
+	*x = RestoreFromTrashRequest{}
+	mi := &file_proto_img_syncer_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RestoreFromTrashRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RestoreFromTrashRequest) ProtoMessage() {}
+
+func (x *RestoreFromTrashRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RestoreFromTrashRequest.ProtoReflect.Descriptor instead.
+func (*RestoreFromTrashRequest) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *RestoreFromTrashRequest) GetTrashPaths() []string {
+	if x != nil {
+		return x.TrashPaths
+	}
+	return nil
+}
+
+type RestoreFromTrashResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RestoreFromTrashResponse) Reset() {
+	*x = RestoreFromTrashResponse{}
+	mi := &file_proto_img_syncer_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RestoreFromTrashResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RestoreFromTrashResponse) ProtoMessage() {}
+
+func (x *RestoreFromTrashResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RestoreFromTrashResponse.ProtoReflect.Descriptor instead.
+func (*RestoreFromTrashResponse) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *RestoreFromTrashResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RestoreFromTrashResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type EmptyTrashRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmptyTrashRequest) Reset() {
+	*x = EmptyTrashRequest{}
+	mi := &file_proto_img_syncer_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmptyTrashRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmptyTrashRequest) ProtoMessage() {}
+
+func (x *EmptyTrashRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmptyTrashRequest.ProtoReflect.Descriptor instead.
+func (*EmptyTrashRequest) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{34}
+}
+
+type EmptyTrashResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmptyTrashResponse) Reset() {
+	*x = EmptyTrashResponse{}
+	mi := &file_proto_img_syncer_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmptyTrashResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmptyTrashResponse) ProtoMessage() {}
+
+func (x *EmptyTrashResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmptyTrashResponse.ProtoReflect.Descriptor instead.
+func (*EmptyTrashResponse) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *EmptyTrashResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *EmptyTrashResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_proto_img_syncer_proto protoreflect.FileDescriptor
 
 const file_proto_img_syncer_proto_rawDesc = "" +
@@ -1623,7 +2083,35 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\"\n" +
 	"\frefreshToken\x18\x03 \x01(\tR\frefreshToken\x12 \n" +
 	"\vaccessToken\x18\x04 \x01(\tR\vaccessToken\x12\x1a\n" +
-	"\bexiresAt\x18\x05 \x01(\x03R\bexiresAt2\xcf\t\n" +
+	"\bexiresAt\x18\x05 \x01(\x03R\bexiresAt\"*\n" +
+	"\x12MoveToTrashRequest\x12\x14\n" +
+	"\x05paths\x18\x01 \x03(\tR\x05paths\"I\n" +
+	"\x13MoveToTrashResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x7f\n" +
+	"\tTrashItem\x12\"\n" +
+	"\foriginalPath\x18\x01 \x01(\tR\foriginalPath\x12\x1c\n" +
+	"\ttrashPath\x18\x02 \x01(\tR\ttrashPath\x12\x1c\n" +
+	"\ttrashedAt\x18\x03 \x01(\x03R\ttrashedAt\x12\x12\n" +
+	"\x04size\x18\x04 \x01(\x03R\x04size\"H\n" +
+	"\x10ListTrashRequest\x12\x16\n" +
+	"\x06offset\x18\x01 \x01(\x05R\x06offset\x12\x1c\n" +
+	"\tmaxReturn\x18\x02 \x01(\x05R\tmaxReturn\"t\n" +
+	"\x11ListTrashResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12+\n" +
+	"\x05items\x18\x03 \x03(\v2\x15.img_syncer.TrashItemR\x05items\"9\n" +
+	"\x17RestoreFromTrashRequest\x12\x1e\n" +
+	"\n" +
+	"trashPaths\x18\x01 \x03(\tR\n" +
+	"trashPaths\"N\n" +
+	"\x18RestoreFromTrashResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x13\n" +
+	"\x11EmptyTrashRequest\"H\n" +
+	"\x12EmptyTrashResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\x9d\f\n" +
 	"\tImgSyncer\x12M\n" +
 	"\n" +
 	"ListByDate\x12\x1d.img_syncer.ListByDateRequest\x1a\x1e.img_syncer.ListByDateResponse\"\x00\x12A\n" +
@@ -1638,7 +2126,12 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\vSetDriveNFS\x12\x1e.img_syncer.SetDriveNFSRequest\x1a\x1f.img_syncer.SetDriveNFSResponse\"\x00\x12\\\n" +
 	"\x0fListDriveNFSDir\x12\".img_syncer.ListDriveNFSDirRequest\x1a#.img_syncer.ListDriveNFSDirResponse\"\x00\x12k\n" +
 	"\x14SetDriveBaiduNetDisk\x12'.img_syncer.SetDriveBaiduNetDiskRequest\x1a(.img_syncer.SetDriveBaiduNetDiskResponse\"\x00\x12q\n" +
-	"\x16StartBaiduNetdiskLogin\x12).img_syncer.StartBaiduNetdiskLoginRequest\x1a*.img_syncer.StartBaiduNetdiskLoginResponse\"\x00B$Z\"github.com/fregie/img_syncer/protob\x06proto3"
+	"\x16StartBaiduNetdiskLogin\x12).img_syncer.StartBaiduNetdiskLoginRequest\x1a*.img_syncer.StartBaiduNetdiskLoginResponse\"\x00\x12P\n" +
+	"\vMoveToTrash\x12\x1e.img_syncer.MoveToTrashRequest\x1a\x1f.img_syncer.MoveToTrashResponse\"\x00\x12J\n" +
+	"\tListTrash\x12\x1c.img_syncer.ListTrashRequest\x1a\x1d.img_syncer.ListTrashResponse\"\x00\x12_\n" +
+	"\x10RestoreFromTrash\x12#.img_syncer.RestoreFromTrashRequest\x1a$.img_syncer.RestoreFromTrashResponse\"\x00\x12M\n" +
+	"\n" +
+	"EmptyTrash\x12\x1d.img_syncer.EmptyTrashRequest\x1a\x1e.img_syncer.EmptyTrashResponse\"\x00B$Z\"github.com/fregie/img_syncer/protob\x06proto3"
 
 var (
 	file_proto_img_syncer_proto_rawDescOnce sync.Once
@@ -1652,7 +2145,7 @@ func file_proto_img_syncer_proto_rawDescGZIP() []byte {
 	return file_proto_img_syncer_proto_rawDescData
 }
 
-var file_proto_img_syncer_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_proto_img_syncer_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_proto_img_syncer_proto_goTypes = []any{
 	(*ListByDateRequest)(nil),              // 0: img_syncer.ListByDateRequest
 	(*ListByDateResponse)(nil),             // 1: img_syncer.ListByDateResponse
@@ -1681,40 +2174,58 @@ var file_proto_img_syncer_proto_goTypes = []any{
 	(*SetDriveBaiduNetDiskResponse)(nil),   // 24: img_syncer.SetDriveBaiduNetDiskResponse
 	(*StartBaiduNetdiskLoginRequest)(nil),  // 25: img_syncer.StartBaiduNetdiskLoginRequest
 	(*StartBaiduNetdiskLoginResponse)(nil), // 26: img_syncer.StartBaiduNetdiskLoginResponse
+	(*MoveToTrashRequest)(nil),             // 27: img_syncer.MoveToTrashRequest
+	(*MoveToTrashResponse)(nil),            // 28: img_syncer.MoveToTrashResponse
+	(*TrashItem)(nil),                      // 29: img_syncer.TrashItem
+	(*ListTrashRequest)(nil),               // 30: img_syncer.ListTrashRequest
+	(*ListTrashResponse)(nil),              // 31: img_syncer.ListTrashResponse
+	(*RestoreFromTrashRequest)(nil),        // 32: img_syncer.RestoreFromTrashRequest
+	(*RestoreFromTrashResponse)(nil),       // 33: img_syncer.RestoreFromTrashResponse
+	(*EmptyTrashRequest)(nil),              // 34: img_syncer.EmptyTrashRequest
+	(*EmptyTrashResponse)(nil),             // 35: img_syncer.EmptyTrashResponse
 }
 var file_proto_img_syncer_proto_depIdxs = []int32{
 	4,  // 0: img_syncer.FilterNotUploadedRequest.photos:type_name -> img_syncer.FilterNotUploadedRequestInfo
-	0,  // 1: img_syncer.ImgSyncer.ListByDate:input_type -> img_syncer.ListByDateRequest
-	2,  // 2: img_syncer.ImgSyncer.Delete:input_type -> img_syncer.DeleteRequest
-	5,  // 3: img_syncer.ImgSyncer.FilterNotUploaded:input_type -> img_syncer.FilterNotUploadedRequest
-	7,  // 4: img_syncer.ImgSyncer.SetDriveSMB:input_type -> img_syncer.SetDriveSMBRequest
-	9,  // 5: img_syncer.ImgSyncer.ListDriveSMBShares:input_type -> img_syncer.ListDriveSMBSharesRequest
-	11, // 6: img_syncer.ImgSyncer.ListDriveSMBDir:input_type -> img_syncer.ListDriveSMBDirRequest
-	13, // 7: img_syncer.ImgSyncer.SetDriveSMBShare:input_type -> img_syncer.SetDriveSMBShareRequest
-	15, // 8: img_syncer.ImgSyncer.SetDriveWebdav:input_type -> img_syncer.SetDriveWebdavRequest
-	17, // 9: img_syncer.ImgSyncer.ListDriveWebdavDir:input_type -> img_syncer.ListDriveWebdavDirRequest
-	19, // 10: img_syncer.ImgSyncer.SetDriveNFS:input_type -> img_syncer.SetDriveNFSRequest
-	21, // 11: img_syncer.ImgSyncer.ListDriveNFSDir:input_type -> img_syncer.ListDriveNFSDirRequest
-	23, // 12: img_syncer.ImgSyncer.SetDriveBaiduNetDisk:input_type -> img_syncer.SetDriveBaiduNetDiskRequest
-	25, // 13: img_syncer.ImgSyncer.StartBaiduNetdiskLogin:input_type -> img_syncer.StartBaiduNetdiskLoginRequest
-	1,  // 14: img_syncer.ImgSyncer.ListByDate:output_type -> img_syncer.ListByDateResponse
-	3,  // 15: img_syncer.ImgSyncer.Delete:output_type -> img_syncer.DeleteResponse
-	6,  // 16: img_syncer.ImgSyncer.FilterNotUploaded:output_type -> img_syncer.FilterNotUploadedResponse
-	8,  // 17: img_syncer.ImgSyncer.SetDriveSMB:output_type -> img_syncer.SetDriveSMBResponse
-	10, // 18: img_syncer.ImgSyncer.ListDriveSMBShares:output_type -> img_syncer.ListDriveSMBSharesResponse
-	12, // 19: img_syncer.ImgSyncer.ListDriveSMBDir:output_type -> img_syncer.ListDriveSMBDirResponse
-	14, // 20: img_syncer.ImgSyncer.SetDriveSMBShare:output_type -> img_syncer.SetDriveSMBShareResponse
-	16, // 21: img_syncer.ImgSyncer.SetDriveWebdav:output_type -> img_syncer.SetDriveWebdavResponse
-	18, // 22: img_syncer.ImgSyncer.ListDriveWebdavDir:output_type -> img_syncer.ListDriveWebdavDirResponse
-	20, // 23: img_syncer.ImgSyncer.SetDriveNFS:output_type -> img_syncer.SetDriveNFSResponse
-	22, // 24: img_syncer.ImgSyncer.ListDriveNFSDir:output_type -> img_syncer.ListDriveNFSDirResponse
-	24, // 25: img_syncer.ImgSyncer.SetDriveBaiduNetDisk:output_type -> img_syncer.SetDriveBaiduNetDiskResponse
-	26, // 26: img_syncer.ImgSyncer.StartBaiduNetdiskLogin:output_type -> img_syncer.StartBaiduNetdiskLoginResponse
-	14, // [14:27] is the sub-list for method output_type
-	1,  // [1:14] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	29, // 1: img_syncer.ListTrashResponse.items:type_name -> img_syncer.TrashItem
+	0,  // 2: img_syncer.ImgSyncer.ListByDate:input_type -> img_syncer.ListByDateRequest
+	2,  // 3: img_syncer.ImgSyncer.Delete:input_type -> img_syncer.DeleteRequest
+	5,  // 4: img_syncer.ImgSyncer.FilterNotUploaded:input_type -> img_syncer.FilterNotUploadedRequest
+	7,  // 5: img_syncer.ImgSyncer.SetDriveSMB:input_type -> img_syncer.SetDriveSMBRequest
+	9,  // 6: img_syncer.ImgSyncer.ListDriveSMBShares:input_type -> img_syncer.ListDriveSMBSharesRequest
+	11, // 7: img_syncer.ImgSyncer.ListDriveSMBDir:input_type -> img_syncer.ListDriveSMBDirRequest
+	13, // 8: img_syncer.ImgSyncer.SetDriveSMBShare:input_type -> img_syncer.SetDriveSMBShareRequest
+	15, // 9: img_syncer.ImgSyncer.SetDriveWebdav:input_type -> img_syncer.SetDriveWebdavRequest
+	17, // 10: img_syncer.ImgSyncer.ListDriveWebdavDir:input_type -> img_syncer.ListDriveWebdavDirRequest
+	19, // 11: img_syncer.ImgSyncer.SetDriveNFS:input_type -> img_syncer.SetDriveNFSRequest
+	21, // 12: img_syncer.ImgSyncer.ListDriveNFSDir:input_type -> img_syncer.ListDriveNFSDirRequest
+	23, // 13: img_syncer.ImgSyncer.SetDriveBaiduNetDisk:input_type -> img_syncer.SetDriveBaiduNetDiskRequest
+	25, // 14: img_syncer.ImgSyncer.StartBaiduNetdiskLogin:input_type -> img_syncer.StartBaiduNetdiskLoginRequest
+	27, // 15: img_syncer.ImgSyncer.MoveToTrash:input_type -> img_syncer.MoveToTrashRequest
+	30, // 16: img_syncer.ImgSyncer.ListTrash:input_type -> img_syncer.ListTrashRequest
+	32, // 17: img_syncer.ImgSyncer.RestoreFromTrash:input_type -> img_syncer.RestoreFromTrashRequest
+	34, // 18: img_syncer.ImgSyncer.EmptyTrash:input_type -> img_syncer.EmptyTrashRequest
+	1,  // 19: img_syncer.ImgSyncer.ListByDate:output_type -> img_syncer.ListByDateResponse
+	3,  // 20: img_syncer.ImgSyncer.Delete:output_type -> img_syncer.DeleteResponse
+	6,  // 21: img_syncer.ImgSyncer.FilterNotUploaded:output_type -> img_syncer.FilterNotUploadedResponse
+	8,  // 22: img_syncer.ImgSyncer.SetDriveSMB:output_type -> img_syncer.SetDriveSMBResponse
+	10, // 23: img_syncer.ImgSyncer.ListDriveSMBShares:output_type -> img_syncer.ListDriveSMBSharesResponse
+	12, // 24: img_syncer.ImgSyncer.ListDriveSMBDir:output_type -> img_syncer.ListDriveSMBDirResponse
+	14, // 25: img_syncer.ImgSyncer.SetDriveSMBShare:output_type -> img_syncer.SetDriveSMBShareResponse
+	16, // 26: img_syncer.ImgSyncer.SetDriveWebdav:output_type -> img_syncer.SetDriveWebdavResponse
+	18, // 27: img_syncer.ImgSyncer.ListDriveWebdavDir:output_type -> img_syncer.ListDriveWebdavDirResponse
+	20, // 28: img_syncer.ImgSyncer.SetDriveNFS:output_type -> img_syncer.SetDriveNFSResponse
+	22, // 29: img_syncer.ImgSyncer.ListDriveNFSDir:output_type -> img_syncer.ListDriveNFSDirResponse
+	24, // 30: img_syncer.ImgSyncer.SetDriveBaiduNetDisk:output_type -> img_syncer.SetDriveBaiduNetDiskResponse
+	26, // 31: img_syncer.ImgSyncer.StartBaiduNetdiskLogin:output_type -> img_syncer.StartBaiduNetdiskLoginResponse
+	28, // 32: img_syncer.ImgSyncer.MoveToTrash:output_type -> img_syncer.MoveToTrashResponse
+	31, // 33: img_syncer.ImgSyncer.ListTrash:output_type -> img_syncer.ListTrashResponse
+	33, // 34: img_syncer.ImgSyncer.RestoreFromTrash:output_type -> img_syncer.RestoreFromTrashResponse
+	35, // 35: img_syncer.ImgSyncer.EmptyTrash:output_type -> img_syncer.EmptyTrashResponse
+	19, // [19:36] is the sub-list for method output_type
+	2,  // [2:19] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_img_syncer_proto_init() }
@@ -1728,7 +2239,7 @@ func file_proto_img_syncer_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_img_syncer_proto_rawDesc), len(file_proto_img_syncer_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   27,
+			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

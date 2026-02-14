@@ -27,7 +27,9 @@ func (a *api) httpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodGet:
-		if strings.HasPrefix(r.URL.Path, "/thumbnail/") {
+		if strings.HasPrefix(r.URL.Path, "/trash/thumbnail/") {
+			a.httpDownloadTrashThumbnail(w, r)
+		} else if strings.HasPrefix(r.URL.Path, "/thumbnail/") {
 			a.httpDownloadThumbnail(w, r)
 		} else {
 			a.httpDownload(w, r)
@@ -185,6 +187,35 @@ func (a *api) httpDownloadThumbnail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
+	}
+	contentType := mime.TypeByExtension(filepath.Ext(realPath))
+	defer img.Content.Close()
+	w.Header().Add("Content-Length", strconv.FormatInt(img.Size, 10))
+	w.Header().Add("Content-Type", contentType)
+	w.WriteHeader(http.StatusOK)
+	_, err = io.Copy(w, img.Content)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+}
+
+func (a *api) httpDownloadTrashThumbnail(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	if path == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	realPath := strings.TrimPrefix(path, "/trash/thumbnail/")
+	img, err := a.im.GetTrashThumbnail(realPath)
+	if err != nil {
+		// Fallback: try to get the full image from trash
+		img, err = a.im.GetImg(filepath.Join(".trash", realPath))
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(err.Error()))
+			return
+		}
 	}
 	contentType := mime.TypeByExtension(filepath.Ext(realPath))
 	defer img.Content.Close()

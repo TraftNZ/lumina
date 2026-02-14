@@ -64,6 +64,7 @@ dependencies:
   flutter_image_compress: ^2.4.0
   gal: ^2.3.2
   vibration: ^3.1.6
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,8 @@ flutter:
     - assets/images/broken.png
     - assets/images/gray.jpg
     - assets/icon/lumina_icon.png
+    - assets/icon/lumina_icon_foreground.png
+    - assets/icon/lumina_icon_transparent.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -426,3 +426,135 @@ final $typed_data.Uint8List startBaiduNetdiskLoginResponseDescriptor =
         'VzcxIYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlEiIKDHJlZnJlc2hUb2tlbhgDIAEoCVIMcmVm'
         'cmVzaFRva2VuEiAKC2FjY2Vzc1Rva2VuGAQgASgJUgthY2Nlc3NUb2tlbhIaCghleGlyZXNBdB'
         'gFIAEoA1IIZXhpcmVzQXQ=');
+
+@$core.Deprecated('Use moveToTrashRequestDescriptor instead')
+const MoveToTrashRequest$json = {
+  '1': 'MoveToTrashRequest',
+  '2': [
+    {'1': 'paths', '3': 1, '4': 3, '5': 9, '10': 'paths'},
+  ],
+};
+
+/// Descriptor for `MoveToTrashRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List moveToTrashRequestDescriptor = $convert
+    .base64Decode('ChJNb3ZlVG9UcmFzaFJlcXVlc3QSFAoFcGF0aHMYASADKAlSBXBhdGhz');
+
+@$core.Deprecated('Use moveToTrashResponseDescriptor instead')
+const MoveToTrashResponse$json = {
+  '1': 'MoveToTrashResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `MoveToTrashResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List moveToTrashResponseDescriptor = $convert.base64Decode(
+    'ChNNb3ZlVG9UcmFzaFJlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSGAoHbWVzc2'
+    'FnZRgCIAEoCVIHbWVzc2FnZQ==');
+
+@$core.Deprecated('Use trashItemDescriptor instead')
+const TrashItem$json = {
+  '1': 'TrashItem',
+  '2': [
+    {'1': 'originalPath', '3': 1, '4': 1, '5': 9, '10': 'originalPath'},
+    {'1': 'trashPath', '3': 2, '4': 1, '5': 9, '10': 'trashPath'},
+    {'1': 'trashedAt', '3': 3, '4': 1, '5': 3, '10': 'trashedAt'},
+    {'1': 'size', '3': 4, '4': 1, '5': 3, '10': 'size'},
+  ],
+};
+
+/// Descriptor for `TrashItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List trashItemDescriptor = $convert.base64Decode(
+    'CglUcmFzaEl0ZW0SIgoMb3JpZ2luYWxQYXRoGAEgASgJUgxvcmlnaW5hbFBhdGgSHAoJdHJhc2'
+    'hQYXRoGAIgASgJUgl0cmFzaFBhdGgSHAoJdHJhc2hlZEF0GAMgASgDUgl0cmFzaGVkQXQSEgoE'
+    'c2l6ZRgEIAEoA1IEc2l6ZQ==');
+
+@$core.Deprecated('Use listTrashRequestDescriptor instead')
+const ListTrashRequest$json = {
+  '1': 'ListTrashRequest',
+  '2': [
+    {'1': 'offset', '3': 1, '4': 1, '5': 5, '10': 'offset'},
+    {'1': 'maxReturn', '3': 2, '4': 1, '5': 5, '10': 'maxReturn'},
+  ],
+};
+
+/// Descriptor for `ListTrashRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listTrashRequestDescriptor = $convert.base64Decode(
+    'ChBMaXN0VHJhc2hSZXF1ZXN0EhYKBm9mZnNldBgBIAEoBVIGb2Zmc2V0EhwKCW1heFJldHVybh'
+    'gCIAEoBVIJbWF4UmV0dXJu');
+
+@$core.Deprecated('Use listTrashResponseDescriptor instead')
+const ListTrashResponse$json = {
+  '1': 'ListTrashResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {
+      '1': 'items',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.img_syncer.TrashItem',
+      '10': 'items'
+    },
+  ],
+};
+
+/// Descriptor for `ListTrashResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listTrashResponseDescriptor = $convert.base64Decode(
+    'ChFMaXN0VHJhc2hSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB21lc3NhZ2'
+    'UYAiABKAlSB21lc3NhZ2USKwoFaXRlbXMYAyADKAsyFS5pbWdfc3luY2VyLlRyYXNoSXRlbVIF'
+    'aXRlbXM=');
+
+@$core.Deprecated('Use restoreFromTrashRequestDescriptor instead')
+const RestoreFromTrashRequest$json = {
+  '1': 'RestoreFromTrashRequest',
+  '2': [
+    {'1': 'trashPaths', '3': 1, '4': 3, '5': 9, '10': 'trashPaths'},
+  ],
+};
+
+/// Descriptor for `RestoreFromTrashRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List restoreFromTrashRequestDescriptor =
+    $convert.base64Decode(
+        'ChdSZXN0b3JlRnJvbVRyYXNoUmVxdWVzdBIeCgp0cmFzaFBhdGhzGAEgAygJUgp0cmFzaFBhdG'
+        'hz');
+
+@$core.Deprecated('Use restoreFromTrashResponseDescriptor instead')
+const RestoreFromTrashResponse$json = {
+  '1': 'RestoreFromTrashResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `RestoreFromTrashResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List restoreFromTrashResponseDescriptor =
+    $convert.base64Decode(
+        'ChhSZXN0b3JlRnJvbVRyYXNoUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCg'
+        'dtZXNzYWdlGAIgASgJUgdtZXNzYWdl');
+
+@$core.Deprecated('Use emptyTrashRequestDescriptor instead')
+const EmptyTrashRequest$json = {
+  '1': 'EmptyTrashRequest',
+};
+
+/// Descriptor for `EmptyTrashRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List emptyTrashRequestDescriptor =
+    $convert.base64Decode('ChFFbXB0eVRyYXNoUmVxdWVzdA==');
+
+@$core.Deprecated('Use emptyTrashResponseDescriptor instead')
+const EmptyTrashResponse$json = {
+  '1': 'EmptyTrashResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `EmptyTrashResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List emptyTrashResponseDescriptor = $convert.base64Decode(
+    'ChJFbXB0eVRyYXNoUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZXNzYW'
+    'dlGAIgASgJUgdtZXNzYWdl');

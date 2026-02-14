@@ -280,6 +280,27 @@ func (s *Smb) Delete(path string) error {
 	return nil
 }
 
+func (s *Smb) Rename(oldPath, newPath string) error {
+	if err := s.checkConn(); err != nil {
+		return err
+	}
+	if s.rootPath == "" {
+		return fmt.Errorf("root path is empty")
+	}
+	fullOld := filepath.Join(s.rootPath, oldPath)
+	fullNew := filepath.Join(s.rootPath, newPath)
+	if err := s.fs.MkdirAll(filepath.Dir(fullNew), 0755); err != nil {
+		s.cleanLastConnTime()
+		return err
+	}
+	if err := s.fs.Rename(fullOld, fullNew); err != nil {
+		s.cleanLastConnTime()
+		return err
+	}
+	s.updateLastConnTime()
+	return nil
+}
+
 func (s *Smb) Range(dir string, deal func(fs.FileInfo) bool) error {
 	if err := s.checkConn(); err != nil {
 		return err

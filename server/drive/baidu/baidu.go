@@ -426,6 +426,46 @@ func (d *BaiduNetdisk) Upload(path string, reader io.ReadCloser, size int64, las
 	return nil
 }
 
+func (d *BaiduNetdisk) Rename(oldPath, newPath string) error {
+	if d.rootPath == "" {
+		return fmt.Errorf("root path is empty")
+	}
+	if !d.isTokenAvaliable() {
+		if err := d.refreshAccessToken(); err != nil {
+			return err
+		}
+	}
+	fullOld := filepath.Join(d.rootPath, oldPath)
+	fullNew := filepath.Join(d.rootPath, newPath)
+	destDir := filepath.Dir(fullNew)
+	destBase := filepath.Base(fullNew)
+	if err := d.MkdirAll(destDir); err != nil {
+		return fmt.Errorf("mkdir for rename dest error: %v", err)
+	}
+	reqUrl := fmt.Sprintf("https://pan.baidu.com/rest/2.0/xpan/file?method=filemanager&access_token=%s&opera=move", d.AccessToken())
+	filelistJSON := fmt.Sprintf(`[{"path":"%s","dest":"%s","newname":"%s"}]`, fullOld, destDir, destBase)
+	formData := url.Values{
+		"async":    {"0"},
+		"filelist": {filelistJSON},
+	}
+	resp, err := http.PostForm(reqUrl, formData)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	var rsp generalRsp
+	if err := json.NewDecoder(resp.Body).Decode(&rsp); err != nil {
+		return err
+	}
+	if rsp.Errno != ErrorNoSuccess {
+		if rsp.Errno == ErrorNoAccessToken {
+			d.refreshAccessToken()
+		}
+		return fmt.Errorf("baidu netdisk (Rename) error: [%d] %s", rsp.Errno, rsp.ErrMsg)
+	}
+	return nil
+}
+
 func (d *BaiduNetdisk) Range(dir string, deal func(fs.FileInfo) bool) error {
 	if d.rootPath == "" {
 		return fmt.Errorf("root path not set")

@@ -283,6 +283,51 @@ func (d desc) Less(i, j int) bool {
 	return d[i].ModTime().After(d[j].ModTime())
 }
 
+func (d *Nfs) Rename(oldPath, newPath string) error {
+	if err := d.checkConn(); err != nil {
+		return err
+	}
+	if d.rootPath == "" {
+		return fmt.Errorf("root path is empty")
+	}
+	fullOld := filepath.Join(d.rootPath, oldPath)
+	fullNew := filepath.Join(d.rootPath, newPath)
+	if err := d.MkdirAll(filepath.Dir(fullNew), 0755); err != nil {
+		return fmt.Errorf("mkdir for rename dest error: %v", err)
+	}
+	// NFS client has no Rename; copy via download+upload+delete
+	srcFile, err := d.cli.Open(fullOld)
+	if err != nil {
+		d.cleanLastConnTime()
+		return fmt.Errorf("open source for rename error: %v", err)
+	}
+	data, err := io.ReadAll(srcFile)
+	srcFile.Close()
+	if err != nil {
+		return fmt.Errorf("read source for rename error: %v", err)
+	}
+	_, err = d.cli.Create(fullNew, 0644)
+	if err != nil {
+		d.cleanLastConnTime()
+		return fmt.Errorf("create dest for rename error: %v", err)
+	}
+	dstFile, err := d.cli.OpenFile(fullNew, 0644)
+	if err != nil {
+		d.cleanLastConnTime()
+		return fmt.Errorf("open dest for rename error: %v", err)
+	}
+	_, err = dstFile.Write(data)
+	dstFile.Close()
+	if err != nil {
+		return fmt.Errorf("write dest for rename error: %v", err)
+	}
+	if err := d.cli.Remove(fullOld); err != nil {
+		return fmt.Errorf("remove source after rename error: %v", err)
+	}
+	d.updateLastConnTime()
+	return nil
+}
+
 // MkdirAll makes a directory path and all parents that does not exist by d.cli.Mkdir.
 func (d *Nfs) MkdirAll(path string, perm fs.FileMode) error {
 	if d.rootPath == "" {

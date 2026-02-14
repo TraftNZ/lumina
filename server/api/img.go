@@ -129,6 +129,59 @@ func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) err
 // 	return
 // }
 
+func (a *api) MoveToTrash(ctx context.Context, req *pb.MoveToTrashRequest) (rsp *pb.MoveToTrashResponse, err error) {
+	rsp = &pb.MoveToTrashResponse{Success: true}
+	for _, path := range req.Paths {
+		if e := a.im.MoveToTrash(path); e != nil {
+			rsp.Success = false
+			rsp.Message = fmt.Sprintf("move to trash error: %v", e)
+			return
+		}
+	}
+	return
+}
+
+func (a *api) ListTrash(ctx context.Context, req *pb.ListTrashRequest) (rsp *pb.ListTrashResponse, err error) {
+	rsp = &pb.ListTrashResponse{Success: true}
+	items, e := a.im.ListTrash(int(req.Offset), int(req.MaxReturn))
+	if e != nil {
+		rsp.Success = false
+		rsp.Message = e.Error()
+		return
+	}
+	rsp.Items = make([]*pb.TrashItem, 0, len(items))
+	for _, item := range items {
+		rsp.Items = append(rsp.Items, &pb.TrashItem{
+			OriginalPath: item.OriginalPath,
+			TrashPath:    item.TrashPath,
+			TrashedAt:    item.TrashedAt.Unix(),
+			Size:         item.Size,
+		})
+	}
+	return
+}
+
+func (a *api) RestoreFromTrash(ctx context.Context, req *pb.RestoreFromTrashRequest) (rsp *pb.RestoreFromTrashResponse, err error) {
+	rsp = &pb.RestoreFromTrashResponse{Success: true}
+	for _, trashPath := range req.TrashPaths {
+		if e := a.im.RestoreFromTrash(trashPath); e != nil {
+			rsp.Success = false
+			rsp.Message = fmt.Sprintf("restore from trash error: %v", e)
+			return
+		}
+	}
+	return
+}
+
+func (a *api) EmptyTrash(ctx context.Context, req *pb.EmptyTrashRequest) (rsp *pb.EmptyTrashResponse, err error) {
+	rsp = &pb.EmptyTrashResponse{Success: true}
+	if e := a.im.EmptyTrash(); e != nil {
+		rsp.Success = false
+		rsp.Message = e.Error()
+	}
+	return
+}
+
 func isVideo(name string) bool {
 	ext := filepath.Ext(name)
 	switch ext {

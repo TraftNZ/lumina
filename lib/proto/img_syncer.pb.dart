@@ -1923,6 +1923,568 @@ class StartBaiduNetdiskLoginResponse extends $pb.GeneratedMessage {
   void clearExiresAt() => $_clearField(5);
 }
 
+class MoveToTrashRequest extends $pb.GeneratedMessage {
+  factory MoveToTrashRequest({
+    $core.Iterable<$core.String>? paths,
+  }) {
+    final result = create();
+    if (paths != null) result.paths.addAll(paths);
+    return result;
+  }
+
+  MoveToTrashRequest._();
+
+  factory MoveToTrashRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MoveToTrashRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MoveToTrashRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'paths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToTrashRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToTrashRequest copyWith(void Function(MoveToTrashRequest) updates) =>
+      super.copyWith((message) => updates(message as MoveToTrashRequest))
+          as MoveToTrashRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MoveToTrashRequest create() => MoveToTrashRequest._();
+  @$core.override
+  MoveToTrashRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MoveToTrashRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MoveToTrashRequest>(create);
+  static MoveToTrashRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get paths => $_getList(0);
+}
+
+class MoveToTrashResponse extends $pb.GeneratedMessage {
+  factory MoveToTrashResponse({
+    $core.bool? success,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  MoveToTrashResponse._();
+
+  factory MoveToTrashResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MoveToTrashResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MoveToTrashResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToTrashResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToTrashResponse copyWith(void Function(MoveToTrashResponse) updates) =>
+      super.copyWith((message) => updates(message as MoveToTrashResponse))
+          as MoveToTrashResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MoveToTrashResponse create() => MoveToTrashResponse._();
+  @$core.override
+  MoveToTrashResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MoveToTrashResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MoveToTrashResponse>(create);
+  static MoveToTrashResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
+class TrashItem extends $pb.GeneratedMessage {
+  factory TrashItem({
+    $core.String? originalPath,
+    $core.String? trashPath,
+    $fixnum.Int64? trashedAt,
+    $fixnum.Int64? size,
+  }) {
+    final result = create();
+    if (originalPath != null) result.originalPath = originalPath;
+    if (trashPath != null) result.trashPath = trashPath;
+    if (trashedAt != null) result.trashedAt = trashedAt;
+    if (size != null) result.size = size;
+    return result;
+  }
+
+  TrashItem._();
+
+  factory TrashItem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory TrashItem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TrashItem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'originalPath', protoName: 'originalPath')
+    ..aOS(2, _omitFieldNames ? '' : 'trashPath', protoName: 'trashPath')
+    ..aInt64(3, _omitFieldNames ? '' : 'trashedAt', protoName: 'trashedAt')
+    ..aInt64(4, _omitFieldNames ? '' : 'size')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TrashItem clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TrashItem copyWith(void Function(TrashItem) updates) =>
+      super.copyWith((message) => updates(message as TrashItem)) as TrashItem;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static TrashItem create() => TrashItem._();
+  @$core.override
+  TrashItem createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static TrashItem getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrashItem>(create);
+  static TrashItem? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get originalPath => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set originalPath($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasOriginalPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOriginalPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get trashPath => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set trashPath($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasTrashPath() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTrashPath() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get trashedAt => $_getI64(2);
+  @$pb.TagNumber(3)
+  set trashedAt($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTrashedAt() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTrashedAt() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get size => $_getI64(3);
+  @$pb.TagNumber(4)
+  set size($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSize() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSize() => $_clearField(4);
+}
+
+class ListTrashRequest extends $pb.GeneratedMessage {
+  factory ListTrashRequest({
+    $core.int? offset,
+    $core.int? maxReturn,
+  }) {
+    final result = create();
+    if (offset != null) result.offset = offset;
+    if (maxReturn != null) result.maxReturn = maxReturn;
+    return result;
+  }
+
+  ListTrashRequest._();
+
+  factory ListTrashRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListTrashRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListTrashRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'offset')
+    ..aI(2, _omitFieldNames ? '' : 'maxReturn', protoName: 'maxReturn')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListTrashRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListTrashRequest copyWith(void Function(ListTrashRequest) updates) =>
+      super.copyWith((message) => updates(message as ListTrashRequest))
+          as ListTrashRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ListTrashRequest create() => ListTrashRequest._();
+  @$core.override
+  ListTrashRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ListTrashRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListTrashRequest>(create);
+  static ListTrashRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get offset => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set offset($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasOffset() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOffset() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get maxReturn => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set maxReturn($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMaxReturn() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMaxReturn() => $_clearField(2);
+}
+
+class ListTrashResponse extends $pb.GeneratedMessage {
+  factory ListTrashResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.Iterable<TrashItem>? items,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (items != null) result.items.addAll(items);
+    return result;
+  }
+
+  ListTrashResponse._();
+
+  factory ListTrashResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListTrashResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListTrashResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPM<TrashItem>(3, _omitFieldNames ? '' : 'items',
+        subBuilder: TrashItem.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListTrashResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListTrashResponse copyWith(void Function(ListTrashResponse) updates) =>
+      super.copyWith((message) => updates(message as ListTrashResponse))
+          as ListTrashResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ListTrashResponse create() => ListTrashResponse._();
+  @$core.override
+  ListTrashResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ListTrashResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListTrashResponse>(create);
+  static ListTrashResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<TrashItem> get items => $_getList(2);
+}
+
+class RestoreFromTrashRequest extends $pb.GeneratedMessage {
+  factory RestoreFromTrashRequest({
+    $core.Iterable<$core.String>? trashPaths,
+  }) {
+    final result = create();
+    if (trashPaths != null) result.trashPaths.addAll(trashPaths);
+    return result;
+  }
+
+  RestoreFromTrashRequest._();
+
+  factory RestoreFromTrashRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RestoreFromTrashRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RestoreFromTrashRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'trashPaths', protoName: 'trashPaths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromTrashRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromTrashRequest copyWith(
+          void Function(RestoreFromTrashRequest) updates) =>
+      super.copyWith((message) => updates(message as RestoreFromTrashRequest))
+          as RestoreFromTrashRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromTrashRequest create() => RestoreFromTrashRequest._();
+  @$core.override
+  RestoreFromTrashRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromTrashRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RestoreFromTrashRequest>(create);
+  static RestoreFromTrashRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get trashPaths => $_getList(0);
+}
+
+class RestoreFromTrashResponse extends $pb.GeneratedMessage {
+  factory RestoreFromTrashResponse({
+    $core.bool? success,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  RestoreFromTrashResponse._();
+
+  factory RestoreFromTrashResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RestoreFromTrashResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RestoreFromTrashResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromTrashResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromTrashResponse copyWith(
+          void Function(RestoreFromTrashResponse) updates) =>
+      super.copyWith((message) => updates(message as RestoreFromTrashResponse))
+          as RestoreFromTrashResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromTrashResponse create() => RestoreFromTrashResponse._();
+  @$core.override
+  RestoreFromTrashResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromTrashResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RestoreFromTrashResponse>(create);
+  static RestoreFromTrashResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
+class EmptyTrashRequest extends $pb.GeneratedMessage {
+  factory EmptyTrashRequest() => create();
+
+  EmptyTrashRequest._();
+
+  factory EmptyTrashRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory EmptyTrashRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EmptyTrashRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EmptyTrashRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EmptyTrashRequest copyWith(void Function(EmptyTrashRequest) updates) =>
+      super.copyWith((message) => updates(message as EmptyTrashRequest))
+          as EmptyTrashRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static EmptyTrashRequest create() => EmptyTrashRequest._();
+  @$core.override
+  EmptyTrashRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static EmptyTrashRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<EmptyTrashRequest>(create);
+  static EmptyTrashRequest? _defaultInstance;
+}
+
+class EmptyTrashResponse extends $pb.GeneratedMessage {
+  factory EmptyTrashResponse({
+    $core.bool? success,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  EmptyTrashResponse._();
+
+  factory EmptyTrashResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory EmptyTrashResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EmptyTrashResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EmptyTrashResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EmptyTrashResponse copyWith(void Function(EmptyTrashResponse) updates) =>
+      super.copyWith((message) => updates(message as EmptyTrashResponse))
+          as EmptyTrashResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static EmptyTrashResponse create() => EmptyTrashResponse._();
+  @$core.override
+  EmptyTrashResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static EmptyTrashResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<EmptyTrashResponse>(create);
+  static EmptyTrashResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

@@ -502,6 +502,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} remaining'**
   String nRemaining(int count);
+
+  /// No description provided for @collections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get collections;
+
+  /// No description provided for @trash.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get trash;
+
+  /// No description provided for @lockedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked Folder'**
+  String get lockedFolder;
+
+  /// No description provided for @deleteUploadedPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete uploaded photos'**
+  String get deleteUploadedPhotos;
+
+  /// No description provided for @deleteUploadedPhotosConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} local copies? Cloud copies will be kept.'**
+  String deleteUploadedPhotosConfirm(int count);
+
+  /// No description provided for @noUploadedPhotosToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'No uploaded photos to delete'**
+  String get noUploadedPhotosToDelete;
+
+  /// No description provided for @movedToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to trash'**
+  String get movedToTrash;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @emptyTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty trash'**
+  String get emptyTrash;
+
+  /// No description provided for @emptyTrashConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete all items in trash?'**
+  String get emptyTrashConfirm;
+
+  /// No description provided for @trashEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash is empty'**
+  String get trashEmpty;
+
+  /// No description provided for @permanentlyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete'**
+  String get permanentlyDelete;
+
+  /// No description provided for @trashAutoDeleteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Items in trash are automatically deleted after 30 days'**
+  String get trashAutoDeleteNote;
+
+  /// No description provided for @lockedFolderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos moved here are hidden and require authentication to view'**
+  String get lockedFolderDescription;
+
+  /// No description provided for @authenticate.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticate'**
+  String get authenticate;
+
+  /// No description provided for @authenticationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed'**
+  String get authenticationFailed;
+
+  /// No description provided for @moveToLockedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Locked Folder'**
+  String get moveToLockedFolder;
+
+  /// No description provided for @removeFromLockedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Locked Folder'**
+  String get removeFromLockedFolder;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

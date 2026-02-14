@@ -1,7 +1,7 @@
 package com.example.img_syncer
 
 import androidx.annotation.NonNull
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import run.Run
@@ -16,7 +16,7 @@ import android.content.Intent
 import java.io.File
 
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
   private val CHANNEL = "com.example.img_syncer/RunGrpcServer"
 
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {

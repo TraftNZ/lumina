@@ -26,7 +26,16 @@ const (
 	defaultThumbnailMaxWidth  = 500
 	defaultThumbnailMaxHeight = 500
 	defaultThumbnailDir       = ".thumbnail"
+	defaultTrashDir           = ".trash"
+	trashAutoDeleteDays       = 30
 )
+
+type TrashItem struct {
+	OriginalPath string
+	TrashPath    string
+	TrashedAt    time.Time
+	Size         int64
+}
 
 type ImgManager struct {
 	dri      StorageDrive
@@ -417,6 +426,165 @@ func (im *ImgManager) listDir(path string) ([]fs.FileInfo, error) {
 		return true
 	})
 	return infos, err
+}
+
+func (im *ImgManager) MoveToTrash(path string) error {
+	trashPath := filepath.Join(defaultTrashDir, path)
+	if err := im.dri.Rename(path, trashPath); err != nil {
+		return fmt.Errorf("move to trash error: %w", err)
+	}
+	// Also move thumbnail (ignore error if not present)
+	thumbPath := filepath.Join(defaultThumbnailDir, path)
+	trashThumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
+	_ = im.dri.Rename(thumbPath, trashThumbPath)
+	return nil
+}
+
+func (im *ImgManager) RestoreFromTrash(trashPath string) error {
+	// trashPath is relative to .trash/, e.g. "2024/01/15/photo.jpg"
+	originalPath := trashPath
+	fullTrashPath := filepath.Join(defaultTrashDir, trashPath)
+	if err := im.dri.Rename(fullTrashPath, originalPath); err != nil {
+		return fmt.Errorf("restore from trash error: %w", err)
+	}
+	// Also restore thumbnail (ignore error)
+	trashThumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, trashPath)
+	thumbPath := filepath.Join(defaultThumbnailDir, trashPath)
+	_ = im.dri.Rename(trashThumbPath, thumbPath)
+	return nil
+}
+
+func (im *ImgManager) ListTrash(offset, maxReturn int) ([]TrashItem, error) {
+	if maxReturn <= 0 {
+		maxReturn = 100
+	}
+	items := make([]TrashItem, 0)
+	currentOffset := 0
+	now := time.Now()
+
+	im.rangeTrashByDate(now, func(path string, size int64, modTime time.Time) bool {
+		// Auto-purge files older than 30 days
+		if now.Sub(modTime) > trashAutoDeleteDays*24*time.Hour {
+			fullPath := filepath.Join(defaultTrashDir, path)
+			_ = im.dri.Delete(fullPath)
+			return true
+		}
+		if currentOffset < offset {
+			currentOffset++
+			return true
+		}
+		items = append(items, TrashItem{
+			OriginalPath: path,
+			TrashPath:    filepath.Join(defaultTrashDir, path),
+			TrashedAt:    modTime,
+			Size:         size,
+		})
+		return len(items) < maxReturn
+	})
+	return items, nil
+}
+
+func (im *ImgManager) EmptyTrash() error {
+	now := time.Now()
+	var lastErr error
+	im.rangeTrashByDate(now, func(path string, size int64, modTime time.Time) bool {
+		fullPath := filepath.Join(defaultTrashDir, path)
+		if err := im.dri.Delete(fullPath); err != nil {
+			im.logger.Printf("Error deleting trash item %s: %v", fullPath, err)
+			lastErr = err
+		}
+		// Also delete thumbnail
+		thumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
+		_ = im.dri.Delete(thumbPath)
+		return true
+	})
+	return lastErr
+}
+
+func (im *ImgManager) rangeTrashByDate(date time.Time, f func(path string, size int64, modTime time.Time) bool) {
+	t := date
+	if t.IsZero() {
+		t = time.Now()
+	}
+	year, month, day := t.Date()
+	yDir, err := im.listDir(defaultTrashDir)
+	if err != nil {
+		return
+	}
+	sort.Sort(desc(yDir))
+	for _, yinfo := range yDir {
+		if !yinfo.IsDir() {
+			continue
+		}
+		if yinfo.Name() == defaultThumbnailDir {
+			continue
+		}
+		yNum, err := strconv.Atoi(yinfo.Name())
+		if err != nil {
+			continue
+		}
+		if yNum > year {
+			continue
+		}
+		mDir, err := im.listDir(filepath.Join(defaultTrashDir, yinfo.Name()))
+		if err != nil {
+			continue
+		}
+		sort.Sort(desc(mDir))
+		for _, minfo := range mDir {
+			if !minfo.IsDir() {
+				continue
+			}
+			mNum, err := strconv.Atoi(minfo.Name())
+			if err != nil {
+				continue
+			}
+			if yNum == year && mNum > int(month) {
+				continue
+			}
+			dDir, err := im.listDir(filepath.Join(defaultTrashDir, yinfo.Name(), minfo.Name()))
+			if err != nil {
+				continue
+			}
+			sort.Sort(desc(dDir))
+			for _, dinfo := range dDir {
+				if !dinfo.IsDir() {
+					continue
+				}
+				dNum, err := strconv.Atoi(dinfo.Name())
+				if err != nil {
+					continue
+				}
+				if yNum == year && mNum == int(month) && dNum > day {
+					continue
+				}
+				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
+				goOn := true
+				im.dri.Range(filepath.Join(defaultTrashDir, dirPath), func(info fs.FileInfo) bool {
+					if info.IsDir() {
+						return true
+					}
+					goOn = f(filepath.Join(dirPath, info.Name()), info.Size(), info.ModTime())
+					return goOn
+				})
+				if !goOn {
+					return
+				}
+			}
+		}
+	}
+}
+
+func (im *ImgManager) GetTrashThumbnail(path string) (*Image, error) {
+	img := &Image{}
+	var err error
+	thumbnailPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
+	img.Content, img.Size, err = im.dri.Download(thumbnailPath)
+	if err != nil {
+		return img, fmt.Errorf("error downloading trash thumbnail: %w", err)
+	}
+	img.Path = thumbnailPath
+	return img, nil
 }
 
 type asc []fs.FileInfo

@@ -80,5 +80,30 @@
         "type": "int"
       }
     }
-  }
+  },
+  "collections": "Collections",
+  "trash": "Trash",
+  "lockedFolder": "Locked Folder",
+  "deleteUploadedPhotos": "Delete uploaded photos",
+  "deleteUploadedPhotosConfirm": "Delete {count} local copies? Cloud copies will be kept.",
+  "@deleteUploadedPhotosConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noUploadedPhotosToDelete": "No uploaded photos to delete",
+  "movedToTrash": "Moved to trash",
+  "restore": "Restore",
+  "emptyTrash": "Empty trash",
+  "emptyTrashConfirm": "Permanently delete all items in trash?",
+  "trashEmpty": "Trash is empty",
+  "permanentlyDelete": "Permanently delete",
+  "trashAutoDeleteNote": "Items in trash are automatically deleted after 30 days",
+  "lockedFolderDescription": "Photos moved here are hidden and require authentication to view",
+  "authenticate": "Authenticate",
+  "authenticationFailed": "Authentication failed",
+  "moveToLockedFolder": "Move to Locked Folder",
+  "removeFromLockedFolder": "Remove from Locked Folder"
 }

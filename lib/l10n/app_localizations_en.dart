@@ -221,4 +221,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String nRemaining(int count) {
     return '$count remaining';
   }
+
+  @override
+  String get collections => 'Collections';
+
+  @override
+  String get trash => 'Trash';
+
+  @override
+  String get lockedFolder => 'Locked Folder';
+
+  @override
+  String get deleteUploadedPhotos => 'Delete uploaded photos';
+
+  @override
+  String deleteUploadedPhotosConfirm(int count) {
+    return 'Delete $count local copies? Cloud copies will be kept.';
+  }
+
+  @override
+  String get noUploadedPhotosToDelete => 'No uploaded photos to delete';
+
+  @override
+  String get movedToTrash => 'Moved to trash';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get emptyTrash => 'Empty trash';
+
+  @override
+  String get emptyTrashConfirm => 'Permanently delete all items in trash?';
+
+  @override
+  String get trashEmpty => 'Trash is empty';
+
+  @override
+  String get permanentlyDelete => 'Permanently delete';
+
+  @override
+  String get trashAutoDeleteNote => 'Items in trash are automatically deleted after 30 days';
+
+  @override
+  String get lockedFolderDescription => 'Photos moved here are hidden and require authentication to view';
+
+  @override
+  String get authenticate => 'Authenticate';
+
+  @override
+  String get authenticationFailed => 'Authentication failed';
+
+  @override
+  String get moveToLockedFolder => 'Move to Locked Folder';
+
+  @override
+  String get removeFromLockedFolder => 'Remove from Locked Folder';
 }

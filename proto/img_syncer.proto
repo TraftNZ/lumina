@@ -20,6 +20,11 @@ service ImgSyncer {
   rpc ListDriveNFSDir (ListDriveNFSDirRequest) returns (ListDriveNFSDirResponse) {}
   rpc SetDriveBaiduNetDisk (SetDriveBaiduNetDiskRequest) returns (SetDriveBaiduNetDiskResponse) {}
   rpc StartBaiduNetdiskLogin (StartBaiduNetdiskLoginRequest) returns (StartBaiduNetdiskLoginResponse) {}
+  // Trash
+  rpc MoveToTrash (MoveToTrashRequest) returns (MoveToTrashResponse) {}
+  rpc ListTrash (ListTrashRequest) returns (ListTrashResponse) {}
+  rpc RestoreFromTrash (RestoreFromTrashRequest) returns (RestoreFromTrashResponse) {}
+  rpc EmptyTrash (EmptyTrashRequest) returns (EmptyTrashResponse) {}
 }
 
 // enum ContentType {
@@ -159,4 +164,43 @@ message StartBaiduNetdiskLoginResponse {
   string refreshToken = 3;
   string accessToken = 4;
   int64 exiresAt = 5;
+}
+
+message MoveToTrashRequest {
+  repeated string paths = 1;
+}
+message MoveToTrashResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message TrashItem {
+  string originalPath = 1;
+  string trashPath = 2;
+  int64 trashedAt = 3;
+  int64 size = 4;
+}
+
+message ListTrashRequest {
+  int32 offset = 1;
+  int32 maxReturn = 2;
+}
+message ListTrashResponse {
+  bool success = 1;
+  string message = 2;
+  repeated TrashItem items = 3;
+}
+
+message RestoreFromTrashRequest {
+  repeated string trashPaths = 1;
+}
+message RestoreFromTrashResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message EmptyTrashRequest {}
+message EmptyTrashResponse {
+  bool success = 1;
+  string message = 2;
 }

@@ -13,6 +13,7 @@ type StorageDrive interface {
 	Download(path string) (io.ReadCloser, int64, error)
 	DownloadWithOffset(path string, offset int64) (io.ReadCloser, int64, error)
 	Delete(path string) error
+	Rename(oldPath string, newPath string) error
 	Range(dir string, deal func(fs.FileInfo) bool) error
 }
 
@@ -52,6 +53,10 @@ func (d *UnimplementedDrive) DownloadWithOffset(path string, offset int64) (io.R
 }
 
 func (d *UnimplementedDrive) Delete(path string) error {
+	return errors.New("no available drive")
+}
+
+func (d *UnimplementedDrive) Rename(oldPath, newPath string) error {
 	return errors.New("no available drive")
 }
 

@@ -15,9 +15,13 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/setting_body.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:vibration/vibration.dart';
+import 'package:local_auth/local_auth.dart';
+import 'dart:convert';
 
 class GalleryBody extends StatefulWidget {
   const GalleryBody({Key? key}) : super(key: key);
@@ -230,7 +234,7 @@ class GalleryBodyState extends State<GalleryBody>
                 }
                 if (remoteToDelete.isNotEmpty) {
                   storage.cli
-                      .delete(DeleteRequest(
+                      .moveToTrash(MoveToTrashRequest(
                         paths: remoteToDelete.map((e) => e.remote!.path).toList(),
                       ))
                       .then((rsp) => eventBus.fire(RemoteRefreshEvent()));
@@ -238,8 +242,7 @@ class GalleryBodyState extends State<GalleryBody>
               } catch (e) {
                 SnackBarManager.showSnackBar(e.toString());
               }
-              SnackBarManager.showSnackBar(
-                  '${l10n.delete} ${toDelete.length} ${l10n.photos}.');
+              SnackBarManager.showSnackBar(l10n.movedToTrash);
               clearSelection();
               setState(() {});
               Navigator.of(context).pop();
@@ -374,6 +377,10 @@ class GalleryBodyState extends State<GalleryBody>
                       _bottomSheetIconButton(Icons.delete_outline, l10n.delete,
                           () => _showDeleteDialog(context)),
                       _bottomSheetIconButton(
+                          Icons.lock_outline,
+                          l10n.moveToLockedFolder,
+                          _moveToLockedFolder),
+                      _bottomSheetIconButton(
                           Icons.cloud_upload_outlined,
                           l10n.upload,
                           uploadSelected,
@@ -428,6 +435,97 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
+  void _showDeleteUploadedDialog(BuildContext context) {
+    final all = assetModel.getUnifiedAssets();
+    final uploaded = all.where((a) => a.hasLocal && a.hasRemote).toList();
+    if (uploaded.isEmpty) {
+      SnackBarManager.showSnackBar(l10n.noUploadedPhotosToDelete);
+      return;
+    }
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(l10n.deleteUploadedPhotos),
+        content: Text(l10n.deleteUploadedPhotosConfirm(uploaded.length)),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              final ids = uploaded.map((e) => e.local!.id).toList();
+              PhotoManager.editor.deleteWithIds(ids).then((_) {
+                eventBus.fire(LocalRefreshEvent());
+              });
+              Navigator.of(context).pop();
+              SnackBarManager.showSnackBar(
+                  '${l10n.delete} ${uploaded.length} ${l10n.photos}.');
+            },
+            child: Text(l10n.yes),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _moveToLockedFolder() async {
+    if (!stateModel.isSelectionMode) return;
+    final localAuth = LocalAuthentication();
+    try {
+      final authenticated = await localAuth.authenticate(
+        localizedReason: l10n.authenticate,
+      );
+      if (!authenticated) {
+        SnackBarManager.showSnackBar(l10n.authenticationFailed);
+        return;
+      }
+    } catch (e) {
+      SnackBarManager.showSnackBar(l10n.authenticationFailed);
+      return;
+    }
+
+    final all = assetModel.getUnifiedAssets();
+    final assets = <Asset>[];
+    _selectedIndices.forEach((key, isSelected) {
+      if (isSelected && all[key].hasLocal) {
+        assets.add(all[key]);
+      }
+    });
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final lockedDir = Directory('${appDir.path}/locked_photos');
+    if (!await lockedDir.exists()) {
+      await lockedDir.create(recursive: true);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final existingJson = prefs.getString('locked_photos') ?? '[]';
+    final List<dynamic> metadata = json.decode(existingJson);
+
+    for (final asset in assets) {
+      final data = await asset.imageDataAsync();
+      final filename = '${DateTime.now().millisecondsSinceEpoch}_${asset.name()}';
+      final file = File('${lockedDir.path}/$filename');
+      await file.writeAsBytes(data);
+      metadata.add({
+        'filename': filename,
+        'originalName': asset.name(),
+        'dateAdded': DateTime.now().toIso8601String(),
+      });
+    }
+    await prefs.setString('locked_photos', json.encode(metadata));
+
+    // Delete local copies
+    final localIds = assets.map((e) => e.local!.id).toList();
+    await PhotoManager.editor.deleteWithIds(localIds);
+    eventBus.fire(LocalRefreshEvent());
+
+    clearSelection();
+    SnackBarManager.showSnackBar(
+        '${assets.length} ${l10n.photos} ${l10n.moveToLockedFolder}');
+  }
+
   Widget _buildToolbar() {
     return SliverToBoxAdapter(
       child: Consumer<StateModel>(
@@ -438,12 +536,7 @@ class GalleryBodyState extends State<GalleryBody>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Text(
-                  'Lumina',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w400,
-                      ),
-                ),
+                Image.asset('assets/icon/lumina_icon_transparent.png', width: 36, height: 36),
                 const Spacer(),
                 if (model.isSyncing)
                   GestureDetector(
@@ -476,6 +569,29 @@ class GalleryBodyState extends State<GalleryBody>
                     size: 20,
                     color: colorScheme.primary,
                   ),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+                  onSelected: (value) {
+                    if (value == 'delete_uploaded') {
+                      _showDeleteUploadedDialog(context);
+                    } else if (value == 'settings') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingBody()),
+                      );
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'delete_uploaded',
+                      child: Text(l10n.deleteUploadedPhotos),
+                    ),
+                    PopupMenuItem(
+                      value: 'settings',
+                      child: Text(l10n.settings),
+                    ),
+                  ],
+                ),
               ],
             ),
           );
