@@ -41,11 +41,13 @@ type TrashItem struct {
 }
 
 type ImgManager struct {
-	dri      StorageDrive
-	actQueue *queue.Queue
-	logger   *log.Logger
-	opt      Option
-	store    *localstore.LocalStore
+	dri            StorageDrive
+	actQueue       *queue.Queue
+	logger         *log.Logger
+	opt            Option
+	store          *localstore.LocalStore
+	syncDebounce   *time.Timer
+	syncDebounceMu sync.Mutex
 }
 
 type Option struct {
@@ -227,7 +229,7 @@ func (im *ImgManager) UploadVideo(content, thumbnailContent io.Reader, contentSi
 		im.store.IndexPhoto(path, filepath.Base(path), contentSize)
 	}
 	if err == nil {
-		go im.WriteSyncState()
+		im.DebouncedWriteSyncState()
 	}
 	return err
 }
@@ -310,7 +312,7 @@ func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize
 			return err
 		}
 	}
-	go im.WriteSyncState()
+	im.DebouncedWriteSyncState()
 	return nil
 }
 
@@ -381,7 +383,7 @@ func (im *ImgManager) DeleteSingleImg(path string) error {
 		im.store.RemovePhoto(path)
 		im.store.RemoveThumb(path)
 	}
-	go im.WriteSyncState()
+	im.DebouncedWriteSyncState()
 	return nil
 }
 
@@ -477,6 +479,20 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 	}
 BREAK:
 	return nil
+}
+
+// DebouncedWriteSyncState schedules a WriteSyncState to run after a short
+// delay. If called multiple times in quick succession (e.g. during a batch
+// upload), only one WriteSyncState runs after the last call settles.
+func (im *ImgManager) DebouncedWriteSyncState() {
+	im.syncDebounceMu.Lock()
+	defer im.syncDebounceMu.Unlock()
+	if im.syncDebounce != nil {
+		im.syncDebounce.Stop()
+	}
+	im.syncDebounce = time.AfterFunc(2*time.Second, func() {
+		im.WriteSyncState()
+	})
 }
 
 // WriteSyncState uploads both the index and marker to remote storage.
@@ -618,7 +634,7 @@ func (im *ImgManager) MoveToTrash(path string) error {
 		im.store.RemovePhoto(path)
 		im.store.RemoveThumb(path)
 	}
-	go im.WriteSyncState()
+	im.DebouncedWriteSyncState()
 	return nil
 }
 
@@ -646,7 +662,7 @@ func (im *ImgManager) RestoreFromTrash(trashPath string) error {
 		})
 		im.store.IndexPhoto(originalPath, filepath.Base(originalPath), size)
 	}
-	go im.WriteSyncState()
+	im.DebouncedWriteSyncState()
 	return nil
 }
 

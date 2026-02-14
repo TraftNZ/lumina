@@ -32,8 +32,7 @@ The app is designed to replace the native photo gallery on your phone while prov
 - [x] Samba (SMB)
 - [x] WebDAV
 - [x] NFS
-- [x] Baidu Netdisk
-- [ ] Alibaba Cloud Drive
+- [x] S3-compatible storage (AWS S3, MinIO, Backblaze B2, etc.)
 - [ ] OneDrive
 - [ ] Google Drive
 - [ ] Google Photos
@@ -122,7 +121,7 @@ Directory structure:
 - [x] Support zooming in/out of images
 - [x] Support uploading/browsing videos
 - [x] Support NFS
-- [x] Support Baidu Netdisk
+- [x] Support S3-compatible storage
 - [x] Support iOS
 - [ ] Support Desktop
 - [x] Support Chinese and English

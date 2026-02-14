@@ -79,7 +79,10 @@ func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) err
 		// Download remote index (2 GETs) instead of walking all directories
 		if err := a.im.SyncFromRemoteIndex(); err != nil {
 			// Index file missing or corrupt — fall back to full rebuild
-			a.im.RebuildIndex(nil)
+			if err := a.im.RebuildIndex(nil); err != nil {
+				// Rebuild also failed — fall back to legacy walk
+				return a.filterNotUploadedLegacy(stream)
+			}
 		}
 	}
 

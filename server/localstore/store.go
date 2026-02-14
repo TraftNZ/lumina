@@ -69,12 +69,12 @@ func (s *LocalStore) SwitchDrive(configHash string) error {
 	}
 
 	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(configHash)))[:16]
-	dataDir := filepath.Join(s.baseDataDir, "pho", hash)
+	dataDir := filepath.Join(s.baseDataDir, "lumina", hash)
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
 		return fmt.Errorf("create data dir: %w", err)
 	}
 	s.dataFile = filepath.Join(dataDir, "index.gob")
-	s.thumbDir = filepath.Join(s.baseCacheDir, "pho", hash, "thumbs")
+	s.thumbDir = filepath.Join(s.baseCacheDir, "lumina", hash, "thumbs")
 	if err := os.MkdirAll(s.thumbDir, 0755); err != nil {
 		return fmt.Errorf("create thumb dir: %w", err)
 	}

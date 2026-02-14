@@ -1,10 +1,12 @@
 package s3
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -15,13 +17,19 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+const defaultRegion = "us-east-1"
+
 type S3Drive struct {
 	client   *s3.Client
 	bucket   string
 	rootPath string
+	logger   *log.Logger
 }
 
 func NewS3Drive(endpoint, region, accessKeyID, secretAccessKey string) *S3Drive {
+	if region == "" {
+		region = defaultRegion
+	}
 	cfg := aws.Config{
 		Region:      region,
 		Credentials: credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
@@ -31,9 +39,14 @@ func NewS3Drive(endpoint, region, accessKeyID, secretAccessKey string) *S3Drive 
 			o.BaseEndpoint = aws.String(endpoint)
 		}
 		o.UsePathStyle = true
+		// Only compute checksums when the API requires them (e.g. DeleteObjects).
+		// The default (WhenSupported) adds CRC32 trailing checksums to PutObject,
+		// which many S3-compatible services don't support.
+		o.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
 	})
 	return &S3Drive{
 		client: client,
+		logger: log.New(log.Writer(), "[S3Drive] ", log.LstdFlags),
 	}
 }
 
@@ -51,7 +64,62 @@ func (d *S3Drive) SetRootPath(root string) {
 }
 
 func (d *S3Drive) fullKey(path string) string {
-	return d.rootPath + filepath.ToSlash(path)
+	path = filepath.ToSlash(path)
+	if path == "." || path == "" {
+		return d.rootPath
+	}
+	return d.rootPath + path
+}
+
+// HeadBucket verifies that the configured bucket is accessible.
+func (d *S3Drive) HeadBucket(ctx context.Context) error {
+	_, err := d.client.HeadBucket(ctx, &s3.HeadBucketInput{
+		Bucket: aws.String(d.bucket),
+	})
+	return err
+}
+
+// RoundtripTest uploads a small test object, downloads it, verifies the
+// content matches, and deletes it. This proves that S3 writes actually persist.
+func (d *S3Drive) RoundtripTest(ctx context.Context) error {
+	testKey := d.fullKey(".lumina_write_test")
+	testData := []byte("pho-roundtrip-test")
+
+	// Upload
+	_, err := d.client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:        aws.String(d.bucket),
+		Key:           aws.String(testKey),
+		Body:          readSeekCloser{bytes.NewReader(testData)},
+		ContentLength: aws.Int64(int64(len(testData))),
+	})
+	if err != nil {
+		return fmt.Errorf("put test object: %w", err)
+	}
+
+	// Download and verify
+	out, err := d.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(d.bucket),
+		Key:    aws.String(testKey),
+	})
+	if err != nil {
+		return fmt.Errorf("get test object: %w", err)
+	}
+	got, err := io.ReadAll(out.Body)
+	out.Body.Close()
+	if err != nil {
+		return fmt.Errorf("read test object: %w", err)
+	}
+	if !bytes.Equal(got, testData) {
+		return fmt.Errorf("roundtrip mismatch: wrote %d bytes, read %d bytes", len(testData), len(got))
+	}
+
+	// Cleanup
+	_, _ = d.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(d.bucket),
+		Key:    aws.String(testKey),
+	})
+	d.logger.Printf("Roundtrip test passed: bucket=%s key=%s", d.bucket, testKey)
+	return nil
 }
 
 func (d *S3Drive) ListBuckets(ctx context.Context) ([]string, error) {
@@ -66,6 +134,15 @@ func (d *S3Drive) ListBuckets(ctx context.Context) ([]string, error) {
 	return names, nil
 }
 
+// readSeekCloser wraps an io.ReadSeeker with a no-op Close.
+// This preserves Seek capability (unlike io.NopCloser) so the
+// AWS SDK can compute checksums and retry without buffering.
+type readSeekCloser struct {
+	io.ReadSeeker
+}
+
+func (r readSeekCloser) Close() error { return nil }
+
 func (d *S3Drive) Upload(path string, reader io.ReadCloser, size int64, lastModified time.Time) error {
 	if reader == nil {
 		return fmt.Errorf("reader is nil")
@@ -75,13 +152,34 @@ func (d *S3Drive) Upload(path string, reader io.ReadCloser, size int64, lastModi
 		return fmt.Errorf("bucket not set")
 	}
 	key := d.fullKey(path)
-	_, err := d.client.PutObject(context.Background(), &s3.PutObjectInput{
+
+	// The AWS SDK v2 needs a seekable body to compute request checksums.
+	// Callers typically pass io.NopCloser(bytes.Reader) which hides Seek.
+	// If the reader isn't seekable, buffer it so PutObject works correctly.
+	var body io.Reader = reader
+	if _, ok := reader.(io.ReadSeeker); !ok {
+		data, err := io.ReadAll(reader)
+		if err != nil {
+			return fmt.Errorf("read upload body: %w", err)
+		}
+		size = int64(len(data))
+		body = readSeekCloser{bytes.NewReader(data)}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	_, err := d.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(d.bucket),
 		Key:           aws.String(key),
-		Body:          reader,
+		Body:          body,
 		ContentLength: aws.Int64(size),
 	})
-	return err
+	if err != nil {
+		d.logger.Printf("PutObject failed: bucket=%s key=%s size=%d err=%v", d.bucket, key, size, err)
+		return fmt.Errorf("s3 put object: %w", err)
+	}
+	return nil
 }
 
 func (d *S3Drive) Download(path string) (io.ReadCloser, int64, error) {
@@ -100,9 +198,13 @@ func (d *S3Drive) DownloadWithOffset(path string, offset int64) (io.ReadCloser, 
 	if offset > 0 {
 		input.Range = aws.String(fmt.Sprintf("bytes=%d-", offset))
 	}
+
+	// Use a background context here. We cannot use a timeout context because
+	// the returned Body must remain readable after this function returns.
+	// The caller is responsible for closing the body.
 	out, err := d.client.GetObject(context.Background(), input)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("s3 get object %s: %w", key, err)
 	}
 	var totalSize int64
 	if out.ContentLength != nil {
@@ -119,11 +221,16 @@ func (d *S3Drive) Delete(path string) error {
 		return fmt.Errorf("bucket not set")
 	}
 	key := d.fullKey(path)
-	_, err := d.client.DeleteObject(context.Background(), &s3.DeleteObjectInput{
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	_, err := d.client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(key),
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("s3 delete object %s: %w", key, err)
+	}
+	return nil
 }
 
 func (d *S3Drive) Rename(oldPath, newPath string) error {
@@ -133,20 +240,24 @@ func (d *S3Drive) Rename(oldPath, newPath string) error {
 	oldKey := d.fullKey(oldPath)
 	newKey := d.fullKey(newPath)
 	copySource := d.bucket + "/" + oldKey
-	_, err := d.client.CopyObject(context.Background(), &s3.CopyObjectInput{
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	_, err := d.client.CopyObject(ctx, &s3.CopyObjectInput{
 		Bucket:     aws.String(d.bucket),
 		CopySource: aws.String(copySource),
 		Key:        aws.String(newKey),
 	})
 	if err != nil {
-		return fmt.Errorf("copy object error: %w", err)
+		return fmt.Errorf("s3 copy %s -> %s: %w", oldKey, newKey, err)
 	}
-	_, err = d.client.DeleteObject(context.Background(), &s3.DeleteObjectInput{
+	_, err = d.client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(oldKey),
 	})
 	if err != nil {
-		return fmt.Errorf("delete old object error: %w", err)
+		return fmt.Errorf("s3 delete after copy %s: %w", oldKey, err)
 	}
 	return nil
 }
@@ -164,11 +275,12 @@ func (d *S3Drive) Range(dir string, deal func(fs.FileInfo) bool) error {
 		Prefix:    aws.String(prefix),
 		Delimiter: aws.String("/"),
 	})
-	// Collect directories from CommonPrefixes
 	for paginator.HasMorePages() {
-		page, err := paginator.NextPage(context.Background())
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		page, err := paginator.NextPage(ctx)
+		cancel()
 		if err != nil {
-			return err
+			return fmt.Errorf("s3 list objects prefix=%s: %w", prefix, err)
 		}
 		// Subdirectories
 		for _, cp := range page.CommonPrefixes {
@@ -211,16 +323,15 @@ type s3FileInfo struct {
 	isDir   bool
 }
 
-func (f *s3FileInfo) Name() string        { return f.name }
-func (f *s3FileInfo) Size() int64          { return f.size }
-func (f *s3FileInfo) Mode() fs.FileMode    { return 0444 }
-func (f *s3FileInfo) ModTime() time.Time   { return f.modTime }
-func (f *s3FileInfo) IsDir() bool          { return f.isDir }
-func (f *s3FileInfo) Sys() interface{}     { return nil }
-func (f *s3FileInfo) Type() fs.FileMode    { return f.Mode().Type() }
+func (f *s3FileInfo) Name() string             { return f.name }
+func (f *s3FileInfo) Size() int64              { return f.size }
+func (f *s3FileInfo) Mode() fs.FileMode        { return 0444 }
+func (f *s3FileInfo) ModTime() time.Time       { return f.modTime }
+func (f *s3FileInfo) IsDir() bool              { return f.isDir }
+func (f *s3FileInfo) Sys() interface{}         { return nil }
+func (f *s3FileInfo) Type() fs.FileMode        { return f.Mode().Type() }
 func (f *s3FileInfo) Info() (fs.FileInfo, error) { return f, nil }
 
-// Ensure it also satisfies fs.DirEntry for callers that type-assert.
 var _ fs.DirEntry = (*s3FileInfo)(nil)
 
 type desc []fs.FileInfo
@@ -230,13 +341,3 @@ func (d desc) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
 func (d desc) Less(i, j int) bool {
 	return d[i].ModTime().After(d[j].ModTime())
 }
-
-// Ensure S3Drive satisfies the StorageDrive interface at compile time.
-var _ interface {
-	Upload(string, io.ReadCloser, int64, time.Time) error
-	Download(string) (io.ReadCloser, int64, error)
-	DownloadWithOffset(string, int64) (io.ReadCloser, int64, error)
-	Delete(string) error
-	Rename(string, string) error
-	Range(string, func(fs.FileInfo) bool) error
-} = (*S3Drive)(nil)

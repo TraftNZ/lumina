@@ -24,11 +24,21 @@ func (a *api) SetDriveS3(ctx context.Context, req *pb.SetDriveS3Request) (rsp *p
 	}
 	d := s3drive.NewS3Drive(req.Endpoint, req.Region, req.AccessKeyId, req.SecretAccessKey)
 	d.SetBucket(req.Bucket)
-	configHash := fmt.Sprintf("s3://%s/%s/%s", req.Endpoint, req.Bucket, req.Root)
-	a.im.SwitchDrive(d, configHash)
 	if req.Root != "" {
 		d.SetRootPath(req.Root)
 	}
+	// Verify bucket is accessible before switching
+	if err := d.HeadBucket(ctx); err != nil {
+		rsp.Success, rsp.Message = false, fmt.Sprintf("cannot access bucket %q: %s", req.Bucket, err.Error())
+		return
+	}
+	// Roundtrip test: upload a small object, read it back, verify, then delete.
+	if err := d.RoundtripTest(ctx); err != nil {
+		rsp.Success, rsp.Message = false, fmt.Sprintf("S3 write test failed: %s", err.Error())
+		return
+	}
+	configHash := fmt.Sprintf("s3://%s/%s/%s", req.Endpoint, req.Bucket, req.Root)
+	a.im.SwitchDrive(d, configHash)
 	return
 }
 

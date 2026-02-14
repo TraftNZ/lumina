@@ -32,8 +32,7 @@ Lumina 是一款无服务端的照片同步和查看应用。它使用 Flutter �
 - [x] Samba (SMB)
 - [x] WebDAV
 - [x] NFS
-- [x] 百度网盘
-- [ ] 阿里网盘
+- [x] S3 兼容存储 (AWS S3, MinIO, Backblaze B2 等)
 - [ ] OneDrive
 - [ ] Google Drive
 - [ ] Google Photos
@@ -122,7 +121,7 @@ docker compose -f test/docker-compose.yml up -d    # 手动启动测试服务
 - [x] 支持放大/缩小图片
 - [x] 支持上传/浏览视频
 - [x] 支持 NFS
-- [x] 支持百度网盘
+- [x] 支持 S3 兼容存储
 - [x] 支持 iOS 端
 - [ ] 支持 Desktop 端
 - [x] 支持中英文
