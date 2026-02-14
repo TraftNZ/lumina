@@ -36,6 +36,9 @@ const (
 	ImgSyncer_ListTrash_FullMethodName              = "/img_syncer.ImgSyncer/ListTrash"
 	ImgSyncer_RestoreFromTrash_FullMethodName       = "/img_syncer.ImgSyncer/RestoreFromTrash"
 	ImgSyncer_EmptyTrash_FullMethodName             = "/img_syncer.ImgSyncer/EmptyTrash"
+	ImgSyncer_RebuildIndex_FullMethodName           = "/img_syncer.ImgSyncer/RebuildIndex"
+	ImgSyncer_GetIndexStats_FullMethodName          = "/img_syncer.ImgSyncer/GetIndexStats"
+	ImgSyncer_ClearThumbnailCache_FullMethodName    = "/img_syncer.ImgSyncer/ClearThumbnailCache"
 )
 
 // ImgSyncerClient is the client API for ImgSyncer service.
@@ -63,6 +66,10 @@ type ImgSyncerClient interface {
 	ListTrash(ctx context.Context, in *ListTrashRequest, opts ...grpc.CallOption) (*ListTrashResponse, error)
 	RestoreFromTrash(ctx context.Context, in *RestoreFromTrashRequest, opts ...grpc.CallOption) (*RestoreFromTrashResponse, error)
 	EmptyTrash(ctx context.Context, in *EmptyTrashRequest, opts ...grpc.CallOption) (*EmptyTrashResponse, error)
+	// Index management
+	RebuildIndex(ctx context.Context, in *RebuildIndexRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RebuildIndexResponse], error)
+	GetIndexStats(ctx context.Context, in *GetIndexStatsRequest, opts ...grpc.CallOption) (*GetIndexStatsResponse, error)
+	ClearThumbnailCache(ctx context.Context, in *ClearThumbnailCacheRequest, opts ...grpc.CallOption) (*ClearThumbnailCacheResponse, error)
 }
 
 type imgSyncerClient struct {
@@ -246,6 +253,45 @@ func (c *imgSyncerClient) EmptyTrash(ctx context.Context, in *EmptyTrashRequest,
 	return out, nil
 }
 
+func (c *imgSyncerClient) RebuildIndex(ctx context.Context, in *RebuildIndexRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RebuildIndexResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ImgSyncer_ServiceDesc.Streams[1], ImgSyncer_RebuildIndex_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[RebuildIndexRequest, RebuildIndexResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ImgSyncer_RebuildIndexClient = grpc.ServerStreamingClient[RebuildIndexResponse]
+
+func (c *imgSyncerClient) GetIndexStats(ctx context.Context, in *GetIndexStatsRequest, opts ...grpc.CallOption) (*GetIndexStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetIndexStatsResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_GetIndexStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) ClearThumbnailCache(ctx context.Context, in *ClearThumbnailCacheRequest, opts ...grpc.CallOption) (*ClearThumbnailCacheResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearThumbnailCacheResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_ClearThumbnailCache_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImgSyncerServer is the server API for ImgSyncer service.
 // All implementations must embed UnimplementedImgSyncerServer
 // for forward compatibility.
@@ -271,6 +317,10 @@ type ImgSyncerServer interface {
 	ListTrash(context.Context, *ListTrashRequest) (*ListTrashResponse, error)
 	RestoreFromTrash(context.Context, *RestoreFromTrashRequest) (*RestoreFromTrashResponse, error)
 	EmptyTrash(context.Context, *EmptyTrashRequest) (*EmptyTrashResponse, error)
+	// Index management
+	RebuildIndex(*RebuildIndexRequest, grpc.ServerStreamingServer[RebuildIndexResponse]) error
+	GetIndexStats(context.Context, *GetIndexStatsRequest) (*GetIndexStatsResponse, error)
+	ClearThumbnailCache(context.Context, *ClearThumbnailCacheRequest) (*ClearThumbnailCacheResponse, error)
 	mustEmbedUnimplementedImgSyncerServer()
 }
 
@@ -331,6 +381,15 @@ func (UnimplementedImgSyncerServer) RestoreFromTrash(context.Context, *RestoreFr
 }
 func (UnimplementedImgSyncerServer) EmptyTrash(context.Context, *EmptyTrashRequest) (*EmptyTrashResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method EmptyTrash not implemented")
+}
+func (UnimplementedImgSyncerServer) RebuildIndex(*RebuildIndexRequest, grpc.ServerStreamingServer[RebuildIndexResponse]) error {
+	return status.Error(codes.Unimplemented, "method RebuildIndex not implemented")
+}
+func (UnimplementedImgSyncerServer) GetIndexStats(context.Context, *GetIndexStatsRequest) (*GetIndexStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetIndexStats not implemented")
+}
+func (UnimplementedImgSyncerServer) ClearThumbnailCache(context.Context, *ClearThumbnailCacheRequest) (*ClearThumbnailCacheResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ClearThumbnailCache not implemented")
 }
 func (UnimplementedImgSyncerServer) mustEmbedUnimplementedImgSyncerServer() {}
 func (UnimplementedImgSyncerServer) testEmbeddedByValue()                   {}
@@ -648,6 +707,53 @@ func _ImgSyncer_EmptyTrash_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImgSyncer_RebuildIndex_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RebuildIndexRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ImgSyncerServer).RebuildIndex(m, &grpc.GenericServerStream[RebuildIndexRequest, RebuildIndexResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ImgSyncer_RebuildIndexServer = grpc.ServerStreamingServer[RebuildIndexResponse]
+
+func _ImgSyncer_GetIndexStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIndexStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).GetIndexStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_GetIndexStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).GetIndexStats(ctx, req.(*GetIndexStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_ClearThumbnailCache_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearThumbnailCacheRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).ClearThumbnailCache(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_ClearThumbnailCache_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).ClearThumbnailCache(ctx, req.(*ClearThumbnailCacheRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ImgSyncer_ServiceDesc is the grpc.ServiceDesc for ImgSyncer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -719,6 +825,14 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "EmptyTrash",
 			Handler:    _ImgSyncer_EmptyTrash_Handler,
 		},
+		{
+			MethodName: "GetIndexStats",
+			Handler:    _ImgSyncer_GetIndexStats_Handler,
+		},
+		{
+			MethodName: "ClearThumbnailCache",
+			Handler:    _ImgSyncer_ClearThumbnailCache_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -726,6 +840,11 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _ImgSyncer_FilterNotUploaded_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "RebuildIndex",
+			Handler:       _ImgSyncer_RebuildIndex_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "proto/img_syncer.proto",

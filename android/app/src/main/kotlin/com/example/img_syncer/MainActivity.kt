@@ -25,7 +25,9 @@ class MainActivity : FlutterFragmentActivity() {
         call,
         result ->
       if (call.method == "RunGrpcServer") {
-        val re =  Run.runGrpcServer()
+        val dataDir = call.argument<String>("dataDir") ?: ""
+        val cacheDir = call.argument<String>("cacheDir") ?: ""
+        val re = Run.runGrpcServer(dataDir, cacheDir)
         result.success(re)
       } else if (call.method == "scanFile") {
         scanFile(call.argument("path"), call.argument("volumeName"), call.argument("relativePath"), call.argument("mimeType"))

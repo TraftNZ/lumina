@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:img_syncer/global.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,40 +24,117 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
   @override
   void initState() {
     super.initState();
-    _authenticate();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _authenticate());
   }
 
   Future<void> _authenticate() async {
     if (!mounted) return;
     setState(() => _authenticating = true);
+
+    // Try biometric/device auth first
+    if (await _tryBiometricAuth()) {
+      _authenticated = true;
+      await _loadPhotos();
+      if (mounted) setState(() => _authenticating = false);
+      return;
+    }
+
+    if (!mounted) return;
+
+    // Fallback to app PIN
+    final prefs = await SharedPreferences.getInstance();
+    final storedPin = prefs.getString('locked_folder_pin');
+
+    if (storedPin != null && storedPin.isNotEmpty) {
+      if (!mounted) return;
+      setState(() => _authenticating = false);
+      final pinOk = await _showPinDialog(storedPin);
+      if (!mounted) return;
+      if (pinOk) {
+        _authenticated = true;
+        await _loadPhotos();
+        if (mounted) setState(() {});
+      } else {
+        if (mounted) Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    // No biometric and no PIN — tell user to set up PIN
+    if (!mounted) return;
+    setState(() => _authenticating = false);
+    SnackBarManager.showSnackBar(l10n.pinRequired);
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+    }
+  }
+
+  /// Returns true if biometric auth succeeded, false if unavailable or failed.
+  Future<bool> _tryBiometricAuth() async {
     final localAuth = LocalAuthentication();
     try {
       final canAuth = await localAuth.canCheckBiometrics || await localAuth.isDeviceSupported();
-      if (!canAuth) {
-        // No biometric/PIN available, grant access directly
-        _authenticated = true;
-        await _loadPhotos();
-        if (mounted) setState(() => _authenticating = false);
-        return;
-      }
-      final result = await localAuth.authenticate(
+      if (!canAuth) return false;
+      return await localAuth.authenticate(
         localizedReason: l10n.authenticate,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: false,
+        ),
       );
-      if (!mounted) return;
-      if (result) {
-        _authenticated = true;
-        await _loadPhotos();
-      } else {
-        Navigator.of(context).pop();
-        return;
-      }
-    } catch (e) {
-      if (!mounted) return;
-      SnackBarManager.showSnackBar(l10n.authenticationFailed);
-      Navigator.of(context).pop();
-      return;
+    } catch (_) {
+      return false;
     }
-    if (mounted) setState(() => _authenticating = false);
+  }
+
+  /// Shows PIN entry dialog. Returns true if correct PIN entered.
+  Future<bool> _showPinDialog(String correctPin) async {
+    final controller = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.enterPin),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          obscureText: true,
+          maxLength: 6,
+          autofocus: true,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: InputDecoration(
+            hintText: l10n.enterPin,
+            counterText: '',
+          ),
+          onSubmitted: (value) {
+            if (value == correctPin) {
+              Navigator.pop(ctx, true);
+            } else {
+              SnackBarManager.showSnackBar(l10n.incorrectPin);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text == correctPin) {
+                Navigator.pop(ctx, true);
+              } else {
+                SnackBarManager.showSnackBar(l10n.incorrectPin);
+              }
+            },
+            child: Text(l10n.yes),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   Future<void> _loadPhotos() async {

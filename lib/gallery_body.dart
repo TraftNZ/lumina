@@ -45,8 +45,6 @@ class GalleryBodyState extends State<GalleryBody>
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
-  PersistentBottomSheetController? _bottomSheetController;
-
   Timer? _autoSyncTimer;
 
   @override
@@ -137,26 +135,15 @@ class GalleryBodyState extends State<GalleryBody>
       }
     });
     stateModel.setSelectionMode(hasSelected);
-
-    if (!hasSelected && _bottomSheetController != null) {
-      _bottomSheetController?.close();
-      _bottomSheetController = null;
-    } else {
-      if (hasSelected && _bottomSheetController == null) {
-        _showBottomSheet(context);
-      }
+    if (!hasSelected) {
+      _selectedIndices.clear();
     }
-
     setState(() {});
   }
 
   void clearSelection() {
     _selectedIndices.clear();
     stateModel.setSelectionMode(false);
-    if (_bottomSheetController != null) {
-      _bottomSheetController?.close();
-      _bottomSheetController = null;
-    }
     setState(() {});
   }
 
@@ -363,44 +350,47 @@ class GalleryBodyState extends State<GalleryBody>
     clearSelection();
   }
 
-  void _showBottomSheet(BuildContext context) {
-    _bottomSheetController = Scaffold.of(context).showBottomSheet(
-      (BuildContext context) {
-        return SizedBox(
-          height: 80,
-          child: Consumer<StateModel>(
-              builder: (context, model, child) => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _bottomSheetIconButton(
-                          Icons.share_outlined, l10n.share, _shareAsset),
-                      _bottomSheetIconButton(Icons.delete_outline, l10n.delete,
-                          () => _showDeleteDialog(context)),
-                      _bottomSheetIconButton(
-                          Icons.lock_outline,
-                          l10n.moveToLockedFolder,
-                          _moveToLockedFolder),
-                      _bottomSheetIconButton(
-                          Icons.cloud_upload_outlined,
-                          l10n.upload,
-                          uploadSelected,
-                          isEnable: !model.isDownloading() &&
-                              !model.isUploading()),
-                      _bottomSheetIconButton(
-                          Icons.cloud_download_outlined,
-                          l10n.download,
-                          downloadSelected,
-                          isEnable: !model.isDownloading() &&
-                              !model.isUploading()),
-                    ],
-                  )),
+  Widget _buildSelectionBar() {
+    return Consumer<StateModel>(
+      builder: (context, model, child) {
+        if (!model.isSelectionMode) return const SizedBox.shrink();
+        return Material(
+          elevation: 3,
+          color: Theme.of(context).colorScheme.surface,
+          child: SizedBox(
+            height: 80,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _selectionBarButton(
+                    Icons.share_outlined, l10n.share, _shareAsset),
+                _selectionBarButton(Icons.delete_outline, l10n.delete,
+                    () => _showDeleteDialog(context)),
+                _selectionBarButton(
+                    Icons.lock_outline,
+                    l10n.moveToLockedFolder,
+                    _moveToLockedFolder),
+                _selectionBarButton(
+                    Icons.cloud_upload_outlined,
+                    l10n.upload,
+                    uploadSelected,
+                    isEnable: !model.isDownloading() &&
+                        !model.isUploading()),
+                _selectionBarButton(
+                    Icons.cloud_download_outlined,
+                    l10n.download,
+                    downloadSelected,
+                    isEnable: !model.isDownloading() &&
+                        !model.isUploading()),
+              ],
+            ),
+          ),
         );
       },
     );
-    _bottomSheetController!.closed.then((value) => clearSelection());
   }
 
-  Widget _bottomSheetIconButton(
+  Widget _selectionBarButton(
       IconData icon, String text, Function()? onTap,
       {bool isEnable = true}) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -918,12 +908,12 @@ class GalleryBodyState extends State<GalleryBody>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return RefreshIndicator(
-      key: _refreshIndicatorKey,
-      onRefresh: refresh,
-      child: Stack(
-        children: [
-          CustomScrollView(
+    return Stack(
+      children: [
+        RefreshIndicator(
+          key: _refreshIndicatorKey,
+          onRefresh: refresh,
+          child: CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
@@ -931,20 +921,26 @@ class GalleryBodyState extends State<GalleryBody>
                 _buildSyncPanel(),
                 Consumer<AssetModel>(builder: contentBuilder),
               ]),
-          Positioned(
-            bottom: 80,
-            right: 20,
-            child: Offstage(
-              offstage: !_showToTopBtn,
-              child: FloatingActionButton.small(
-                onPressed: _scrollToTop,
-                heroTag: 'gallery_body_toTop',
-                child: const Icon(Icons.arrow_upward),
-              ),
+        ),
+        Positioned(
+          bottom: 80,
+          right: 20,
+          child: Offstage(
+            offstage: !_showToTopBtn,
+            child: FloatingActionButton.small(
+              onPressed: _scrollToTop,
+              heroTag: 'gallery_body_toTop',
+              child: const Icon(Icons.arrow_upward),
             ),
           ),
-        ],
-      ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: _buildSelectionBar(),
+        ),
+      ],
     );
   }
 }

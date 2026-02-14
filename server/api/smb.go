@@ -25,7 +25,8 @@ func (a *api) SetDriveSMB(ctx context.Context, req *pb.SetDriveSMBRequest) (rsp 
 		return
 	}
 	s := smb.NewSmbDrive(req.Addr, req.Username, req.Password)
-	a.im.SetDrive(s)
+	configHash := fmt.Sprintf("smb://%s@%s/%s/%s", req.Username, req.Addr, req.Share, req.Root)
+	a.im.SwitchDrive(s, configHash)
 	if req.Share != "" {
 		e := s.SetShare(req.Share)
 		if e != nil {

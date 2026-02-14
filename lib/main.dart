@@ -17,9 +17,9 @@ void main() {
   Global.init().then((e) => runApp(
         MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (context) => settingModel),
-            ChangeNotifierProvider(create: (context) => assetModel),
-            ChangeNotifierProvider(create: (context) => stateModel),
+            ChangeNotifierProvider.value(value: settingModel),
+            ChangeNotifierProvider.value(value: assetModel),
+            ChangeNotifierProvider.value(value: stateModel),
           ],
           child: const MyApp(),
         ),
@@ -100,21 +100,22 @@ class _MyHomePageState extends State<MyHomePage> {
     SnackBarManager.init(context);
     initI18n(context);
     initRequestPermission(context);
-    return Consumer<StateModel>(
-      builder: (context, model, child) => Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              IndexedStack(
-                index: _selectedTab,
-                children: const [
-                  GalleryBody(),
-                  CollectionsBody(),
-                ],
-              ),
-              if (!model.isSelectionMode)
-                Positioned(
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            IndexedStack(
+              index: _selectedTab,
+              children: const [
+                GalleryBody(),
+                CollectionsBody(),
+              ],
+            ),
+            Consumer<StateModel>(
+              builder: (context, model, child) {
+                if (model.isSelectionMode) return const SizedBox.shrink();
+                return Positioned(
                   left: 16,
                   right: 16,
                   bottom: 12,
@@ -126,9 +127,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                   ),
-                ),
-            ],
-          ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

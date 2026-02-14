@@ -25,6 +25,10 @@ service ImgSyncer {
   rpc ListTrash (ListTrashRequest) returns (ListTrashResponse) {}
   rpc RestoreFromTrash (RestoreFromTrashRequest) returns (RestoreFromTrashResponse) {}
   rpc EmptyTrash (EmptyTrashRequest) returns (EmptyTrashResponse) {}
+  // Index management
+  rpc RebuildIndex (RebuildIndexRequest) returns (stream RebuildIndexResponse) {}
+  rpc GetIndexStats (GetIndexStatsRequest) returns (GetIndexStatsResponse) {}
+  rpc ClearThumbnailCache (ClearThumbnailCacheRequest) returns (ClearThumbnailCacheResponse) {}
 }
 
 // enum ContentType {
@@ -203,4 +207,28 @@ message EmptyTrashRequest {}
 message EmptyTrashResponse {
   bool success = 1;
   string message = 2;
+}
+
+message RebuildIndexRequest {}
+message RebuildIndexResponse {
+  bool success = 1;
+  string message = 2;
+  int32 totalFound = 3;
+  bool isFinished = 4;
+}
+
+message GetIndexStatsRequest {}
+message GetIndexStatsResponse {
+  bool success = 1;
+  string message = 2;
+  int64 totalPhotos = 3;
+  int64 cacheSizeBytes = 4;
+  int64 lastIndexTimestamp = 5;
+}
+
+message ClearThumbnailCacheRequest {}
+message ClearThumbnailCacheResponse {
+  bool success = 1;
+  string message = 2;
+  int64 freedBytes = 3;
 }

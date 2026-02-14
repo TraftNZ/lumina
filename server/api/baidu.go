@@ -36,7 +36,8 @@ func (a *api) SetDriveBaiduNetDisk(ctx context.Context, req *pb.SetDriveBaiduNet
 	if req.TmpDir != "" {
 		d.SetTmpDir(req.TmpDir)
 	}
-	a.im.SetDrive(d)
+	configHash := fmt.Sprintf("baidu://%s", req.RefreshToken[:16])
+	a.im.SwitchDrive(d, configHash)
 	return
 }
 
@@ -133,6 +134,7 @@ func (a *api) httpBaiduCallback(w http.ResponseWriter, r *http.Request) {
 	loginRsp.RefreshToken = auth.RefreshToken
 	loginRsp.AccessToken = auth.AccessToken
 	loginRsp.ExiresAt = int64(auth.ExpiresIn) + time.Now().Unix()
-	a.im.SetDrive(d)
+	configHash := fmt.Sprintf("baidu://%s", auth.RefreshToken[:16])
+	a.im.SwitchDrive(d, configHash)
 	w.Write(login_success_html.Html)
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/fregie/img_syncer/server/api"
 	"github.com/fregie/img_syncer/server/imgmanager"
+	"github.com/fregie/img_syncer/server/localstore"
 	_ "golang.org/x/mobile/bind"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -21,8 +22,19 @@ var (
 	imgManager *imgmanager.ImgManager
 )
 
-func RunGrpcServer() (string, error) {
-	imgManager = imgmanager.NewImgManager(imgmanager.Option{})
+func RunGrpcServer(dataDir, cacheDir string) (string, error) {
+	opt := imgmanager.Option{}
+
+	if dataDir != "" && cacheDir != "" {
+		store, err := localstore.New(dataDir, cacheDir)
+		if err != nil {
+			Info.Printf("Failed to create local store (continuing without): %v", err)
+		} else {
+			opt.LocalStore = store
+		}
+	}
+
+	imgManager = imgmanager.NewImgManager(opt)
 	var grpcLis, httpLis net.Listener
 	var err error
 	var grpcPort, httpPort int

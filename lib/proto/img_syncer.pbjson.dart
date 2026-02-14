@@ -558,3 +558,89 @@ const EmptyTrashResponse$json = {
 final $typed_data.Uint8List emptyTrashResponseDescriptor = $convert.base64Decode(
     'ChJFbXB0eVRyYXNoUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZXNzYW'
     'dlGAIgASgJUgdtZXNzYWdl');
+
+@$core.Deprecated('Use rebuildIndexRequestDescriptor instead')
+const RebuildIndexRequest$json = {
+  '1': 'RebuildIndexRequest',
+};
+
+/// Descriptor for `RebuildIndexRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rebuildIndexRequestDescriptor =
+    $convert.base64Decode('ChNSZWJ1aWxkSW5kZXhSZXF1ZXN0');
+
+@$core.Deprecated('Use rebuildIndexResponseDescriptor instead')
+const RebuildIndexResponse$json = {
+  '1': 'RebuildIndexResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'totalFound', '3': 3, '4': 1, '5': 5, '10': 'totalFound'},
+    {'1': 'isFinished', '3': 4, '4': 1, '5': 8, '10': 'isFinished'},
+  ],
+};
+
+/// Descriptor for `RebuildIndexResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rebuildIndexResponseDescriptor = $convert.base64Decode(
+    'ChRSZWJ1aWxkSW5kZXhSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB21lc3'
+    'NhZ2UYAiABKAlSB21lc3NhZ2USHgoKdG90YWxGb3VuZBgDIAEoBVIKdG90YWxGb3VuZBIeCgpp'
+    'c0ZpbmlzaGVkGAQgASgIUgppc0ZpbmlzaGVk');
+
+@$core.Deprecated('Use getIndexStatsRequestDescriptor instead')
+const GetIndexStatsRequest$json = {
+  '1': 'GetIndexStatsRequest',
+};
+
+/// Descriptor for `GetIndexStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getIndexStatsRequestDescriptor =
+    $convert.base64Decode('ChRHZXRJbmRleFN0YXRzUmVxdWVzdA==');
+
+@$core.Deprecated('Use getIndexStatsResponseDescriptor instead')
+const GetIndexStatsResponse$json = {
+  '1': 'GetIndexStatsResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'totalPhotos', '3': 3, '4': 1, '5': 3, '10': 'totalPhotos'},
+    {'1': 'cacheSizeBytes', '3': 4, '4': 1, '5': 3, '10': 'cacheSizeBytes'},
+    {
+      '1': 'lastIndexTimestamp',
+      '3': 5,
+      '4': 1,
+      '5': 3,
+      '10': 'lastIndexTimestamp'
+    },
+  ],
+};
+
+/// Descriptor for `GetIndexStatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getIndexStatsResponseDescriptor = $convert.base64Decode(
+    'ChVHZXRJbmRleFN0YXRzUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZX'
+    'NzYWdlGAIgASgJUgdtZXNzYWdlEiAKC3RvdGFsUGhvdG9zGAMgASgDUgt0b3RhbFBob3RvcxIm'
+    'Cg5jYWNoZVNpemVCeXRlcxgEIAEoA1IOY2FjaGVTaXplQnl0ZXMSLgoSbGFzdEluZGV4VGltZX'
+    'N0YW1wGAUgASgDUhJsYXN0SW5kZXhUaW1lc3RhbXA=');
+
+@$core.Deprecated('Use clearThumbnailCacheRequestDescriptor instead')
+const ClearThumbnailCacheRequest$json = {
+  '1': 'ClearThumbnailCacheRequest',
+};
+
+/// Descriptor for `ClearThumbnailCacheRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List clearThumbnailCacheRequestDescriptor =
+    $convert.base64Decode('ChpDbGVhclRodW1ibmFpbENhY2hlUmVxdWVzdA==');
+
+@$core.Deprecated('Use clearThumbnailCacheResponseDescriptor instead')
+const ClearThumbnailCacheResponse$json = {
+  '1': 'ClearThumbnailCacheResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'freedBytes', '3': 3, '4': 1, '5': 3, '10': 'freedBytes'},
+  ],
+};
+
+/// Descriptor for `ClearThumbnailCacheResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List clearThumbnailCacheResponseDescriptor =
+    $convert.base64Decode(
+        'ChtDbGVhclRodW1ibmFpbENhY2hlUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2Vzcx'
+        'IYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlEh4KCmZyZWVkQnl0ZXMYAyABKANSCmZyZWVkQnl0'
+        'ZXM=');

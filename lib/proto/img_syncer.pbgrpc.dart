@@ -157,6 +157,30 @@ class ImgSyncerClient extends $grpc.Client {
     return $createUnaryCall(_$emptyTrash, request, options: options);
   }
 
+  /// Index management
+  $grpc.ResponseStream<$0.RebuildIndexResponse> rebuildIndex(
+    $0.RebuildIndexRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$rebuildIndex, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$0.GetIndexStatsResponse> getIndexStats(
+    $0.GetIndexStatsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getIndexStats, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ClearThumbnailCacheResponse> clearThumbnailCache(
+    $0.ClearThumbnailCacheRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$clearThumbnailCache, request, options: options);
+  }
+
   // method descriptors
 
   static final _$listByDate =
@@ -244,6 +268,21 @@ class ImgSyncerClient extends $grpc.Client {
           '/img_syncer.ImgSyncer/EmptyTrash',
           ($0.EmptyTrashRequest value) => value.writeToBuffer(),
           $0.EmptyTrashResponse.fromBuffer);
+  static final _$rebuildIndex =
+      $grpc.ClientMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
+          '/img_syncer.ImgSyncer/RebuildIndex',
+          ($0.RebuildIndexRequest value) => value.writeToBuffer(),
+          $0.RebuildIndexResponse.fromBuffer);
+  static final _$getIndexStats =
+      $grpc.ClientMethod<$0.GetIndexStatsRequest, $0.GetIndexStatsResponse>(
+          '/img_syncer.ImgSyncer/GetIndexStats',
+          ($0.GetIndexStatsRequest value) => value.writeToBuffer(),
+          $0.GetIndexStatsResponse.fromBuffer);
+  static final _$clearThumbnailCache = $grpc.ClientMethod<
+          $0.ClearThumbnailCacheRequest, $0.ClearThumbnailCacheResponse>(
+      '/img_syncer.ImgSyncer/ClearThumbnailCache',
+      ($0.ClearThumbnailCacheRequest value) => value.writeToBuffer(),
+      $0.ClearThumbnailCacheResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('img_syncer.ImgSyncer')
@@ -396,6 +435,33 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.EmptyTrashRequest.fromBuffer(value),
         ($0.EmptyTrashResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
+            'RebuildIndex',
+            rebuildIndex_Pre,
+            false,
+            true,
+            ($core.List<$core.int> value) =>
+                $0.RebuildIndexRequest.fromBuffer(value),
+            ($0.RebuildIndexResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.GetIndexStatsRequest, $0.GetIndexStatsResponse>(
+            'GetIndexStats',
+            getIndexStats_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.GetIndexStatsRequest.fromBuffer(value),
+            ($0.GetIndexStatsResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ClearThumbnailCacheRequest,
+            $0.ClearThumbnailCacheResponse>(
+        'ClearThumbnailCache',
+        clearThumbnailCache_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.ClearThumbnailCacheRequest.fromBuffer(value),
+        ($0.ClearThumbnailCacheResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall $call,
@@ -538,4 +604,31 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
 
   $async.Future<$0.EmptyTrashResponse> emptyTrash(
       $grpc.ServiceCall call, $0.EmptyTrashRequest request);
+
+  $async.Stream<$0.RebuildIndexResponse> rebuildIndex_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.RebuildIndexRequest> $request) async* {
+    yield* rebuildIndex($call, await $request);
+  }
+
+  $async.Stream<$0.RebuildIndexResponse> rebuildIndex(
+      $grpc.ServiceCall call, $0.RebuildIndexRequest request);
+
+  $async.Future<$0.GetIndexStatsResponse> getIndexStats_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetIndexStatsRequest> $request) async {
+    return getIndexStats($call, await $request);
+  }
+
+  $async.Future<$0.GetIndexStatsResponse> getIndexStats(
+      $grpc.ServiceCall call, $0.GetIndexStatsRequest request);
+
+  $async.Future<$0.ClearThumbnailCacheResponse> clearThumbnailCache_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ClearThumbnailCacheRequest> $request) async {
+    return clearThumbnailCache($call, await $request);
+  }
+
+  $async.Future<$0.ClearThumbnailCacheResponse> clearThumbnailCache(
+      $grpc.ServiceCall call, $0.ClearThumbnailCacheRequest request);
 }

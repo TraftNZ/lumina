@@ -610,6 +610,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove from Locked Folder'**
   String get removeFromLockedFolder;
+
+  /// No description provided for @lockedFolderPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked Folder PIN'**
+  String get lockedFolderPin;
+
+  /// No description provided for @lockedFolderPinDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a PIN for the Locked Folder when biometrics are unavailable'**
+  String get lockedFolderPinDescription;
+
+  /// No description provided for @setPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set PIN'**
+  String get setPin;
+
+  /// No description provided for @changePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get changePin;
+
+  /// No description provided for @removePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove PIN'**
+  String get removePin;
+
+  /// No description provided for @enterPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN'**
+  String get enterPin;
+
+  /// No description provided for @enterNewPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new PIN'**
+  String get enterNewPin;
+
+  /// No description provided for @confirmPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm PIN'**
+  String get confirmPin;
+
+  /// No description provided for @pinSet.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN has been set'**
+  String get pinSet;
+
+  /// No description provided for @pinRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN has been removed'**
+  String get pinRemoved;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match'**
+  String get pinMismatch;
+
+  /// No description provided for @incorrectPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN'**
+  String get incorrectPin;
+
+  /// No description provided for @pinRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please set a Locked Folder PIN in Settings first'**
+  String get pinRequired;
+
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @thumbnailCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail cache'**
+  String get thumbnailCache;
+
+  /// No description provided for @clearCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear cache'**
+  String get clearCache;
+
+  /// No description provided for @cacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache cleared, freed {size}'**
+  String cacheCleared(String size);
+
+  /// No description provided for @rebuildIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild photo index'**
+  String get rebuildIndex;
+
+  /// No description provided for @rebuildingIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilding index...'**
+  String get rebuildingIndex;
+
+  /// No description provided for @indexRebuilt.
+  ///
+  /// In en, this message translates to:
+  /// **'Index rebuilt: {count} photos indexed'**
+  String indexRebuilt(int count);
+
+  /// No description provided for @cacheManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache'**
+  String get cacheManagement;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

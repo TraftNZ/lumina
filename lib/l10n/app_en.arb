@@ -105,5 +105,40 @@
   "authenticate": "Authenticate",
   "authenticationFailed": "Authentication failed",
   "moveToLockedFolder": "Move to Locked Folder",
-  "removeFromLockedFolder": "Remove from Locked Folder"
+  "removeFromLockedFolder": "Remove from Locked Folder",
+  "lockedFolderPin": "Locked Folder PIN",
+  "lockedFolderPinDescription": "Set a PIN for the Locked Folder when biometrics are unavailable",
+  "setPin": "Set PIN",
+  "changePin": "Change PIN",
+  "removePin": "Remove PIN",
+  "enterPin": "Enter PIN",
+  "enterNewPin": "Enter new PIN",
+  "confirmPin": "Confirm PIN",
+  "pinSet": "PIN has been set",
+  "pinRemoved": "PIN has been removed",
+  "pinMismatch": "PINs do not match",
+  "incorrectPin": "Incorrect PIN",
+  "pinRequired": "Please set a Locked Folder PIN in Settings first",
+  "security": "Security",
+  "thumbnailCache": "Thumbnail cache",
+  "clearCache": "Clear cache",
+  "cacheCleared": "Cache cleared, freed {size}",
+  "@cacheCleared": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "rebuildIndex": "Rebuild photo index",
+  "rebuildingIndex": "Rebuilding index...",
+  "indexRebuilt": "Index rebuilt: {count} photos indexed",
+  "@indexRebuilt": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cacheManagement": "Cache"
 }

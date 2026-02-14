@@ -1,10 +1,14 @@
-BUILD_VERSION   := $(shell git describe --tags)
+BUILD_VERSION   := $(shell git describe --tags 2>/dev/null || echo "dev")
 GIT_COMMIT_SHA1 := $(shell git rev-parse HEAD)
 BUILD_TIME      := $(shell date "+%F %T")
 BUILD_NAME      := img_syncer_server
 VERSION_PACKAGE_NAME := github.com/fregie/PrintVersion
+GOPATH          := $(shell go env GOPATH)
+export PATH     := $(GOPATH)/bin:$(HOME)/.pub-cache/bin:$(PATH)
 
 DESCRIBE := img_syncer grpc server
+
+.DEFAULT_GOAL := server-aar
 
 prebuild:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -25,6 +29,10 @@ server:
 		-X '${VERSION_PACKAGE_NAME}.Describe=${DESCRIBE}' \
 		-X '${VERSION_PACKAGE_NAME}.Name=${BUILD_NAME}'" \
     -o server/output/${BUILD_NAME} ./server
+
+server-mobile: protobuf
+	CGO_ENABLED=0 gomobile bind -target=android -androidapi 24 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run
+	CGO_ENABLED=0 gomobile bind -target=ios -ldflags "-s -w" -o ios/Frameworks/RUN.xcframework ./server/run
 
 server-aar: protobuf
 	CGO_ENABLED=0 gomobile bind -target=android -androidapi 24 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -92,13 +93,25 @@ func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		dateTime = time.Now()
 	}
-	err = a.im.UploadImg(nil, r.Body, 0, length, encodeName(dateTime, name), dateTime)
+	thumbData, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
 	r.Body.Close()
+	_ = length
+	encodedName := encodeName(dateTime, name)
+	err = a.im.UploadImg(nil, bytes.NewReader(thumbData), 0, int64(len(thumbData)), encodedName, dateTime)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if store := a.im.Store(); store != nil {
+		thumbPath := filepath.Join(dateTime.Format("2006/01/02"), encodedName)
+		go store.PutThumb(thumbPath, thumbData)
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -182,22 +195,16 @@ func (a *api) httpDownloadThumbnail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	realPath := strings.TrimPrefix(path, "/thumbnail")
-	img, err := a.im.GetThumbnail(realPath)
+	data, err := a.im.GetCachedThumbnail(realPath)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
 	contentType := mime.TypeByExtension(filepath.Ext(realPath))
-	defer img.Content.Close()
-	w.Header().Add("Content-Length", strconv.FormatInt(img.Size, 10))
-	w.Header().Add("Content-Type", contentType)
-	w.WriteHeader(http.StatusOK)
-	_, err = io.Copy(w, img.Content)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	w.Header().Set("Content-Type", contentType)
+	w.Write(data)
 }
 
 func (a *api) httpDownloadTrashThumbnail(w http.ResponseWriter, r *http.Request) {

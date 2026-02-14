@@ -8,7 +8,7 @@ require (
 	github.com/fregie/PrintVersion v0.1.0
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.10.0
 	github.com/studio-b12/gowebdav v0.12.0
 	github.com/vmware/go-nfs-client v0.0.0-20190605212624-d43b92724c1b
 	golang.org/x/mobile v0.0.0-20260211191516-dcd2a3258864

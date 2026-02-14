@@ -13,7 +13,10 @@ import RUN
     batteryChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         var error: NSError? = nil
-        let ports = RunRunGrpcServer(&error)
+        let args = call.arguments as? [String: Any]
+        let dataDir = args?["dataDir"] as? String ?? ""
+        let cacheDir = args?["cacheDir"] as? String ?? ""
+        let ports = RunRunGrpcServer(dataDir, cacheDir, &error)
         result(ports)
     })
 

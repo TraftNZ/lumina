@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/Workiva/go-datastructures/queue"
+	"github.com/fregie/img_syncer/server/localstore"
 	"github.com/nfnt/resize"
 )
 
@@ -28,6 +29,7 @@ const (
 	defaultThumbnailDir       = ".thumbnail"
 	defaultTrashDir           = ".trash"
 	trashAutoDeleteDays       = 30
+	syncMarkerFile            = ".sync_marker"
 )
 
 type TrashItem struct {
@@ -42,6 +44,7 @@ type ImgManager struct {
 	actQueue *queue.Queue
 	logger   *log.Logger
 	opt      Option
+	store    *localstore.LocalStore
 }
 
 type Option struct {
@@ -49,6 +52,7 @@ type Option struct {
 	ThumbnailMaxWidth  int
 	ThumbnailMaxHeight int
 	ThumbbailQuality   int
+	LocalStore         *localstore.LocalStore
 }
 
 func NewImgManager(opt Option) *ImgManager {
@@ -66,6 +70,7 @@ func NewImgManager(opt Option) *ImgManager {
 		logger:   log.New(os.Stdout, "[ImgManager] ", log.LstdFlags),
 		opt:      opt,
 		dri:      &UnimplementedDrive{},
+		store:    opt.LocalStore,
 	}
 	for i := 0; i < im.opt.WorkerNum; i++ {
 		go im.runWorker()
@@ -73,8 +78,21 @@ func NewImgManager(opt Option) *ImgManager {
 	return im
 }
 
+func (im *ImgManager) Store() *localstore.LocalStore {
+	return im.store
+}
+
 func (im *ImgManager) SetDrive(dri StorageDrive) {
 	im.dri = dri
+}
+
+func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
+	im.dri = dri
+	if im.store != nil {
+		if err := im.store.SwitchDrive(configHash); err != nil {
+			im.logger.Printf("Failed to switch drive store: %v", err)
+		}
+	}
 }
 
 func (im *ImgManager) Drive() StorageDrive {
@@ -137,8 +155,6 @@ func (im *ImgManager) GenerateThumbnail(path string, content []byte) error {
 		imghdl, err = jpeg.Decode(bytes.NewReader(content))
 	case PngSuffix:
 		imghdl, err = png.Decode(bytes.NewReader(content))
-	// case DngSuffix:
-	// 	imghdl, err = dng.Decode(bytes.NewReader(content))
 	default:
 		return fmt.Errorf("unsupported image format: %s", filepath.Ext(path))
 	}
@@ -206,6 +222,12 @@ func (im *ImgManager) UploadVideo(content, thumbnailContent io.Reader, contentSi
 		}
 	}()
 	wg.Wait()
+	if err == nil && im.store != nil {
+		im.store.IndexPhoto(path, filepath.Base(path), contentSize)
+	}
+	if err == nil {
+		go im.WriteSyncMarker()
+	}
 	return err
 }
 
@@ -268,13 +290,15 @@ func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize
 	}
 	path := filepath.Join(date.Format("2006/01/02"), name)
 	var err error
-	// TODO: check if file exist
 	if len(data) > 0 {
 		err = im.dri.Upload(path,
 			io.NopCloser(bytes.NewReader(data)), int64(len(data)), date)
 		if err != nil {
 			im.logger.Println("Error uploading image:", err)
 			return err
+		}
+		if im.store != nil {
+			im.store.IndexPhoto(path, filepath.Base(path), int64(len(data)))
 		}
 	}
 	if len(thumbData) > 0 {
@@ -285,6 +309,7 @@ func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize
 			return err
 		}
 	}
+	go im.WriteSyncMarker()
 	return nil
 }
 
@@ -322,10 +347,40 @@ func (im *ImgManager) GetThumbnail(path string) (*Image, error) {
 	return img, nil
 }
 
-func (im *ImgManager) DeleteSingleImg(path string) error {
-	if path != "" {
-		return im.dri.Delete(path)
+func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
+	if im.store != nil {
+		if data, err := im.store.GetThumb(path); err == nil {
+			return data, nil
+		}
 	}
+	img, err := im.GetThumbnail(path)
+	if err != nil {
+		return nil, err
+	}
+	defer img.Content.Close()
+	data, err := io.ReadAll(img.Content)
+	if err != nil {
+		return nil, err
+	}
+	if im.store != nil {
+		go im.store.PutThumb(path, data)
+	}
+	return data, nil
+}
+
+func (im *ImgManager) DeleteSingleImg(path string) error {
+	if path == "" {
+		return nil
+	}
+	err := im.dri.Delete(path)
+	if err != nil {
+		return err
+	}
+	if im.store != nil {
+		im.store.RemovePhoto(path)
+		im.store.RemoveThumb(path)
+	}
+	go im.WriteSyncMarker()
 	return nil
 }
 
@@ -339,6 +394,10 @@ func (im *ImgManager) DeleteImg(paths []string) {
 	for _, path := range paths {
 		if path != "" {
 			im.DeleteSingleImgAsync(path)
+			if im.store != nil {
+				im.store.RemovePhoto(path)
+				im.store.RemoveThumb(path)
+			}
 		}
 	}
 }
@@ -419,6 +478,71 @@ BREAK:
 	return nil
 }
 
+func (im *ImgManager) WriteSyncMarker() {
+	marker := fmt.Sprintf("%d", time.Now().UnixNano())
+	content := []byte(marker)
+	err := im.dri.Upload(syncMarkerFile,
+		io.NopCloser(bytes.NewReader(content)),
+		int64(len(content)), time.Time{})
+	if err != nil {
+		im.logger.Printf("Failed to write sync marker: %v", err)
+		return
+	}
+	if im.store != nil {
+		im.store.SetLastSeenMarker(marker)
+	}
+}
+
+func (im *ImgManager) ReadSyncMarker() (string, error) {
+	rc, _, err := im.dri.Download(syncMarkerFile)
+	if err != nil {
+		return "", err
+	}
+	defer rc.Close()
+	data, err := io.ReadAll(rc)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(data)), nil
+}
+
+func (im *ImgManager) CheckMarkerChanged() (bool, error) {
+	if im.store == nil {
+		return true, nil
+	}
+	remote, err := im.ReadSyncMarker()
+	if err != nil {
+		return true, nil
+	}
+	local := im.store.GetLastSeenMarker()
+	if local == "" {
+		return true, nil
+	}
+	return remote != local, nil
+}
+
+func (im *ImgManager) RebuildIndex(progressCb func(found int)) error {
+	if im.store == nil {
+		return fmt.Errorf("local store not available")
+	}
+	err := im.store.RebuildFromRemote(func(cb func(path string, filename string, size int64) bool) error {
+		return im.RangeByDate(time.Now(), func(path string, size int64) bool {
+			return cb(path, filepath.Base(path), size)
+		})
+	}, progressCb)
+	if err != nil {
+		return err
+	}
+	marker, err := im.ReadSyncMarker()
+	if err != nil {
+		// No marker exists yet — write one so future syncs use the fast path
+		im.WriteSyncMarker()
+	} else {
+		im.store.SetLastSeenMarker(marker)
+	}
+	return nil
+}
+
 func (im *ImgManager) listDir(path string) ([]fs.FileInfo, error) {
 	infos := make([]fs.FileInfo, 0)
 	err := im.dri.Range(path, func(info fs.FileInfo) bool {
@@ -437,6 +561,12 @@ func (im *ImgManager) MoveToTrash(path string) error {
 	thumbPath := filepath.Join(defaultThumbnailDir, path)
 	trashThumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
 	_ = im.dri.Rename(thumbPath, trashThumbPath)
+
+	if im.store != nil {
+		im.store.RemovePhoto(path)
+		im.store.RemoveThumb(path)
+	}
+	go im.WriteSyncMarker()
 	return nil
 }
 
@@ -451,6 +581,20 @@ func (im *ImgManager) RestoreFromTrash(trashPath string) error {
 	trashThumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, trashPath)
 	thumbPath := filepath.Join(defaultThumbnailDir, trashPath)
 	_ = im.dri.Rename(trashThumbPath, thumbPath)
+
+	if im.store != nil {
+		// Try to get file size from the restored file
+		var size int64
+		im.dri.Range(filepath.Dir(originalPath), func(info fs.FileInfo) bool {
+			if info.Name() == filepath.Base(originalPath) {
+				size = info.Size()
+				return false
+			}
+			return true
+		})
+		im.store.IndexPhoto(originalPath, filepath.Base(originalPath), size)
+	}
+	go im.WriteSyncMarker()
 	return nil
 }
 

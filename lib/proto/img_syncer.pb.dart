@@ -2485,6 +2485,399 @@ class EmptyTrashResponse extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(2);
 }
 
+class RebuildIndexRequest extends $pb.GeneratedMessage {
+  factory RebuildIndexRequest() => create();
+
+  RebuildIndexRequest._();
+
+  factory RebuildIndexRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RebuildIndexRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RebuildIndexRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RebuildIndexRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RebuildIndexRequest copyWith(void Function(RebuildIndexRequest) updates) =>
+      super.copyWith((message) => updates(message as RebuildIndexRequest))
+          as RebuildIndexRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RebuildIndexRequest create() => RebuildIndexRequest._();
+  @$core.override
+  RebuildIndexRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RebuildIndexRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RebuildIndexRequest>(create);
+  static RebuildIndexRequest? _defaultInstance;
+}
+
+class RebuildIndexResponse extends $pb.GeneratedMessage {
+  factory RebuildIndexResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.int? totalFound,
+    $core.bool? isFinished,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (totalFound != null) result.totalFound = totalFound;
+    if (isFinished != null) result.isFinished = isFinished;
+    return result;
+  }
+
+  RebuildIndexResponse._();
+
+  factory RebuildIndexResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RebuildIndexResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RebuildIndexResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aI(3, _omitFieldNames ? '' : 'totalFound', protoName: 'totalFound')
+    ..aOB(4, _omitFieldNames ? '' : 'isFinished', protoName: 'isFinished')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RebuildIndexResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RebuildIndexResponse copyWith(void Function(RebuildIndexResponse) updates) =>
+      super.copyWith((message) => updates(message as RebuildIndexResponse))
+          as RebuildIndexResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RebuildIndexResponse create() => RebuildIndexResponse._();
+  @$core.override
+  RebuildIndexResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RebuildIndexResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RebuildIndexResponse>(create);
+  static RebuildIndexResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get totalFound => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set totalFound($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTotalFound() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotalFound() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isFinished => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isFinished($core.bool value) => $_setBool(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasIsFinished() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsFinished() => $_clearField(4);
+}
+
+class GetIndexStatsRequest extends $pb.GeneratedMessage {
+  factory GetIndexStatsRequest() => create();
+
+  GetIndexStatsRequest._();
+
+  factory GetIndexStatsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetIndexStatsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetIndexStatsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetIndexStatsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetIndexStatsRequest copyWith(void Function(GetIndexStatsRequest) updates) =>
+      super.copyWith((message) => updates(message as GetIndexStatsRequest))
+          as GetIndexStatsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetIndexStatsRequest create() => GetIndexStatsRequest._();
+  @$core.override
+  GetIndexStatsRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetIndexStatsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetIndexStatsRequest>(create);
+  static GetIndexStatsRequest? _defaultInstance;
+}
+
+class GetIndexStatsResponse extends $pb.GeneratedMessage {
+  factory GetIndexStatsResponse({
+    $core.bool? success,
+    $core.String? message,
+    $fixnum.Int64? totalPhotos,
+    $fixnum.Int64? cacheSizeBytes,
+    $fixnum.Int64? lastIndexTimestamp,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (totalPhotos != null) result.totalPhotos = totalPhotos;
+    if (cacheSizeBytes != null) result.cacheSizeBytes = cacheSizeBytes;
+    if (lastIndexTimestamp != null)
+      result.lastIndexTimestamp = lastIndexTimestamp;
+    return result;
+  }
+
+  GetIndexStatsResponse._();
+
+  factory GetIndexStatsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetIndexStatsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetIndexStatsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aInt64(3, _omitFieldNames ? '' : 'totalPhotos', protoName: 'totalPhotos')
+    ..aInt64(4, _omitFieldNames ? '' : 'cacheSizeBytes',
+        protoName: 'cacheSizeBytes')
+    ..aInt64(5, _omitFieldNames ? '' : 'lastIndexTimestamp',
+        protoName: 'lastIndexTimestamp')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetIndexStatsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetIndexStatsResponse copyWith(
+          void Function(GetIndexStatsResponse) updates) =>
+      super.copyWith((message) => updates(message as GetIndexStatsResponse))
+          as GetIndexStatsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetIndexStatsResponse create() => GetIndexStatsResponse._();
+  @$core.override
+  GetIndexStatsResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetIndexStatsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetIndexStatsResponse>(create);
+  static GetIndexStatsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get totalPhotos => $_getI64(2);
+  @$pb.TagNumber(3)
+  set totalPhotos($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTotalPhotos() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotalPhotos() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get cacheSizeBytes => $_getI64(3);
+  @$pb.TagNumber(4)
+  set cacheSizeBytes($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasCacheSizeBytes() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCacheSizeBytes() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get lastIndexTimestamp => $_getI64(4);
+  @$pb.TagNumber(5)
+  set lastIndexTimestamp($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasLastIndexTimestamp() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearLastIndexTimestamp() => $_clearField(5);
+}
+
+class ClearThumbnailCacheRequest extends $pb.GeneratedMessage {
+  factory ClearThumbnailCacheRequest() => create();
+
+  ClearThumbnailCacheRequest._();
+
+  factory ClearThumbnailCacheRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ClearThumbnailCacheRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ClearThumbnailCacheRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ClearThumbnailCacheRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ClearThumbnailCacheRequest copyWith(
+          void Function(ClearThumbnailCacheRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as ClearThumbnailCacheRequest))
+          as ClearThumbnailCacheRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ClearThumbnailCacheRequest create() => ClearThumbnailCacheRequest._();
+  @$core.override
+  ClearThumbnailCacheRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ClearThumbnailCacheRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ClearThumbnailCacheRequest>(create);
+  static ClearThumbnailCacheRequest? _defaultInstance;
+}
+
+class ClearThumbnailCacheResponse extends $pb.GeneratedMessage {
+  factory ClearThumbnailCacheResponse({
+    $core.bool? success,
+    $core.String? message,
+    $fixnum.Int64? freedBytes,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (freedBytes != null) result.freedBytes = freedBytes;
+    return result;
+  }
+
+  ClearThumbnailCacheResponse._();
+
+  factory ClearThumbnailCacheResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ClearThumbnailCacheResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ClearThumbnailCacheResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aInt64(3, _omitFieldNames ? '' : 'freedBytes', protoName: 'freedBytes')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ClearThumbnailCacheResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ClearThumbnailCacheResponse copyWith(
+          void Function(ClearThumbnailCacheResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as ClearThumbnailCacheResponse))
+          as ClearThumbnailCacheResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ClearThumbnailCacheResponse create() =>
+      ClearThumbnailCacheResponse._();
+  @$core.override
+  ClearThumbnailCacheResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ClearThumbnailCacheResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ClearThumbnailCacheResponse>(create);
+  static ClearThumbnailCacheResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get freedBytes => $_getI64(2);
+  @$pb.TagNumber(3)
+  set freedBytes($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFreedBytes() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFreedBytes() => $_clearField(3);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

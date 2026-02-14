@@ -69,6 +69,58 @@ func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.Delete
 }
 
 func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) error {
+	store := a.im.Store()
+	if store == nil || store.IsEmpty() {
+		return a.filterNotUploadedLegacy(stream)
+	}
+
+	// Check if remote has changed since last rebuild
+	changed, _ := a.im.CheckMarkerChanged()
+	if changed {
+		go func() {
+			a.im.RebuildIndex(nil)
+		}()
+		return a.filterNotUploadedLegacy(stream)
+	}
+
+	for {
+		r, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		filenames := make([]string, 0, len(r.Photos))
+		infoMap := make(map[string]string) // encodedName -> assetId
+		for _, info := range r.Photos {
+			t, err := time.Parse("2006:01:02 15:04:05", info.Date)
+			if err != nil {
+				continue
+			}
+			encoded := encodeName(t, info.Name)
+			filenames = append(filenames, encoded)
+			infoMap[encoded] = info.Id
+		}
+		exists := store.BatchExistsByFilename(filenames)
+		rsp := &pb.FilterNotUploadedResponse{Success: true, IsFinished: r.IsFinished}
+		rsp.NotUploaedIDs = make([]string, 0)
+		for _, name := range filenames {
+			if !exists[name] {
+				rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, infoMap[name])
+			}
+		}
+		if err := stream.Send(rsp); err != nil {
+			return err
+		}
+		if rsp.IsFinished {
+			break
+		}
+	}
+	return nil
+}
+
+func (a *api) filterNotUploadedLegacy(stream pb.ImgSyncer_FilterNotUploadedServer) error {
 	all := make(map[string]bool)
 	a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
 		name := filepath.Base(path)
@@ -103,31 +155,6 @@ func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) err
 	}
 	return nil
 }
-
-// func (a *api) FilterNotUploaded(ctx context.Context, req *pb.FilterNotUploadedRequest) (rsp *pb.FilterNotUploadedResponse, err error) {
-// 	rsp = &pb.FilterNotUploadedResponse{Success: true}
-// 	if len(req.Photos) == 0 {
-// 		rsp.Success, rsp.Message = false, "param error: names is empty"
-// 		return
-// 	}
-// 	all := make(map[string]bool)
-// 	a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
-// 		name := filepath.Base(path)
-// 		all[name] = true
-// 		return true
-// 	})
-// 	rsp.NotUploaedIDs = make([]string, 0, 100)
-// 	for _, info := range req.Photos {
-// 		t, err := time.Parse("2006:01:02 15:04:05", info.Date)
-// 		if err != nil {
-// 			continue
-// 		}
-// 		if !all[encodeName(t, info.Name)] {
-// 			rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, info.Id)
-// 		}
-// 	}
-// 	return
-// }
 
 func (a *api) MoveToTrash(ctx context.Context, req *pb.MoveToTrashRequest) (rsp *pb.MoveToTrashResponse, err error) {
 	rsp = &pb.MoveToTrashResponse{Success: true}
@@ -179,6 +206,60 @@ func (a *api) EmptyTrash(ctx context.Context, req *pb.EmptyTrashRequest) (rsp *p
 		rsp.Success = false
 		rsp.Message = e.Error()
 	}
+	return
+}
+
+func (a *api) RebuildIndex(req *pb.RebuildIndexRequest, stream pb.ImgSyncer_RebuildIndexServer) error {
+	err := a.im.RebuildIndex(func(found int) {
+		stream.Send(&pb.RebuildIndexResponse{
+			Success:    true,
+			TotalFound: int32(found),
+		})
+	})
+	if err != nil {
+		stream.Send(&pb.RebuildIndexResponse{
+			Success:    false,
+			Message:    err.Error(),
+			IsFinished: true,
+		})
+		return nil
+	}
+	store := a.im.Store()
+	var total int32
+	if store != nil {
+		total = int32(store.PhotoCount())
+	}
+	stream.Send(&pb.RebuildIndexResponse{
+		Success:    true,
+		TotalFound: total,
+		IsFinished: true,
+	})
+	return nil
+}
+
+func (a *api) GetIndexStats(ctx context.Context, req *pb.GetIndexStatsRequest) (rsp *pb.GetIndexStatsResponse, err error) {
+	rsp = &pb.GetIndexStatsResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		rsp.Message = "local store not available"
+		return
+	}
+	rsp.TotalPhotos = store.PhotoCount()
+	rsp.CacheSizeBytes = store.CacheSizeBytes()
+	rsp.LastIndexTimestamp = store.LastIndexTimestamp()
+	return
+}
+
+func (a *api) ClearThumbnailCache(ctx context.Context, req *pb.ClearThumbnailCacheRequest) (rsp *pb.ClearThumbnailCacheResponse, err error) {
+	rsp = &pb.ClearThumbnailCacheResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		rsp.Message = "local store not available"
+		return
+	}
+	rsp.FreedBytes = store.ClearAllThumbs()
 	return
 }
 

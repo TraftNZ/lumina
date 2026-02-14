@@ -277,4 +277,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeFromLockedFolder => 'Remove from Locked Folder';
+
+  @override
+  String get lockedFolderPin => 'Locked Folder PIN';
+
+  @override
+  String get lockedFolderPinDescription => 'Set a PIN for the Locked Folder when biometrics are unavailable';
+
+  @override
+  String get setPin => 'Set PIN';
+
+  @override
+  String get changePin => 'Change PIN';
+
+  @override
+  String get removePin => 'Remove PIN';
+
+  @override
+  String get enterPin => 'Enter PIN';
+
+  @override
+  String get enterNewPin => 'Enter new PIN';
+
+  @override
+  String get confirmPin => 'Confirm PIN';
+
+  @override
+  String get pinSet => 'PIN has been set';
+
+  @override
+  String get pinRemoved => 'PIN has been removed';
+
+  @override
+  String get pinMismatch => 'PINs do not match';
+
+  @override
+  String get incorrectPin => 'Incorrect PIN';
+
+  @override
+  String get pinRequired => 'Please set a Locked Folder PIN in Settings first';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get thumbnailCache => 'Thumbnail cache';
+
+  @override
+  String get clearCache => 'Clear cache';
+
+  @override
+  String cacheCleared(String size) {
+    return 'Cache cleared, freed $size';
+  }
+
+  @override
+  String get rebuildIndex => 'Rebuild photo index';
+
+  @override
+  String get rebuildingIndex => 'Rebuilding index...';
+
+  @override
+  String indexRebuilt(int count) {
+    return 'Index rebuilt: $count photos indexed';
+  }
+
+  @override
+  String get cacheManagement => 'Cache';
 }

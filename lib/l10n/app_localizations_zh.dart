@@ -271,4 +271,71 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get removeFromLockedFolder => '从已锁定的文件夹移除';
+
+  @override
+  String get lockedFolderPin => '锁定文件夹 PIN';
+
+  @override
+  String get lockedFolderPinDescription => '当生物识别不可用时，使用 PIN 码访问锁定文件夹';
+
+  @override
+  String get setPin => '设置 PIN';
+
+  @override
+  String get changePin => '更改 PIN';
+
+  @override
+  String get removePin => '移除 PIN';
+
+  @override
+  String get enterPin => '输入 PIN';
+
+  @override
+  String get enterNewPin => '输入新 PIN';
+
+  @override
+  String get confirmPin => '确认 PIN';
+
+  @override
+  String get pinSet => 'PIN 已设置';
+
+  @override
+  String get pinRemoved => 'PIN 已移除';
+
+  @override
+  String get pinMismatch => '两次输入的 PIN 不一致';
+
+  @override
+  String get incorrectPin => 'PIN 不正确';
+
+  @override
+  String get pinRequired => '请先在设置中设置锁定文件夹 PIN';
+
+  @override
+  String get security => '安全';
+
+  @override
+  String get thumbnailCache => '缩略图缓存';
+
+  @override
+  String get clearCache => '清除缓存';
+
+  @override
+  String cacheCleared(String size) {
+    return '缓存已清除，释放了 $size';
+  }
+
+  @override
+  String get rebuildIndex => '重建照片索引';
+
+  @override
+  String get rebuildingIndex => '正在重建索引...';
+
+  @override
+  String indexRebuilt(int count) {
+    return '索引重建完成：已索引 $count 张照片';
+  }
+
+  @override
+  String get cacheManagement => '缓存';
 }
