@@ -22,10 +22,6 @@ func (a *api) HttpHandler() http.Handler {
 }
 
 func (a *api) httpHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/baidu/callback" {
-		a.httpBaiduCallback(w, r)
-		return
-	}
 	switch r.Method {
 	case http.MethodGet:
 		if strings.HasPrefix(r.URL.Path, "/trash/thumbnail/") {

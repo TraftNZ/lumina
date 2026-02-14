@@ -1,6 +1,7 @@
 package localstore
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 const defaultMaxCache = 500 * 1024 * 1024 // 500MB
@@ -159,4 +161,97 @@ func (s *LocalStore) SetLastSeenMarker(marker string) {
 	}
 	s.data.LastSeenMarker = marker
 	s.saveLocked()
+}
+
+// syncIndexEntry is the format used for remote index exchange between devices.
+type syncIndexEntry struct {
+	Path     string
+	Filename string
+	Size     int64
+}
+
+// ExportIndex serializes the photo index for uploading to remote storage.
+func (s *LocalStore) ExportIndex() ([]byte, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if !s.initialized {
+		return nil, fmt.Errorf("store not initialized")
+	}
+	entries := make([]syncIndexEntry, 0, len(s.data.Photos))
+	for _, p := range s.data.Photos {
+		entries = append(entries, syncIndexEntry{
+			Path:     p.Path,
+			Filename: p.Filename,
+			Size:     p.Size,
+		})
+	}
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(entries); err != nil {
+		return nil, fmt.Errorf("encode index: %w", err)
+	}
+	return buf.Bytes(), nil
+}
+
+// MergeIndex adds entries from remote index data into the local index
+// without removing existing entries. This prevents concurrent uploads
+// from different devices overwriting each other's entries.
+func (s *LocalStore) MergeIndex(data []byte) {
+	var entries []syncIndexEntry
+	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&entries); err != nil {
+		s.logger.Printf("MergeIndex decode error: %v", err)
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.initialized {
+		return
+	}
+	now := time.Now().Unix()
+	added := 0
+	for _, e := range entries {
+		if _, exists := s.data.Photos[e.Path]; exists {
+			continue
+		}
+		s.data.Photos[e.Path] = photoEntry{
+			Path:      e.Path,
+			Filename:  e.Filename,
+			Size:      e.Size,
+			IndexedAt: now,
+		}
+		s.data.FilenameIndex[e.Filename] = append(s.data.FilenameIndex[e.Filename], e.Path)
+		added++
+	}
+	if added > 0 {
+		s.saveLocked()
+		s.logger.Printf("MergeIndex: added %d entries from remote", added)
+	}
+}
+
+// ImportIndex replaces the local photo index with data downloaded from remote.
+func (s *LocalStore) ImportIndex(data []byte) error {
+	var entries []syncIndexEntry
+	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&entries); err != nil {
+		return fmt.Errorf("decode index: %w", err)
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.initialized {
+		return fmt.Errorf("store not initialized")
+	}
+	now := time.Now().Unix()
+	s.data.Photos = make(map[string]photoEntry, len(entries))
+	s.data.FilenameIndex = make(map[string][]string, len(entries))
+	for _, e := range entries {
+		s.data.Photos[e.Path] = photoEntry{
+			Path:      e.Path,
+			Filename:  e.Filename,
+			Size:      e.Size,
+			IndexedAt: now,
+		}
+		s.data.FilenameIndex[e.Filename] = append(s.data.FilenameIndex[e.Filename], e.Path)
+	}
+	s.data.LastFullIndex = now
+	s.saveLocked()
+	s.logger.Printf("ImportIndex complete: %d photos", len(entries))
+	return nil
 }

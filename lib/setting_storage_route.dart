@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:img_syncer/storageform/smbform.dart';
 import 'package:img_syncer/storageform/webdavform.dart';
 import 'package:img_syncer/storageform/nfsform.dart';
-import 'package:img_syncer/storageform/baidu_netdisk.dart';
+import 'package:img_syncer/storageform/s3form.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/state_model.dart';
 import 'package:img_syncer/global.dart';
@@ -30,8 +30,8 @@ IconData _driveIcon(Drive drive) {
       return Icons.cloud_outlined;
     case Drive.nfs:
       return Icons.dns_outlined;
-    case Drive.baiduNetdisk:
-      return Icons.cloud_circle_outlined;
+    case Drive.s3:
+      return Icons.cloud_outlined;
   }
 }
 
@@ -65,8 +65,8 @@ class SettingStorageRouteState extends State<SettingStorageRoute> {
       case Drive.nfs:
         form = const NFSForm();
         break;
-      case Drive.baiduNetdisk:
-        form = const BaiduNetdiskForm();
+      case Drive.s3:
+        form = const S3Form();
         break;
     }
     return Scaffold(
@@ -97,8 +97,8 @@ class SettingStorageRouteState extends State<SettingStorageRoute> {
                   dropdownMenuEntries: driveName.entries
                       .map((entry) => DropdownMenuEntry<Drive>(
                             value: entry.key,
-                            label: entry.key == Drive.baiduNetdisk
-                                ? l10n.baiduNetdisk
+                            label: entry.key == Drive.s3
+                                ? l10n.s3Storage
                                 : entry.value,
                             leadingIcon: Icon(_driveIcon(entry.key)),
                           ))

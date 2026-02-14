@@ -112,20 +112,19 @@ class ImgSyncerClient extends $grpc.Client {
     return $createUnaryCall(_$listDriveNFSDir, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk(
-    $0.SetDriveBaiduNetDiskRequest request, {
+  /// S3 Compatible Drive
+  $grpc.ResponseFuture<$0.SetDriveS3Response> setDriveS3(
+    $0.SetDriveS3Request request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$setDriveBaiduNetDisk, request, options: options);
+    return $createUnaryCall(_$setDriveS3, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.StartBaiduNetdiskLoginResponse>
-      startBaiduNetdiskLogin(
-    $0.StartBaiduNetdiskLoginRequest request, {
+  $grpc.ResponseFuture<$0.ListDriveS3BucketsResponse> listDriveS3Buckets(
+    $0.ListDriveS3BucketsRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$startBaiduNetdiskLogin, request,
-        options: options);
+    return $createUnaryCall(_$listDriveS3Buckets, request, options: options);
   }
 
   /// Trash
@@ -238,16 +237,16 @@ class ImgSyncerClient extends $grpc.Client {
           '/img_syncer.ImgSyncer/ListDriveNFSDir',
           ($0.ListDriveNFSDirRequest value) => value.writeToBuffer(),
           $0.ListDriveNFSDirResponse.fromBuffer);
-  static final _$setDriveBaiduNetDisk = $grpc.ClientMethod<
-          $0.SetDriveBaiduNetDiskRequest, $0.SetDriveBaiduNetDiskResponse>(
-      '/img_syncer.ImgSyncer/SetDriveBaiduNetDisk',
-      ($0.SetDriveBaiduNetDiskRequest value) => value.writeToBuffer(),
-      $0.SetDriveBaiduNetDiskResponse.fromBuffer);
-  static final _$startBaiduNetdiskLogin = $grpc.ClientMethod<
-          $0.StartBaiduNetdiskLoginRequest, $0.StartBaiduNetdiskLoginResponse>(
-      '/img_syncer.ImgSyncer/StartBaiduNetdiskLogin',
-      ($0.StartBaiduNetdiskLoginRequest value) => value.writeToBuffer(),
-      $0.StartBaiduNetdiskLoginResponse.fromBuffer);
+  static final _$setDriveS3 =
+      $grpc.ClientMethod<$0.SetDriveS3Request, $0.SetDriveS3Response>(
+          '/img_syncer.ImgSyncer/SetDriveS3',
+          ($0.SetDriveS3Request value) => value.writeToBuffer(),
+          $0.SetDriveS3Response.fromBuffer);
+  static final _$listDriveS3Buckets = $grpc.ClientMethod<
+          $0.ListDriveS3BucketsRequest, $0.ListDriveS3BucketsResponse>(
+      '/img_syncer.ImgSyncer/ListDriveS3Buckets',
+      ($0.ListDriveS3BucketsRequest value) => value.writeToBuffer(),
+      $0.ListDriveS3BucketsResponse.fromBuffer);
   static final _$moveToTrash =
       $grpc.ClientMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
           '/img_syncer.ImgSyncer/MoveToTrash',
@@ -385,24 +384,22 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.ListDriveNFSDirRequest.fromBuffer(value),
         ($0.ListDriveNFSDirResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.SetDriveBaiduNetDiskRequest,
-            $0.SetDriveBaiduNetDiskResponse>(
-        'SetDriveBaiduNetDisk',
-        setDriveBaiduNetDisk_Pre,
+    $addMethod($grpc.ServiceMethod<$0.SetDriveS3Request, $0.SetDriveS3Response>(
+        'SetDriveS3',
+        setDriveS3_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.SetDriveS3Request.fromBuffer(value),
+        ($0.SetDriveS3Response value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ListDriveS3BucketsRequest,
+            $0.ListDriveS3BucketsResponse>(
+        'ListDriveS3Buckets',
+        listDriveS3Buckets_Pre,
         false,
         false,
         ($core.List<$core.int> value) =>
-            $0.SetDriveBaiduNetDiskRequest.fromBuffer(value),
-        ($0.SetDriveBaiduNetDiskResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.StartBaiduNetdiskLoginRequest,
-            $0.StartBaiduNetdiskLoginResponse>(
-        'StartBaiduNetdiskLogin',
-        startBaiduNetdiskLogin_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $0.StartBaiduNetdiskLoginRequest.fromBuffer(value),
-        ($0.StartBaiduNetdiskLoginResponse value) => value.writeToBuffer()));
+            $0.ListDriveS3BucketsRequest.fromBuffer(value),
+        ($0.ListDriveS3BucketsResponse value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
             'MoveToTrash',
@@ -554,23 +551,22 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
   $async.Future<$0.ListDriveNFSDirResponse> listDriveNFSDir(
       $grpc.ServiceCall call, $0.ListDriveNFSDirRequest request);
 
-  $async.Future<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$0.SetDriveBaiduNetDiskRequest> $request) async {
-    return setDriveBaiduNetDisk($call, await $request);
+  $async.Future<$0.SetDriveS3Response> setDriveS3_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveS3Request> $request) async {
+    return setDriveS3($call, await $request);
   }
 
-  $async.Future<$0.SetDriveBaiduNetDiskResponse> setDriveBaiduNetDisk(
-      $grpc.ServiceCall call, $0.SetDriveBaiduNetDiskRequest request);
+  $async.Future<$0.SetDriveS3Response> setDriveS3(
+      $grpc.ServiceCall call, $0.SetDriveS3Request request);
 
-  $async.Future<$0.StartBaiduNetdiskLoginResponse> startBaiduNetdiskLogin_Pre(
+  $async.Future<$0.ListDriveS3BucketsResponse> listDriveS3Buckets_Pre(
       $grpc.ServiceCall $call,
-      $async.Future<$0.StartBaiduNetdiskLoginRequest> $request) async {
-    return startBaiduNetdiskLogin($call, await $request);
+      $async.Future<$0.ListDriveS3BucketsRequest> $request) async {
+    return listDriveS3Buckets($call, await $request);
   }
 
-  $async.Future<$0.StartBaiduNetdiskLoginResponse> startBaiduNetdiskLogin(
-      $grpc.ServiceCall call, $0.StartBaiduNetdiskLoginRequest request);
+  $async.Future<$0.ListDriveS3BucketsResponse> listDriveS3Buckets(
+      $grpc.ServiceCall call, $0.ListDriveS3BucketsRequest request);
 
   $async.Future<$0.MoveToTrashResponse> moveToTrash_Pre($grpc.ServiceCall $call,
       $async.Future<$0.MoveToTrashRequest> $request) async {

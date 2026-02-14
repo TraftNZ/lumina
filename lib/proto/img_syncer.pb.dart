@@ -1611,89 +1611,123 @@ class ListDriveNFSDirResponse extends $pb.GeneratedMessage {
   $pb.PbList<$core.String> get dirs => $_getList(2);
 }
 
-class SetDriveBaiduNetDiskRequest extends $pb.GeneratedMessage {
-  factory SetDriveBaiduNetDiskRequest({
-    $core.String? refreshToken,
-    $core.String? accessToken,
-    $core.String? tmpDir,
+class SetDriveS3Request extends $pb.GeneratedMessage {
+  factory SetDriveS3Request({
+    $core.String? endpoint,
+    $core.String? region,
+    $core.String? accessKeyId,
+    $core.String? secretAccessKey,
+    $core.String? bucket,
+    $core.String? root,
   }) {
     final result = create();
-    if (refreshToken != null) result.refreshToken = refreshToken;
-    if (accessToken != null) result.accessToken = accessToken;
-    if (tmpDir != null) result.tmpDir = tmpDir;
+    if (endpoint != null) result.endpoint = endpoint;
+    if (region != null) result.region = region;
+    if (accessKeyId != null) result.accessKeyId = accessKeyId;
+    if (secretAccessKey != null) result.secretAccessKey = secretAccessKey;
+    if (bucket != null) result.bucket = bucket;
+    if (root != null) result.root = root;
     return result;
   }
 
-  SetDriveBaiduNetDiskRequest._();
+  SetDriveS3Request._();
 
-  factory SetDriveBaiduNetDiskRequest.fromBuffer($core.List<$core.int> data,
+  factory SetDriveS3Request.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory SetDriveBaiduNetDiskRequest.fromJson($core.String json,
+  factory SetDriveS3Request.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SetDriveBaiduNetDiskRequest',
+      _omitMessageNames ? '' : 'SetDriveS3Request',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'refreshToken', protoName: 'refreshToken')
-    ..aOS(2, _omitFieldNames ? '' : 'accessToken', protoName: 'accessToken')
-    ..aOS(3, _omitFieldNames ? '' : 'tmpDir', protoName: 'tmpDir')
+    ..aOS(1, _omitFieldNames ? '' : 'endpoint')
+    ..aOS(2, _omitFieldNames ? '' : 'region')
+    ..aOS(3, _omitFieldNames ? '' : 'accessKeyId', protoName: 'accessKeyId')
+    ..aOS(4, _omitFieldNames ? '' : 'secretAccessKey',
+        protoName: 'secretAccessKey')
+    ..aOS(5, _omitFieldNames ? '' : 'bucket')
+    ..aOS(6, _omitFieldNames ? '' : 'root')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SetDriveBaiduNetDiskRequest clone() => deepCopy();
+  SetDriveS3Request clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SetDriveBaiduNetDiskRequest copyWith(
-          void Function(SetDriveBaiduNetDiskRequest) updates) =>
-      super.copyWith(
-              (message) => updates(message as SetDriveBaiduNetDiskRequest))
-          as SetDriveBaiduNetDiskRequest;
+  SetDriveS3Request copyWith(void Function(SetDriveS3Request) updates) =>
+      super.copyWith((message) => updates(message as SetDriveS3Request))
+          as SetDriveS3Request;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskRequest create() =>
-      SetDriveBaiduNetDiskRequest._();
+  static SetDriveS3Request create() => SetDriveS3Request._();
   @$core.override
-  SetDriveBaiduNetDiskRequest createEmptyInstance() => create();
+  SetDriveS3Request createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SetDriveBaiduNetDiskRequest>(create);
-  static SetDriveBaiduNetDiskRequest? _defaultInstance;
+  static SetDriveS3Request getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveS3Request>(create);
+  static SetDriveS3Request? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get refreshToken => $_getSZ(0);
+  $core.String get endpoint => $_getSZ(0);
   @$pb.TagNumber(1)
-  set refreshToken($core.String value) => $_setString(0, value);
+  set endpoint($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasRefreshToken() => $_has(0);
+  $core.bool hasEndpoint() => $_has(0);
   @$pb.TagNumber(1)
-  void clearRefreshToken() => $_clearField(1);
+  void clearEndpoint() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get accessToken => $_getSZ(1);
+  $core.String get region => $_getSZ(1);
   @$pb.TagNumber(2)
-  set accessToken($core.String value) => $_setString(1, value);
+  set region($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasAccessToken() => $_has(1);
+  $core.bool hasRegion() => $_has(1);
   @$pb.TagNumber(2)
-  void clearAccessToken() => $_clearField(2);
+  void clearRegion() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get tmpDir => $_getSZ(2);
+  $core.String get accessKeyId => $_getSZ(2);
   @$pb.TagNumber(3)
-  set tmpDir($core.String value) => $_setString(2, value);
+  set accessKeyId($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasTmpDir() => $_has(2);
+  $core.bool hasAccessKeyId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTmpDir() => $_clearField(3);
+  void clearAccessKeyId() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get secretAccessKey => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set secretAccessKey($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSecretAccessKey() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSecretAccessKey() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get bucket => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set bucket($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasBucket() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearBucket() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get root => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set root($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRoot() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRoot() => $_clearField(6);
 }
 
-class SetDriveBaiduNetDiskResponse extends $pb.GeneratedMessage {
-  factory SetDriveBaiduNetDiskResponse({
+class SetDriveS3Response extends $pb.GeneratedMessage {
+  factory SetDriveS3Response({
     $core.bool? success,
     $core.String? message,
   }) {
@@ -1703,17 +1737,17 @@ class SetDriveBaiduNetDiskResponse extends $pb.GeneratedMessage {
     return result;
   }
 
-  SetDriveBaiduNetDiskResponse._();
+  SetDriveS3Response._();
 
-  factory SetDriveBaiduNetDiskResponse.fromBuffer($core.List<$core.int> data,
+  factory SetDriveS3Response.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory SetDriveBaiduNetDiskResponse.fromJson($core.String json,
+  factory SetDriveS3Response.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SetDriveBaiduNetDiskResponse',
+      _omitMessageNames ? '' : 'SetDriveS3Response',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
@@ -1721,26 +1755,23 @@ class SetDriveBaiduNetDiskResponse extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SetDriveBaiduNetDiskResponse clone() => deepCopy();
+  SetDriveS3Response clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SetDriveBaiduNetDiskResponse copyWith(
-          void Function(SetDriveBaiduNetDiskResponse) updates) =>
-      super.copyWith(
-              (message) => updates(message as SetDriveBaiduNetDiskResponse))
-          as SetDriveBaiduNetDiskResponse;
+  SetDriveS3Response copyWith(void Function(SetDriveS3Response) updates) =>
+      super.copyWith((message) => updates(message as SetDriveS3Response))
+          as SetDriveS3Response;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskResponse create() =>
-      SetDriveBaiduNetDiskResponse._();
+  static SetDriveS3Response create() => SetDriveS3Response._();
   @$core.override
-  SetDriveBaiduNetDiskResponse createEmptyInstance() => create();
+  SetDriveS3Response createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static SetDriveBaiduNetDiskResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SetDriveBaiduNetDiskResponse>(create);
-  static SetDriveBaiduNetDiskResponse? _defaultInstance;
+  static SetDriveS3Response getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveS3Response>(create);
+  static SetDriveS3Response? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
@@ -1761,121 +1792,96 @@ class SetDriveBaiduNetDiskResponse extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(2);
 }
 
-class StartBaiduNetdiskLoginRequest extends $pb.GeneratedMessage {
-  factory StartBaiduNetdiskLoginRequest({
-    $core.String? tmpDir,
-  }) {
-    final result = create();
-    if (tmpDir != null) result.tmpDir = tmpDir;
-    return result;
-  }
+class ListDriveS3BucketsRequest extends $pb.GeneratedMessage {
+  factory ListDriveS3BucketsRequest() => create();
 
-  StartBaiduNetdiskLoginRequest._();
+  ListDriveS3BucketsRequest._();
 
-  factory StartBaiduNetdiskLoginRequest.fromBuffer($core.List<$core.int> data,
+  factory ListDriveS3BucketsRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory StartBaiduNetdiskLoginRequest.fromJson($core.String json,
+  factory ListDriveS3BucketsRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StartBaiduNetdiskLoginRequest',
+      _omitMessageNames ? '' : 'ListDriveS3BucketsRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'tmpDir', protoName: 'tmpDir')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartBaiduNetdiskLoginRequest clone() => deepCopy();
+  ListDriveS3BucketsRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartBaiduNetdiskLoginRequest copyWith(
-          void Function(StartBaiduNetdiskLoginRequest) updates) =>
-      super.copyWith(
-              (message) => updates(message as StartBaiduNetdiskLoginRequest))
-          as StartBaiduNetdiskLoginRequest;
+  ListDriveS3BucketsRequest copyWith(
+          void Function(ListDriveS3BucketsRequest) updates) =>
+      super.copyWith((message) => updates(message as ListDriveS3BucketsRequest))
+          as ListDriveS3BucketsRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginRequest create() =>
-      StartBaiduNetdiskLoginRequest._();
+  static ListDriveS3BucketsRequest create() => ListDriveS3BucketsRequest._();
   @$core.override
-  StartBaiduNetdiskLoginRequest createEmptyInstance() => create();
+  ListDriveS3BucketsRequest createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StartBaiduNetdiskLoginRequest>(create);
-  static StartBaiduNetdiskLoginRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get tmpDir => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set tmpDir($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasTmpDir() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTmpDir() => $_clearField(1);
+  static ListDriveS3BucketsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveS3BucketsRequest>(create);
+  static ListDriveS3BucketsRequest? _defaultInstance;
 }
 
-class StartBaiduNetdiskLoginResponse extends $pb.GeneratedMessage {
-  factory StartBaiduNetdiskLoginResponse({
+class ListDriveS3BucketsResponse extends $pb.GeneratedMessage {
+  factory ListDriveS3BucketsResponse({
     $core.bool? success,
     $core.String? message,
-    $core.String? refreshToken,
-    $core.String? accessToken,
-    $fixnum.Int64? exiresAt,
+    $core.Iterable<$core.String>? buckets,
   }) {
     final result = create();
     if (success != null) result.success = success;
     if (message != null) result.message = message;
-    if (refreshToken != null) result.refreshToken = refreshToken;
-    if (accessToken != null) result.accessToken = accessToken;
-    if (exiresAt != null) result.exiresAt = exiresAt;
+    if (buckets != null) result.buckets.addAll(buckets);
     return result;
   }
 
-  StartBaiduNetdiskLoginResponse._();
+  ListDriveS3BucketsResponse._();
 
-  factory StartBaiduNetdiskLoginResponse.fromBuffer($core.List<$core.int> data,
+  factory ListDriveS3BucketsResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory StartBaiduNetdiskLoginResponse.fromJson($core.String json,
+  factory ListDriveS3BucketsResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StartBaiduNetdiskLoginResponse',
+      _omitMessageNames ? '' : 'ListDriveS3BucketsResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
-    ..aOS(3, _omitFieldNames ? '' : 'refreshToken', protoName: 'refreshToken')
-    ..aOS(4, _omitFieldNames ? '' : 'accessToken', protoName: 'accessToken')
-    ..aInt64(5, _omitFieldNames ? '' : 'exiresAt', protoName: 'exiresAt')
+    ..pPS(3, _omitFieldNames ? '' : 'buckets')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartBaiduNetdiskLoginResponse clone() => deepCopy();
+  ListDriveS3BucketsResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartBaiduNetdiskLoginResponse copyWith(
-          void Function(StartBaiduNetdiskLoginResponse) updates) =>
+  ListDriveS3BucketsResponse copyWith(
+          void Function(ListDriveS3BucketsResponse) updates) =>
       super.copyWith(
-              (message) => updates(message as StartBaiduNetdiskLoginResponse))
-          as StartBaiduNetdiskLoginResponse;
+              (message) => updates(message as ListDriveS3BucketsResponse))
+          as ListDriveS3BucketsResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginResponse create() =>
-      StartBaiduNetdiskLoginResponse._();
+  static ListDriveS3BucketsResponse create() => ListDriveS3BucketsResponse._();
   @$core.override
-  StartBaiduNetdiskLoginResponse createEmptyInstance() => create();
+  ListDriveS3BucketsResponse createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static StartBaiduNetdiskLoginResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StartBaiduNetdiskLoginResponse>(create);
-  static StartBaiduNetdiskLoginResponse? _defaultInstance;
+  static ListDriveS3BucketsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveS3BucketsResponse>(create);
+  static ListDriveS3BucketsResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
@@ -1896,31 +1902,7 @@ class StartBaiduNetdiskLoginResponse extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get refreshToken => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set refreshToken($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasRefreshToken() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearRefreshToken() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get accessToken => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set accessToken($core.String value) => $_setString(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasAccessToken() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearAccessToken() => $_clearField(4);
-
-  @$pb.TagNumber(5)
-  $fixnum.Int64 get exiresAt => $_getI64(4);
-  @$pb.TagNumber(5)
-  set exiresAt($fixnum.Int64 value) => $_setInt64(4, value);
-  @$pb.TagNumber(5)
-  $core.bool hasExiresAt() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearExiresAt() => $_clearField(5);
+  $pb.PbList<$core.String> get buckets => $_getList(2);
 }
 
 class MoveToTrashRequest extends $pb.GeneratedMessage {

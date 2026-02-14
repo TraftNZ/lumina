@@ -18,8 +18,9 @@ service ImgSyncer {
   // NFS Drive
   rpc SetDriveNFS (SetDriveNFSRequest) returns (SetDriveNFSResponse) {}
   rpc ListDriveNFSDir (ListDriveNFSDirRequest) returns (ListDriveNFSDirResponse) {}
-  rpc SetDriveBaiduNetDisk (SetDriveBaiduNetDiskRequest) returns (SetDriveBaiduNetDiskResponse) {}
-  rpc StartBaiduNetdiskLogin (StartBaiduNetdiskLoginRequest) returns (StartBaiduNetdiskLoginResponse) {}
+  // S3 Compatible Drive
+  rpc SetDriveS3 (SetDriveS3Request) returns (SetDriveS3Response) {}
+  rpc ListDriveS3Buckets (ListDriveS3BucketsRequest) returns (ListDriveS3BucketsResponse) {}
   // Trash
   rpc MoveToTrash (MoveToTrashRequest) returns (MoveToTrashResponse) {}
   rpc ListTrash (ListTrashRequest) returns (ListTrashResponse) {}
@@ -149,25 +150,24 @@ message ListDriveNFSDirResponse {
   repeated string dirs = 3;
 }
 
-message SetDriveBaiduNetDiskRequest {
-  string refreshToken = 1;
-  string accessToken = 2;
-  string tmpDir = 3;
+message SetDriveS3Request {
+  string endpoint = 1;
+  string region = 2;
+  string accessKeyId = 3;
+  string secretAccessKey = 4;
+  string bucket = 5;
+  string root = 6;
 }
-message SetDriveBaiduNetDiskResponse {
+message SetDriveS3Response {
   bool success = 1;
   string message = 2;
 }
 
-message StartBaiduNetdiskLoginRequest {
-  string tmpDir = 1;
-}
-message StartBaiduNetdiskLoginResponse {
+message ListDriveS3BucketsRequest {}
+message ListDriveS3BucketsResponse {
   bool success = 1;
   string message = 2;
-  string refreshToken = 3;
-  string accessToken = 4;
-  int64 exiresAt = 5;
+  repeated string buckets = 3;
 }
 
 message MoveToTrashRequest {

@@ -19,26 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ImgSyncer_ListByDate_FullMethodName             = "/img_syncer.ImgSyncer/ListByDate"
-	ImgSyncer_Delete_FullMethodName                 = "/img_syncer.ImgSyncer/Delete"
-	ImgSyncer_FilterNotUploaded_FullMethodName      = "/img_syncer.ImgSyncer/FilterNotUploaded"
-	ImgSyncer_SetDriveSMB_FullMethodName            = "/img_syncer.ImgSyncer/SetDriveSMB"
-	ImgSyncer_ListDriveSMBShares_FullMethodName     = "/img_syncer.ImgSyncer/ListDriveSMBShares"
-	ImgSyncer_ListDriveSMBDir_FullMethodName        = "/img_syncer.ImgSyncer/ListDriveSMBDir"
-	ImgSyncer_SetDriveSMBShare_FullMethodName       = "/img_syncer.ImgSyncer/SetDriveSMBShare"
-	ImgSyncer_SetDriveWebdav_FullMethodName         = "/img_syncer.ImgSyncer/SetDriveWebdav"
-	ImgSyncer_ListDriveWebdavDir_FullMethodName     = "/img_syncer.ImgSyncer/ListDriveWebdavDir"
-	ImgSyncer_SetDriveNFS_FullMethodName            = "/img_syncer.ImgSyncer/SetDriveNFS"
-	ImgSyncer_ListDriveNFSDir_FullMethodName        = "/img_syncer.ImgSyncer/ListDriveNFSDir"
-	ImgSyncer_SetDriveBaiduNetDisk_FullMethodName   = "/img_syncer.ImgSyncer/SetDriveBaiduNetDisk"
-	ImgSyncer_StartBaiduNetdiskLogin_FullMethodName = "/img_syncer.ImgSyncer/StartBaiduNetdiskLogin"
-	ImgSyncer_MoveToTrash_FullMethodName            = "/img_syncer.ImgSyncer/MoveToTrash"
-	ImgSyncer_ListTrash_FullMethodName              = "/img_syncer.ImgSyncer/ListTrash"
-	ImgSyncer_RestoreFromTrash_FullMethodName       = "/img_syncer.ImgSyncer/RestoreFromTrash"
-	ImgSyncer_EmptyTrash_FullMethodName             = "/img_syncer.ImgSyncer/EmptyTrash"
-	ImgSyncer_RebuildIndex_FullMethodName           = "/img_syncer.ImgSyncer/RebuildIndex"
-	ImgSyncer_GetIndexStats_FullMethodName          = "/img_syncer.ImgSyncer/GetIndexStats"
-	ImgSyncer_ClearThumbnailCache_FullMethodName    = "/img_syncer.ImgSyncer/ClearThumbnailCache"
+	ImgSyncer_ListByDate_FullMethodName          = "/img_syncer.ImgSyncer/ListByDate"
+	ImgSyncer_Delete_FullMethodName              = "/img_syncer.ImgSyncer/Delete"
+	ImgSyncer_FilterNotUploaded_FullMethodName   = "/img_syncer.ImgSyncer/FilterNotUploaded"
+	ImgSyncer_SetDriveSMB_FullMethodName         = "/img_syncer.ImgSyncer/SetDriveSMB"
+	ImgSyncer_ListDriveSMBShares_FullMethodName  = "/img_syncer.ImgSyncer/ListDriveSMBShares"
+	ImgSyncer_ListDriveSMBDir_FullMethodName     = "/img_syncer.ImgSyncer/ListDriveSMBDir"
+	ImgSyncer_SetDriveSMBShare_FullMethodName    = "/img_syncer.ImgSyncer/SetDriveSMBShare"
+	ImgSyncer_SetDriveWebdav_FullMethodName      = "/img_syncer.ImgSyncer/SetDriveWebdav"
+	ImgSyncer_ListDriveWebdavDir_FullMethodName  = "/img_syncer.ImgSyncer/ListDriveWebdavDir"
+	ImgSyncer_SetDriveNFS_FullMethodName         = "/img_syncer.ImgSyncer/SetDriveNFS"
+	ImgSyncer_ListDriveNFSDir_FullMethodName     = "/img_syncer.ImgSyncer/ListDriveNFSDir"
+	ImgSyncer_SetDriveS3_FullMethodName          = "/img_syncer.ImgSyncer/SetDriveS3"
+	ImgSyncer_ListDriveS3Buckets_FullMethodName  = "/img_syncer.ImgSyncer/ListDriveS3Buckets"
+	ImgSyncer_MoveToTrash_FullMethodName         = "/img_syncer.ImgSyncer/MoveToTrash"
+	ImgSyncer_ListTrash_FullMethodName           = "/img_syncer.ImgSyncer/ListTrash"
+	ImgSyncer_RestoreFromTrash_FullMethodName    = "/img_syncer.ImgSyncer/RestoreFromTrash"
+	ImgSyncer_EmptyTrash_FullMethodName          = "/img_syncer.ImgSyncer/EmptyTrash"
+	ImgSyncer_RebuildIndex_FullMethodName        = "/img_syncer.ImgSyncer/RebuildIndex"
+	ImgSyncer_GetIndexStats_FullMethodName       = "/img_syncer.ImgSyncer/GetIndexStats"
+	ImgSyncer_ClearThumbnailCache_FullMethodName = "/img_syncer.ImgSyncer/ClearThumbnailCache"
 )
 
 // ImgSyncerClient is the client API for ImgSyncer service.
@@ -59,8 +59,9 @@ type ImgSyncerClient interface {
 	// NFS Drive
 	SetDriveNFS(ctx context.Context, in *SetDriveNFSRequest, opts ...grpc.CallOption) (*SetDriveNFSResponse, error)
 	ListDriveNFSDir(ctx context.Context, in *ListDriveNFSDirRequest, opts ...grpc.CallOption) (*ListDriveNFSDirResponse, error)
-	SetDriveBaiduNetDisk(ctx context.Context, in *SetDriveBaiduNetDiskRequest, opts ...grpc.CallOption) (*SetDriveBaiduNetDiskResponse, error)
-	StartBaiduNetdiskLogin(ctx context.Context, in *StartBaiduNetdiskLoginRequest, opts ...grpc.CallOption) (*StartBaiduNetdiskLoginResponse, error)
+	// S3 Compatible Drive
+	SetDriveS3(ctx context.Context, in *SetDriveS3Request, opts ...grpc.CallOption) (*SetDriveS3Response, error)
+	ListDriveS3Buckets(ctx context.Context, in *ListDriveS3BucketsRequest, opts ...grpc.CallOption) (*ListDriveS3BucketsResponse, error)
 	// Trash
 	MoveToTrash(ctx context.Context, in *MoveToTrashRequest, opts ...grpc.CallOption) (*MoveToTrashResponse, error)
 	ListTrash(ctx context.Context, in *ListTrashRequest, opts ...grpc.CallOption) (*ListTrashResponse, error)
@@ -193,20 +194,20 @@ func (c *imgSyncerClient) ListDriveNFSDir(ctx context.Context, in *ListDriveNFSD
 	return out, nil
 }
 
-func (c *imgSyncerClient) SetDriveBaiduNetDisk(ctx context.Context, in *SetDriveBaiduNetDiskRequest, opts ...grpc.CallOption) (*SetDriveBaiduNetDiskResponse, error) {
+func (c *imgSyncerClient) SetDriveS3(ctx context.Context, in *SetDriveS3Request, opts ...grpc.CallOption) (*SetDriveS3Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SetDriveBaiduNetDiskResponse)
-	err := c.cc.Invoke(ctx, ImgSyncer_SetDriveBaiduNetDisk_FullMethodName, in, out, cOpts...)
+	out := new(SetDriveS3Response)
+	err := c.cc.Invoke(ctx, ImgSyncer_SetDriveS3_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *imgSyncerClient) StartBaiduNetdiskLogin(ctx context.Context, in *StartBaiduNetdiskLoginRequest, opts ...grpc.CallOption) (*StartBaiduNetdiskLoginResponse, error) {
+func (c *imgSyncerClient) ListDriveS3Buckets(ctx context.Context, in *ListDriveS3BucketsRequest, opts ...grpc.CallOption) (*ListDriveS3BucketsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StartBaiduNetdiskLoginResponse)
-	err := c.cc.Invoke(ctx, ImgSyncer_StartBaiduNetdiskLogin_FullMethodName, in, out, cOpts...)
+	out := new(ListDriveS3BucketsResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_ListDriveS3Buckets_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -310,8 +311,9 @@ type ImgSyncerServer interface {
 	// NFS Drive
 	SetDriveNFS(context.Context, *SetDriveNFSRequest) (*SetDriveNFSResponse, error)
 	ListDriveNFSDir(context.Context, *ListDriveNFSDirRequest) (*ListDriveNFSDirResponse, error)
-	SetDriveBaiduNetDisk(context.Context, *SetDriveBaiduNetDiskRequest) (*SetDriveBaiduNetDiskResponse, error)
-	StartBaiduNetdiskLogin(context.Context, *StartBaiduNetdiskLoginRequest) (*StartBaiduNetdiskLoginResponse, error)
+	// S3 Compatible Drive
+	SetDriveS3(context.Context, *SetDriveS3Request) (*SetDriveS3Response, error)
+	ListDriveS3Buckets(context.Context, *ListDriveS3BucketsRequest) (*ListDriveS3BucketsResponse, error)
 	// Trash
 	MoveToTrash(context.Context, *MoveToTrashRequest) (*MoveToTrashResponse, error)
 	ListTrash(context.Context, *ListTrashRequest) (*ListTrashResponse, error)
@@ -364,11 +366,11 @@ func (UnimplementedImgSyncerServer) SetDriveNFS(context.Context, *SetDriveNFSReq
 func (UnimplementedImgSyncerServer) ListDriveNFSDir(context.Context, *ListDriveNFSDirRequest) (*ListDriveNFSDirResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListDriveNFSDir not implemented")
 }
-func (UnimplementedImgSyncerServer) SetDriveBaiduNetDisk(context.Context, *SetDriveBaiduNetDiskRequest) (*SetDriveBaiduNetDiskResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SetDriveBaiduNetDisk not implemented")
+func (UnimplementedImgSyncerServer) SetDriveS3(context.Context, *SetDriveS3Request) (*SetDriveS3Response, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetDriveS3 not implemented")
 }
-func (UnimplementedImgSyncerServer) StartBaiduNetdiskLogin(context.Context, *StartBaiduNetdiskLoginRequest) (*StartBaiduNetdiskLoginResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method StartBaiduNetdiskLogin not implemented")
+func (UnimplementedImgSyncerServer) ListDriveS3Buckets(context.Context, *ListDriveS3BucketsRequest) (*ListDriveS3BucketsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDriveS3Buckets not implemented")
 }
 func (UnimplementedImgSyncerServer) MoveToTrash(context.Context, *MoveToTrashRequest) (*MoveToTrashResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method MoveToTrash not implemented")
@@ -599,38 +601,38 @@ func _ImgSyncer_ListDriveNFSDir_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ImgSyncer_SetDriveBaiduNetDisk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetDriveBaiduNetDiskRequest)
+func _ImgSyncer_SetDriveS3_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetDriveS3Request)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ImgSyncerServer).SetDriveBaiduNetDisk(ctx, in)
+		return srv.(ImgSyncerServer).SetDriveS3(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ImgSyncer_SetDriveBaiduNetDisk_FullMethodName,
+		FullMethod: ImgSyncer_SetDriveS3_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImgSyncerServer).SetDriveBaiduNetDisk(ctx, req.(*SetDriveBaiduNetDiskRequest))
+		return srv.(ImgSyncerServer).SetDriveS3(ctx, req.(*SetDriveS3Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ImgSyncer_StartBaiduNetdiskLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StartBaiduNetdiskLoginRequest)
+func _ImgSyncer_ListDriveS3Buckets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDriveS3BucketsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ImgSyncerServer).StartBaiduNetdiskLogin(ctx, in)
+		return srv.(ImgSyncerServer).ListDriveS3Buckets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ImgSyncer_StartBaiduNetdiskLogin_FullMethodName,
+		FullMethod: ImgSyncer_ListDriveS3Buckets_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImgSyncerServer).StartBaiduNetdiskLogin(ctx, req.(*StartBaiduNetdiskLoginRequest))
+		return srv.(ImgSyncerServer).ListDriveS3Buckets(ctx, req.(*ListDriveS3BucketsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -802,12 +804,12 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ImgSyncer_ListDriveNFSDir_Handler,
 		},
 		{
-			MethodName: "SetDriveBaiduNetDisk",
-			Handler:    _ImgSyncer_SetDriveBaiduNetDisk_Handler,
+			MethodName: "SetDriveS3",
+			Handler:    _ImgSyncer_SetDriveS3_Handler,
 		},
 		{
-			MethodName: "StartBaiduNetdiskLogin",
-			Handler:    _ImgSyncer_StartBaiduNetdiskLogin_Handler,
+			MethodName: "ListDriveS3Buckets",
+			Handler:    _ImgSyncer_ListDriveS3Buckets_Handler,
 		},
 		{
 			MethodName: "MoveToTrash",

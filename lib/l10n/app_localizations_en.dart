@@ -174,10 +174,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentPath => 'Current path';
 
   @override
-  String get baiduNetdisk => 'Baidu Netdisk';
+  String get s3Storage => 'S3 Storage';
 
   @override
-  String get baiduNetdiskLogin => 'Baidu Netdisk Login';
+  String get s3Endpoint => 'Endpoint';
+
+  @override
+  String get s3Region => 'Region';
+
+  @override
+  String get s3AccessKeyId => 'Access Key ID';
+
+  @override
+  String get s3SecretAccessKey => 'Secret Access Key';
+
+  @override
+  String get s3Bucket => 'Bucket';
 
   @override
   String get refreshingPleaseWait => 'Comparing your local and cloud photos, if there are many photos, it may take some time. Please be patient......';

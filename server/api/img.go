@@ -12,9 +12,8 @@ import (
 )
 
 type api struct {
-	im                *imgmanager.ImgManager
-	httpPort          int
-	baiduLogginInChan chan *pb.StartBaiduNetdiskLoginResponse
+	im       *imgmanager.ImgManager
+	httpPort int
 
 	pb.UnimplementedImgSyncerServer
 }
@@ -77,10 +76,11 @@ func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) err
 	// Check if remote has changed since last rebuild
 	changed, _ := a.im.CheckMarkerChanged()
 	if changed {
-		go func() {
+		// Download remote index (2 GETs) instead of walking all directories
+		if err := a.im.SyncFromRemoteIndex(); err != nil {
+			// Index file missing or corrupt — fall back to full rebuild
 			a.im.RebuildIndex(nil)
-		}()
-		return a.filterNotUploadedLegacy(stream)
+		}
 	}
 
 	for {

@@ -361,71 +361,64 @@ final $typed_data.Uint8List listDriveNFSDirResponseDescriptor =
         'ChdMaXN0RHJpdmVORlNEaXJSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB2'
         '1lc3NhZ2UYAiABKAlSB21lc3NhZ2USEgoEZGlycxgDIAMoCVIEZGlycw==');
 
-@$core.Deprecated('Use setDriveBaiduNetDiskRequestDescriptor instead')
-const SetDriveBaiduNetDiskRequest$json = {
-  '1': 'SetDriveBaiduNetDiskRequest',
+@$core.Deprecated('Use setDriveS3RequestDescriptor instead')
+const SetDriveS3Request$json = {
+  '1': 'SetDriveS3Request',
   '2': [
-    {'1': 'refreshToken', '3': 1, '4': 1, '5': 9, '10': 'refreshToken'},
-    {'1': 'accessToken', '3': 2, '4': 1, '5': 9, '10': 'accessToken'},
-    {'1': 'tmpDir', '3': 3, '4': 1, '5': 9, '10': 'tmpDir'},
+    {'1': 'endpoint', '3': 1, '4': 1, '5': 9, '10': 'endpoint'},
+    {'1': 'region', '3': 2, '4': 1, '5': 9, '10': 'region'},
+    {'1': 'accessKeyId', '3': 3, '4': 1, '5': 9, '10': 'accessKeyId'},
+    {'1': 'secretAccessKey', '3': 4, '4': 1, '5': 9, '10': 'secretAccessKey'},
+    {'1': 'bucket', '3': 5, '4': 1, '5': 9, '10': 'bucket'},
+    {'1': 'root', '3': 6, '4': 1, '5': 9, '10': 'root'},
   ],
 };
 
-/// Descriptor for `SetDriveBaiduNetDiskRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List setDriveBaiduNetDiskRequestDescriptor =
-    $convert.base64Decode(
-        'ChtTZXREcml2ZUJhaWR1TmV0RGlza1JlcXVlc3QSIgoMcmVmcmVzaFRva2VuGAEgASgJUgxyZW'
-        'ZyZXNoVG9rZW4SIAoLYWNjZXNzVG9rZW4YAiABKAlSC2FjY2Vzc1Rva2VuEhYKBnRtcERpchgD'
-        'IAEoCVIGdG1wRGly');
+/// Descriptor for `SetDriveS3Request`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setDriveS3RequestDescriptor = $convert.base64Decode(
+    'ChFTZXREcml2ZVMzUmVxdWVzdBIaCghlbmRwb2ludBgBIAEoCVIIZW5kcG9pbnQSFgoGcmVnaW'
+    '9uGAIgASgJUgZyZWdpb24SIAoLYWNjZXNzS2V5SWQYAyABKAlSC2FjY2Vzc0tleUlkEigKD3Nl'
+    'Y3JldEFjY2Vzc0tleRgEIAEoCVIPc2VjcmV0QWNjZXNzS2V5EhYKBmJ1Y2tldBgFIAEoCVIGYn'
+    'Vja2V0EhIKBHJvb3QYBiABKAlSBHJvb3Q=');
 
-@$core.Deprecated('Use setDriveBaiduNetDiskResponseDescriptor instead')
-const SetDriveBaiduNetDiskResponse$json = {
-  '1': 'SetDriveBaiduNetDiskResponse',
-  '2': [
-    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
-    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
-  ],
-};
-
-/// Descriptor for `SetDriveBaiduNetDiskResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List setDriveBaiduNetDiskResponseDescriptor =
-    $convert.base64Decode(
-        'ChxTZXREcml2ZUJhaWR1TmV0RGlza1Jlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3'
-        'MSGAoHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZQ==');
-
-@$core.Deprecated('Use startBaiduNetdiskLoginRequestDescriptor instead')
-const StartBaiduNetdiskLoginRequest$json = {
-  '1': 'StartBaiduNetdiskLoginRequest',
-  '2': [
-    {'1': 'tmpDir', '3': 1, '4': 1, '5': 9, '10': 'tmpDir'},
-  ],
-};
-
-/// Descriptor for `StartBaiduNetdiskLoginRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startBaiduNetdiskLoginRequestDescriptor =
-    $convert.base64Decode(
-        'Ch1TdGFydEJhaWR1TmV0ZGlza0xvZ2luUmVxdWVzdBIWCgZ0bXBEaXIYASABKAlSBnRtcERpcg'
-        '==');
-
-@$core.Deprecated('Use startBaiduNetdiskLoginResponseDescriptor instead')
-const StartBaiduNetdiskLoginResponse$json = {
-  '1': 'StartBaiduNetdiskLoginResponse',
+@$core.Deprecated('Use setDriveS3ResponseDescriptor instead')
+const SetDriveS3Response$json = {
+  '1': 'SetDriveS3Response',
   '2': [
     {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
     {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
-    {'1': 'refreshToken', '3': 3, '4': 1, '5': 9, '10': 'refreshToken'},
-    {'1': 'accessToken', '3': 4, '4': 1, '5': 9, '10': 'accessToken'},
-    {'1': 'exiresAt', '3': 5, '4': 1, '5': 3, '10': 'exiresAt'},
   ],
 };
 
-/// Descriptor for `StartBaiduNetdiskLoginResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startBaiduNetdiskLoginResponseDescriptor =
+/// Descriptor for `SetDriveS3Response`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setDriveS3ResponseDescriptor = $convert.base64Decode(
+    'ChJTZXREcml2ZVMzUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZXNzYW'
+    'dlGAIgASgJUgdtZXNzYWdl');
+
+@$core.Deprecated('Use listDriveS3BucketsRequestDescriptor instead')
+const ListDriveS3BucketsRequest$json = {
+  '1': 'ListDriveS3BucketsRequest',
+};
+
+/// Descriptor for `ListDriveS3BucketsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listDriveS3BucketsRequestDescriptor =
+    $convert.base64Decode('ChlMaXN0RHJpdmVTM0J1Y2tldHNSZXF1ZXN0');
+
+@$core.Deprecated('Use listDriveS3BucketsResponseDescriptor instead')
+const ListDriveS3BucketsResponse$json = {
+  '1': 'ListDriveS3BucketsResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'buckets', '3': 3, '4': 3, '5': 9, '10': 'buckets'},
+  ],
+};
+
+/// Descriptor for `ListDriveS3BucketsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listDriveS3BucketsResponseDescriptor =
     $convert.base64Decode(
-        'Ch5TdGFydEJhaWR1TmV0ZGlza0xvZ2luUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2'
-        'VzcxIYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlEiIKDHJlZnJlc2hUb2tlbhgDIAEoCVIMcmVm'
-        'cmVzaFRva2VuEiAKC2FjY2Vzc1Rva2VuGAQgASgJUgthY2Nlc3NUb2tlbhIaCghleGlyZXNBdB'
-        'gFIAEoA1IIZXhpcmVzQXQ=');
+        'ChpMaXN0RHJpdmVTM0J1Y2tldHNSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEh'
+        'gKB21lc3NhZ2UYAiABKAlSB21lc3NhZ2USGAoHYnVja2V0cxgDIAMoCVIHYnVja2V0cw==');
 
 @$core.Deprecated('Use moveToTrashRequestDescriptor instead')
 const MoveToTrashRequest$json = {

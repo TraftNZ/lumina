@@ -30,6 +30,7 @@ const (
 	defaultTrashDir           = ".trash"
 	trashAutoDeleteDays       = 30
 	syncMarkerFile            = ".sync_marker"
+	syncIndexFile             = ".sync_index"
 )
 
 type TrashItem struct {
@@ -226,7 +227,7 @@ func (im *ImgManager) UploadVideo(content, thumbnailContent io.Reader, contentSi
 		im.store.IndexPhoto(path, filepath.Base(path), contentSize)
 	}
 	if err == nil {
-		go im.WriteSyncMarker()
+		go im.WriteSyncState()
 	}
 	return err
 }
@@ -309,7 +310,7 @@ func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize
 			return err
 		}
 	}
-	go im.WriteSyncMarker()
+	go im.WriteSyncState()
 	return nil
 }
 
@@ -380,7 +381,7 @@ func (im *ImgManager) DeleteSingleImg(path string) error {
 		im.store.RemovePhoto(path)
 		im.store.RemoveThumb(path)
 	}
-	go im.WriteSyncMarker()
+	go im.WriteSyncState()
 	return nil
 }
 
@@ -478,19 +479,50 @@ BREAK:
 	return nil
 }
 
-func (im *ImgManager) WriteSyncMarker() {
+// WriteSyncState uploads both the index and marker to remote storage.
+// Called async after mutations so other devices can download the index
+// instead of walking all directories.
+// It merges with the existing remote index first so concurrent uploads
+// from different devices don't overwrite each other's entries.
+func (im *ImgManager) WriteSyncState() {
+	if im.store == nil {
+		return
+	}
+	// Download existing remote index and merge into local before exporting,
+	// so we don't lose entries added by other devices
+	rc, _, err := im.dri.Download(syncIndexFile)
+	if err == nil {
+		data, readErr := io.ReadAll(rc)
+		rc.Close()
+		if readErr == nil {
+			im.store.MergeIndex(data)
+		}
+	}
+	// Upload merged index, then marker
+	indexData, err := im.store.ExportIndex()
+	if err != nil {
+		im.logger.Printf("Failed to export index: %v", err)
+		return
+	}
+	err = im.dri.Upload(syncIndexFile,
+		io.NopCloser(bytes.NewReader(indexData)),
+		int64(len(indexData)), time.Time{})
+	if err != nil {
+		im.logger.Printf("Failed to upload sync index: %v", err)
+		return
+	}
+	// Write marker after index — so if a reader sees a new marker,
+	// the index is guaranteed to be available
 	marker := fmt.Sprintf("%d", time.Now().UnixNano())
 	content := []byte(marker)
-	err := im.dri.Upload(syncMarkerFile,
+	err = im.dri.Upload(syncMarkerFile,
 		io.NopCloser(bytes.NewReader(content)),
 		int64(len(content)), time.Time{})
 	if err != nil {
 		im.logger.Printf("Failed to write sync marker: %v", err)
 		return
 	}
-	if im.store != nil {
-		im.store.SetLastSeenMarker(marker)
-	}
+	im.store.SetLastSeenMarker(marker)
 }
 
 func (im *ImgManager) ReadSyncMarker() (string, error) {
@@ -521,6 +553,31 @@ func (im *ImgManager) CheckMarkerChanged() (bool, error) {
 	return remote != local, nil
 }
 
+// SyncFromRemoteIndex downloads the remote index file and imports it.
+// Cost: 2 GETs (marker + index) instead of walking all directories.
+func (im *ImgManager) SyncFromRemoteIndex() error {
+	if im.store == nil {
+		return fmt.Errorf("local store not available")
+	}
+	rc, _, err := im.dri.Download(syncIndexFile)
+	if err != nil {
+		return fmt.Errorf("download sync index: %w", err)
+	}
+	defer rc.Close()
+	data, err := io.ReadAll(rc)
+	if err != nil {
+		return fmt.Errorf("read sync index: %w", err)
+	}
+	if err := im.store.ImportIndex(data); err != nil {
+		return fmt.Errorf("import index: %w", err)
+	}
+	// Snapshot the current marker so we don't re-download next time
+	if marker, err := im.ReadSyncMarker(); err == nil {
+		im.store.SetLastSeenMarker(marker)
+	}
+	return nil
+}
+
 func (im *ImgManager) RebuildIndex(progressCb func(found int)) error {
 	if im.store == nil {
 		return fmt.Errorf("local store not available")
@@ -533,13 +590,8 @@ func (im *ImgManager) RebuildIndex(progressCb func(found int)) error {
 	if err != nil {
 		return err
 	}
-	marker, err := im.ReadSyncMarker()
-	if err != nil {
-		// No marker exists yet — write one so future syncs use the fast path
-		im.WriteSyncMarker()
-	} else {
-		im.store.SetLastSeenMarker(marker)
-	}
+	// After full rebuild, upload index + marker so other devices can use it
+	im.WriteSyncState()
 	return nil
 }
 
@@ -566,7 +618,7 @@ func (im *ImgManager) MoveToTrash(path string) error {
 		im.store.RemovePhoto(path)
 		im.store.RemoveThumb(path)
 	}
-	go im.WriteSyncMarker()
+	go im.WriteSyncState()
 	return nil
 }
 
@@ -594,7 +646,7 @@ func (im *ImgManager) RestoreFromTrash(trashPath string) error {
 		})
 		im.store.IndexPhoto(originalPath, filepath.Base(originalPath), size)
 	}
-	go im.WriteSyncMarker()
+	go im.WriteSyncState()
 	return nil
 }
 

@@ -9,7 +9,6 @@ import 'package:img_syncer/logger.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:img_syncer/l10n/app_localizations.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -163,27 +162,29 @@ Future<void> initDrive() async {
         }
       }
       break;
-    case Drive.baiduNetdisk:
-      final refreshToken = prefs.getString("baidu_refresh_token");
-      final accessToken = prefs.getString("baidu_access_token");
-      final expiresAt = prefs.getInt("baidu_expires_at");
-      if (refreshToken == null || refreshToken == "") {
-        break;
-      }
-      final temporaryDir = await getTemporaryDirectory();
-      print("temp dir: ${temporaryDir.path}");
-      final rsp =
-          await storage.cli.setDriveBaiduNetDisk(SetDriveBaiduNetDiskRequest(
-        refreshToken: refreshToken,
-        accessToken: accessToken,
-        tmpDir: temporaryDir.path,
-      ));
-      if (rsp.success) {
-        logger.i("set drive baidu netdisk success");
-        settingModel.setRemoteStorageSetted(true);
-      } else {
-        settingModel.setRemoteStorageSetted(false);
-        assetModel.remoteLastError = rsp.message;
+    case Drive.s3:
+      final endpoint = prefs.getString('s3_endpoint');
+      final region = prefs.getString('s3_region');
+      final accessKeyId = prefs.getString('s3_access_key_id');
+      final secretAccessKey = prefs.getString('s3_secret_access_key');
+      final bucket = prefs.getString('s3_bucket');
+      final root = prefs.getString('s3_root_path');
+      if (accessKeyId != null && secretAccessKey != null && bucket != null) {
+        final rsp = await storage.cli.setDriveS3(SetDriveS3Request(
+          endpoint: endpoint ?? '',
+          region: region ?? '',
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+          bucket: bucket,
+          root: root ?? '',
+        ));
+        if (rsp.success) {
+          logger.i("set drive s3 success");
+          settingModel.setRemoteStorageSetted(true);
+        } else {
+          settingModel.setRemoteStorageSetted(false);
+          assetModel.remoteLastError = rsp.message;
+        }
       }
   }
 }

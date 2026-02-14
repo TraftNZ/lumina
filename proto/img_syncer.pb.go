@@ -1289,29 +1289,32 @@ func (x *ListDriveNFSDirResponse) GetDirs() []string {
 	return nil
 }
 
-type SetDriveBaiduNetDiskRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RefreshToken  string                 `protobuf:"bytes,1,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
-	AccessToken   string                 `protobuf:"bytes,2,opt,name=accessToken,proto3" json:"accessToken,omitempty"`
-	TmpDir        string                 `protobuf:"bytes,3,opt,name=tmpDir,proto3" json:"tmpDir,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+type SetDriveS3Request struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Endpoint        string                 `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	Region          string                 `protobuf:"bytes,2,opt,name=region,proto3" json:"region,omitempty"`
+	AccessKeyId     string                 `protobuf:"bytes,3,opt,name=accessKeyId,proto3" json:"accessKeyId,omitempty"`
+	SecretAccessKey string                 `protobuf:"bytes,4,opt,name=secretAccessKey,proto3" json:"secretAccessKey,omitempty"`
+	Bucket          string                 `protobuf:"bytes,5,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Root            string                 `protobuf:"bytes,6,opt,name=root,proto3" json:"root,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
-func (x *SetDriveBaiduNetDiskRequest) Reset() {
-	*x = SetDriveBaiduNetDiskRequest{}
+func (x *SetDriveS3Request) Reset() {
+	*x = SetDriveS3Request{}
 	mi := &file_proto_img_syncer_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SetDriveBaiduNetDiskRequest) String() string {
+func (x *SetDriveS3Request) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SetDriveBaiduNetDiskRequest) ProtoMessage() {}
+func (*SetDriveS3Request) ProtoMessage() {}
 
-func (x *SetDriveBaiduNetDiskRequest) ProtoReflect() protoreflect.Message {
+func (x *SetDriveS3Request) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_img_syncer_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1323,33 +1326,54 @@ func (x *SetDriveBaiduNetDiskRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SetDriveBaiduNetDiskRequest.ProtoReflect.Descriptor instead.
-func (*SetDriveBaiduNetDiskRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use SetDriveS3Request.ProtoReflect.Descriptor instead.
+func (*SetDriveS3Request) Descriptor() ([]byte, []int) {
 	return file_proto_img_syncer_proto_rawDescGZIP(), []int{23}
 }
 
-func (x *SetDriveBaiduNetDiskRequest) GetRefreshToken() string {
+func (x *SetDriveS3Request) GetEndpoint() string {
 	if x != nil {
-		return x.RefreshToken
+		return x.Endpoint
 	}
 	return ""
 }
 
-func (x *SetDriveBaiduNetDiskRequest) GetAccessToken() string {
+func (x *SetDriveS3Request) GetRegion() string {
 	if x != nil {
-		return x.AccessToken
+		return x.Region
 	}
 	return ""
 }
 
-func (x *SetDriveBaiduNetDiskRequest) GetTmpDir() string {
+func (x *SetDriveS3Request) GetAccessKeyId() string {
 	if x != nil {
-		return x.TmpDir
+		return x.AccessKeyId
 	}
 	return ""
 }
 
-type SetDriveBaiduNetDiskResponse struct {
+func (x *SetDriveS3Request) GetSecretAccessKey() string {
+	if x != nil {
+		return x.SecretAccessKey
+	}
+	return ""
+}
+
+func (x *SetDriveS3Request) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *SetDriveS3Request) GetRoot() string {
+	if x != nil {
+		return x.Root
+	}
+	return ""
+}
+
+type SetDriveS3Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
@@ -1357,20 +1381,20 @@ type SetDriveBaiduNetDiskResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SetDriveBaiduNetDiskResponse) Reset() {
-	*x = SetDriveBaiduNetDiskResponse{}
+func (x *SetDriveS3Response) Reset() {
+	*x = SetDriveS3Response{}
 	mi := &file_proto_img_syncer_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SetDriveBaiduNetDiskResponse) String() string {
+func (x *SetDriveS3Response) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SetDriveBaiduNetDiskResponse) ProtoMessage() {}
+func (*SetDriveS3Response) ProtoMessage() {}
 
-func (x *SetDriveBaiduNetDiskResponse) ProtoReflect() protoreflect.Message {
+func (x *SetDriveS3Response) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_img_syncer_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1382,46 +1406,45 @@ func (x *SetDriveBaiduNetDiskResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SetDriveBaiduNetDiskResponse.ProtoReflect.Descriptor instead.
-func (*SetDriveBaiduNetDiskResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use SetDriveS3Response.ProtoReflect.Descriptor instead.
+func (*SetDriveS3Response) Descriptor() ([]byte, []int) {
 	return file_proto_img_syncer_proto_rawDescGZIP(), []int{24}
 }
 
-func (x *SetDriveBaiduNetDiskResponse) GetSuccess() bool {
+func (x *SetDriveS3Response) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-func (x *SetDriveBaiduNetDiskResponse) GetMessage() string {
+func (x *SetDriveS3Response) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-type StartBaiduNetdiskLoginRequest struct {
+type ListDriveS3BucketsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TmpDir        string                 `protobuf:"bytes,1,opt,name=tmpDir,proto3" json:"tmpDir,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *StartBaiduNetdiskLoginRequest) Reset() {
-	*x = StartBaiduNetdiskLoginRequest{}
+func (x *ListDriveS3BucketsRequest) Reset() {
+	*x = ListDriveS3BucketsRequest{}
 	mi := &file_proto_img_syncer_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StartBaiduNetdiskLoginRequest) String() string {
+func (x *ListDriveS3BucketsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StartBaiduNetdiskLoginRequest) ProtoMessage() {}
+func (*ListDriveS3BucketsRequest) ProtoMessage() {}
 
-func (x *StartBaiduNetdiskLoginRequest) ProtoReflect() protoreflect.Message {
+func (x *ListDriveS3BucketsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_img_syncer_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1433,43 +1456,34 @@ func (x *StartBaiduNetdiskLoginRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StartBaiduNetdiskLoginRequest.ProtoReflect.Descriptor instead.
-func (*StartBaiduNetdiskLoginRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDriveS3BucketsRequest.ProtoReflect.Descriptor instead.
+func (*ListDriveS3BucketsRequest) Descriptor() ([]byte, []int) {
 	return file_proto_img_syncer_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *StartBaiduNetdiskLoginRequest) GetTmpDir() string {
-	if x != nil {
-		return x.TmpDir
-	}
-	return ""
-}
-
-type StartBaiduNetdiskLoginResponse struct {
+type ListDriveS3BucketsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	RefreshToken  string                 `protobuf:"bytes,3,opt,name=refreshToken,proto3" json:"refreshToken,omitempty"`
-	AccessToken   string                 `protobuf:"bytes,4,opt,name=accessToken,proto3" json:"accessToken,omitempty"`
-	ExiresAt      int64                  `protobuf:"varint,5,opt,name=exiresAt,proto3" json:"exiresAt,omitempty"`
+	Buckets       []string               `protobuf:"bytes,3,rep,name=buckets,proto3" json:"buckets,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *StartBaiduNetdiskLoginResponse) Reset() {
-	*x = StartBaiduNetdiskLoginResponse{}
+func (x *ListDriveS3BucketsResponse) Reset() {
+	*x = ListDriveS3BucketsResponse{}
 	mi := &file_proto_img_syncer_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StartBaiduNetdiskLoginResponse) String() string {
+func (x *ListDriveS3BucketsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StartBaiduNetdiskLoginResponse) ProtoMessage() {}
+func (*ListDriveS3BucketsResponse) ProtoMessage() {}
 
-func (x *StartBaiduNetdiskLoginResponse) ProtoReflect() protoreflect.Message {
+func (x *ListDriveS3BucketsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_img_syncer_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1481,44 +1495,30 @@ func (x *StartBaiduNetdiskLoginResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StartBaiduNetdiskLoginResponse.ProtoReflect.Descriptor instead.
-func (*StartBaiduNetdiskLoginResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDriveS3BucketsResponse.ProtoReflect.Descriptor instead.
+func (*ListDriveS3BucketsResponse) Descriptor() ([]byte, []int) {
 	return file_proto_img_syncer_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *StartBaiduNetdiskLoginResponse) GetSuccess() bool {
+func (x *ListDriveS3BucketsResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-func (x *StartBaiduNetdiskLoginResponse) GetMessage() string {
+func (x *ListDriveS3BucketsResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *StartBaiduNetdiskLoginResponse) GetRefreshToken() string {
+func (x *ListDriveS3BucketsResponse) GetBuckets() []string {
 	if x != nil {
-		return x.RefreshToken
+		return x.Buckets
 	}
-	return ""
-}
-
-func (x *StartBaiduNetdiskLoginResponse) GetAccessToken() string {
-	if x != nil {
-		return x.AccessToken
-	}
-	return ""
-}
-
-func (x *StartBaiduNetdiskLoginResponse) GetExiresAt() int64 {
-	if x != nil {
-		return x.ExiresAt
-	}
-	return 0
+	return nil
 }
 
 type MoveToTrashRequest struct {
@@ -2380,22 +2380,22 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\x17ListDriveNFSDirResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x12\n" +
-	"\x04dirs\x18\x03 \x03(\tR\x04dirs\"{\n" +
-	"\x1bSetDriveBaiduNetDiskRequest\x12\"\n" +
-	"\frefreshToken\x18\x01 \x01(\tR\frefreshToken\x12 \n" +
-	"\vaccessToken\x18\x02 \x01(\tR\vaccessToken\x12\x16\n" +
-	"\x06tmpDir\x18\x03 \x01(\tR\x06tmpDir\"R\n" +
-	"\x1cSetDriveBaiduNetDiskResponse\x12\x18\n" +
+	"\x04dirs\x18\x03 \x03(\tR\x04dirs\"\xbf\x01\n" +
+	"\x11SetDriveS3Request\x12\x1a\n" +
+	"\bendpoint\x18\x01 \x01(\tR\bendpoint\x12\x16\n" +
+	"\x06region\x18\x02 \x01(\tR\x06region\x12 \n" +
+	"\vaccessKeyId\x18\x03 \x01(\tR\vaccessKeyId\x12(\n" +
+	"\x0fsecretAccessKey\x18\x04 \x01(\tR\x0fsecretAccessKey\x12\x16\n" +
+	"\x06bucket\x18\x05 \x01(\tR\x06bucket\x12\x12\n" +
+	"\x04root\x18\x06 \x01(\tR\x04root\"H\n" +
+	"\x12SetDriveS3Response\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"7\n" +
-	"\x1dStartBaiduNetdiskLoginRequest\x12\x16\n" +
-	"\x06tmpDir\x18\x01 \x01(\tR\x06tmpDir\"\xb6\x01\n" +
-	"\x1eStartBaiduNetdiskLoginResponse\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x1b\n" +
+	"\x19ListDriveS3BucketsRequest\"j\n" +
+	"\x1aListDriveS3BucketsResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12\"\n" +
-	"\frefreshToken\x18\x03 \x01(\tR\frefreshToken\x12 \n" +
-	"\vaccessToken\x18\x04 \x01(\tR\vaccessToken\x12\x1a\n" +
-	"\bexiresAt\x18\x05 \x01(\x03R\bexiresAt\"*\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x18\n" +
+	"\abuckets\x18\x03 \x03(\tR\abuckets\"*\n" +
 	"\x12MoveToTrashRequest\x12\x14\n" +
 	"\x05paths\x18\x01 \x03(\tR\x05paths\"I\n" +
 	"\x13MoveToTrashResponse\x12\x18\n" +
@@ -2447,7 +2447,7 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1e\n" +
 	"\n" +
 	"freedBytes\x18\x03 \x01(\x03R\n" +
-	"freedBytes2\xb6\x0e\n" +
+	"freedBytes2\x8c\x0e\n" +
 	"\tImgSyncer\x12M\n" +
 	"\n" +
 	"ListByDate\x12\x1d.img_syncer.ListByDateRequest\x1a\x1e.img_syncer.ListByDateResponse\"\x00\x12A\n" +
@@ -2460,9 +2460,10 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\x0eSetDriveWebdav\x12!.img_syncer.SetDriveWebdavRequest\x1a\".img_syncer.SetDriveWebdavResponse\"\x00\x12e\n" +
 	"\x12ListDriveWebdavDir\x12%.img_syncer.ListDriveWebdavDirRequest\x1a&.img_syncer.ListDriveWebdavDirResponse\"\x00\x12P\n" +
 	"\vSetDriveNFS\x12\x1e.img_syncer.SetDriveNFSRequest\x1a\x1f.img_syncer.SetDriveNFSResponse\"\x00\x12\\\n" +
-	"\x0fListDriveNFSDir\x12\".img_syncer.ListDriveNFSDirRequest\x1a#.img_syncer.ListDriveNFSDirResponse\"\x00\x12k\n" +
-	"\x14SetDriveBaiduNetDisk\x12'.img_syncer.SetDriveBaiduNetDiskRequest\x1a(.img_syncer.SetDriveBaiduNetDiskResponse\"\x00\x12q\n" +
-	"\x16StartBaiduNetdiskLogin\x12).img_syncer.StartBaiduNetdiskLoginRequest\x1a*.img_syncer.StartBaiduNetdiskLoginResponse\"\x00\x12P\n" +
+	"\x0fListDriveNFSDir\x12\".img_syncer.ListDriveNFSDirRequest\x1a#.img_syncer.ListDriveNFSDirResponse\"\x00\x12M\n" +
+	"\n" +
+	"SetDriveS3\x12\x1d.img_syncer.SetDriveS3Request\x1a\x1e.img_syncer.SetDriveS3Response\"\x00\x12e\n" +
+	"\x12ListDriveS3Buckets\x12%.img_syncer.ListDriveS3BucketsRequest\x1a&.img_syncer.ListDriveS3BucketsResponse\"\x00\x12P\n" +
 	"\vMoveToTrash\x12\x1e.img_syncer.MoveToTrashRequest\x1a\x1f.img_syncer.MoveToTrashResponse\"\x00\x12J\n" +
 	"\tListTrash\x12\x1c.img_syncer.ListTrashRequest\x1a\x1d.img_syncer.ListTrashResponse\"\x00\x12_\n" +
 	"\x10RestoreFromTrash\x12#.img_syncer.RestoreFromTrashRequest\x1a$.img_syncer.RestoreFromTrashResponse\"\x00\x12M\n" +
@@ -2486,48 +2487,48 @@ func file_proto_img_syncer_proto_rawDescGZIP() []byte {
 
 var file_proto_img_syncer_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_proto_img_syncer_proto_goTypes = []any{
-	(*ListByDateRequest)(nil),              // 0: img_syncer.ListByDateRequest
-	(*ListByDateResponse)(nil),             // 1: img_syncer.ListByDateResponse
-	(*DeleteRequest)(nil),                  // 2: img_syncer.DeleteRequest
-	(*DeleteResponse)(nil),                 // 3: img_syncer.DeleteResponse
-	(*FilterNotUploadedRequestInfo)(nil),   // 4: img_syncer.FilterNotUploadedRequestInfo
-	(*FilterNotUploadedRequest)(nil),       // 5: img_syncer.FilterNotUploadedRequest
-	(*FilterNotUploadedResponse)(nil),      // 6: img_syncer.FilterNotUploadedResponse
-	(*SetDriveSMBRequest)(nil),             // 7: img_syncer.SetDriveSMBRequest
-	(*SetDriveSMBResponse)(nil),            // 8: img_syncer.SetDriveSMBResponse
-	(*ListDriveSMBSharesRequest)(nil),      // 9: img_syncer.ListDriveSMBSharesRequest
-	(*ListDriveSMBSharesResponse)(nil),     // 10: img_syncer.ListDriveSMBSharesResponse
-	(*ListDriveSMBDirRequest)(nil),         // 11: img_syncer.ListDriveSMBDirRequest
-	(*ListDriveSMBDirResponse)(nil),        // 12: img_syncer.ListDriveSMBDirResponse
-	(*SetDriveSMBShareRequest)(nil),        // 13: img_syncer.SetDriveSMBShareRequest
-	(*SetDriveSMBShareResponse)(nil),       // 14: img_syncer.SetDriveSMBShareResponse
-	(*SetDriveWebdavRequest)(nil),          // 15: img_syncer.SetDriveWebdavRequest
-	(*SetDriveWebdavResponse)(nil),         // 16: img_syncer.SetDriveWebdavResponse
-	(*ListDriveWebdavDirRequest)(nil),      // 17: img_syncer.ListDriveWebdavDirRequest
-	(*ListDriveWebdavDirResponse)(nil),     // 18: img_syncer.ListDriveWebdavDirResponse
-	(*SetDriveNFSRequest)(nil),             // 19: img_syncer.SetDriveNFSRequest
-	(*SetDriveNFSResponse)(nil),            // 20: img_syncer.SetDriveNFSResponse
-	(*ListDriveNFSDirRequest)(nil),         // 21: img_syncer.ListDriveNFSDirRequest
-	(*ListDriveNFSDirResponse)(nil),        // 22: img_syncer.ListDriveNFSDirResponse
-	(*SetDriveBaiduNetDiskRequest)(nil),    // 23: img_syncer.SetDriveBaiduNetDiskRequest
-	(*SetDriveBaiduNetDiskResponse)(nil),   // 24: img_syncer.SetDriveBaiduNetDiskResponse
-	(*StartBaiduNetdiskLoginRequest)(nil),  // 25: img_syncer.StartBaiduNetdiskLoginRequest
-	(*StartBaiduNetdiskLoginResponse)(nil), // 26: img_syncer.StartBaiduNetdiskLoginResponse
-	(*MoveToTrashRequest)(nil),             // 27: img_syncer.MoveToTrashRequest
-	(*MoveToTrashResponse)(nil),            // 28: img_syncer.MoveToTrashResponse
-	(*TrashItem)(nil),                      // 29: img_syncer.TrashItem
-	(*ListTrashRequest)(nil),               // 30: img_syncer.ListTrashRequest
-	(*ListTrashResponse)(nil),              // 31: img_syncer.ListTrashResponse
-	(*RestoreFromTrashRequest)(nil),        // 32: img_syncer.RestoreFromTrashRequest
-	(*RestoreFromTrashResponse)(nil),       // 33: img_syncer.RestoreFromTrashResponse
-	(*EmptyTrashRequest)(nil),              // 34: img_syncer.EmptyTrashRequest
-	(*EmptyTrashResponse)(nil),             // 35: img_syncer.EmptyTrashResponse
-	(*RebuildIndexRequest)(nil),            // 36: img_syncer.RebuildIndexRequest
-	(*RebuildIndexResponse)(nil),           // 37: img_syncer.RebuildIndexResponse
-	(*GetIndexStatsRequest)(nil),           // 38: img_syncer.GetIndexStatsRequest
-	(*GetIndexStatsResponse)(nil),          // 39: img_syncer.GetIndexStatsResponse
-	(*ClearThumbnailCacheRequest)(nil),     // 40: img_syncer.ClearThumbnailCacheRequest
-	(*ClearThumbnailCacheResponse)(nil),    // 41: img_syncer.ClearThumbnailCacheResponse
+	(*ListByDateRequest)(nil),            // 0: img_syncer.ListByDateRequest
+	(*ListByDateResponse)(nil),           // 1: img_syncer.ListByDateResponse
+	(*DeleteRequest)(nil),                // 2: img_syncer.DeleteRequest
+	(*DeleteResponse)(nil),               // 3: img_syncer.DeleteResponse
+	(*FilterNotUploadedRequestInfo)(nil), // 4: img_syncer.FilterNotUploadedRequestInfo
+	(*FilterNotUploadedRequest)(nil),     // 5: img_syncer.FilterNotUploadedRequest
+	(*FilterNotUploadedResponse)(nil),    // 6: img_syncer.FilterNotUploadedResponse
+	(*SetDriveSMBRequest)(nil),           // 7: img_syncer.SetDriveSMBRequest
+	(*SetDriveSMBResponse)(nil),          // 8: img_syncer.SetDriveSMBResponse
+	(*ListDriveSMBSharesRequest)(nil),    // 9: img_syncer.ListDriveSMBSharesRequest
+	(*ListDriveSMBSharesResponse)(nil),   // 10: img_syncer.ListDriveSMBSharesResponse
+	(*ListDriveSMBDirRequest)(nil),       // 11: img_syncer.ListDriveSMBDirRequest
+	(*ListDriveSMBDirResponse)(nil),      // 12: img_syncer.ListDriveSMBDirResponse
+	(*SetDriveSMBShareRequest)(nil),      // 13: img_syncer.SetDriveSMBShareRequest
+	(*SetDriveSMBShareResponse)(nil),     // 14: img_syncer.SetDriveSMBShareResponse
+	(*SetDriveWebdavRequest)(nil),        // 15: img_syncer.SetDriveWebdavRequest
+	(*SetDriveWebdavResponse)(nil),       // 16: img_syncer.SetDriveWebdavResponse
+	(*ListDriveWebdavDirRequest)(nil),    // 17: img_syncer.ListDriveWebdavDirRequest
+	(*ListDriveWebdavDirResponse)(nil),   // 18: img_syncer.ListDriveWebdavDirResponse
+	(*SetDriveNFSRequest)(nil),           // 19: img_syncer.SetDriveNFSRequest
+	(*SetDriveNFSResponse)(nil),          // 20: img_syncer.SetDriveNFSResponse
+	(*ListDriveNFSDirRequest)(nil),       // 21: img_syncer.ListDriveNFSDirRequest
+	(*ListDriveNFSDirResponse)(nil),      // 22: img_syncer.ListDriveNFSDirResponse
+	(*SetDriveS3Request)(nil),            // 23: img_syncer.SetDriveS3Request
+	(*SetDriveS3Response)(nil),           // 24: img_syncer.SetDriveS3Response
+	(*ListDriveS3BucketsRequest)(nil),    // 25: img_syncer.ListDriveS3BucketsRequest
+	(*ListDriveS3BucketsResponse)(nil),   // 26: img_syncer.ListDriveS3BucketsResponse
+	(*MoveToTrashRequest)(nil),           // 27: img_syncer.MoveToTrashRequest
+	(*MoveToTrashResponse)(nil),          // 28: img_syncer.MoveToTrashResponse
+	(*TrashItem)(nil),                    // 29: img_syncer.TrashItem
+	(*ListTrashRequest)(nil),             // 30: img_syncer.ListTrashRequest
+	(*ListTrashResponse)(nil),            // 31: img_syncer.ListTrashResponse
+	(*RestoreFromTrashRequest)(nil),      // 32: img_syncer.RestoreFromTrashRequest
+	(*RestoreFromTrashResponse)(nil),     // 33: img_syncer.RestoreFromTrashResponse
+	(*EmptyTrashRequest)(nil),            // 34: img_syncer.EmptyTrashRequest
+	(*EmptyTrashResponse)(nil),           // 35: img_syncer.EmptyTrashResponse
+	(*RebuildIndexRequest)(nil),          // 36: img_syncer.RebuildIndexRequest
+	(*RebuildIndexResponse)(nil),         // 37: img_syncer.RebuildIndexResponse
+	(*GetIndexStatsRequest)(nil),         // 38: img_syncer.GetIndexStatsRequest
+	(*GetIndexStatsResponse)(nil),        // 39: img_syncer.GetIndexStatsResponse
+	(*ClearThumbnailCacheRequest)(nil),   // 40: img_syncer.ClearThumbnailCacheRequest
+	(*ClearThumbnailCacheResponse)(nil),  // 41: img_syncer.ClearThumbnailCacheResponse
 }
 var file_proto_img_syncer_proto_depIdxs = []int32{
 	4,  // 0: img_syncer.FilterNotUploadedRequest.photos:type_name -> img_syncer.FilterNotUploadedRequestInfo
@@ -2543,8 +2544,8 @@ var file_proto_img_syncer_proto_depIdxs = []int32{
 	17, // 10: img_syncer.ImgSyncer.ListDriveWebdavDir:input_type -> img_syncer.ListDriveWebdavDirRequest
 	19, // 11: img_syncer.ImgSyncer.SetDriveNFS:input_type -> img_syncer.SetDriveNFSRequest
 	21, // 12: img_syncer.ImgSyncer.ListDriveNFSDir:input_type -> img_syncer.ListDriveNFSDirRequest
-	23, // 13: img_syncer.ImgSyncer.SetDriveBaiduNetDisk:input_type -> img_syncer.SetDriveBaiduNetDiskRequest
-	25, // 14: img_syncer.ImgSyncer.StartBaiduNetdiskLogin:input_type -> img_syncer.StartBaiduNetdiskLoginRequest
+	23, // 13: img_syncer.ImgSyncer.SetDriveS3:input_type -> img_syncer.SetDriveS3Request
+	25, // 14: img_syncer.ImgSyncer.ListDriveS3Buckets:input_type -> img_syncer.ListDriveS3BucketsRequest
 	27, // 15: img_syncer.ImgSyncer.MoveToTrash:input_type -> img_syncer.MoveToTrashRequest
 	30, // 16: img_syncer.ImgSyncer.ListTrash:input_type -> img_syncer.ListTrashRequest
 	32, // 17: img_syncer.ImgSyncer.RestoreFromTrash:input_type -> img_syncer.RestoreFromTrashRequest
@@ -2563,8 +2564,8 @@ var file_proto_img_syncer_proto_depIdxs = []int32{
 	18, // 30: img_syncer.ImgSyncer.ListDriveWebdavDir:output_type -> img_syncer.ListDriveWebdavDirResponse
 	20, // 31: img_syncer.ImgSyncer.SetDriveNFS:output_type -> img_syncer.SetDriveNFSResponse
 	22, // 32: img_syncer.ImgSyncer.ListDriveNFSDir:output_type -> img_syncer.ListDriveNFSDirResponse
-	24, // 33: img_syncer.ImgSyncer.SetDriveBaiduNetDisk:output_type -> img_syncer.SetDriveBaiduNetDiskResponse
-	26, // 34: img_syncer.ImgSyncer.StartBaiduNetdiskLogin:output_type -> img_syncer.StartBaiduNetdiskLoginResponse
+	24, // 33: img_syncer.ImgSyncer.SetDriveS3:output_type -> img_syncer.SetDriveS3Response
+	26, // 34: img_syncer.ImgSyncer.ListDriveS3Buckets:output_type -> img_syncer.ListDriveS3BucketsResponse
 	28, // 35: img_syncer.ImgSyncer.MoveToTrash:output_type -> img_syncer.MoveToTrashResponse
 	31, // 36: img_syncer.ImgSyncer.ListTrash:output_type -> img_syncer.ListTrashResponse
 	33, // 37: img_syncer.ImgSyncer.RestoreFromTrash:output_type -> img_syncer.RestoreFromTrashResponse

@@ -174,10 +174,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get currentPath => '当前目录';
 
   @override
-  String get baiduNetdisk => '百度网盘';
+  String get s3Storage => 'S3 存储';
 
   @override
-  String get baiduNetdiskLogin => '百度网盘登录';
+  String get s3Endpoint => '端点';
+
+  @override
+  String get s3Region => '区域';
+
+  @override
+  String get s3AccessKeyId => 'Access Key ID';
+
+  @override
+  String get s3SecretAccessKey => 'Secret Access Key';
+
+  @override
+  String get s3Bucket => '存储桶';
 
   @override
   String get refreshingPleaseWait => '正在交叉对比你本地和云端的照片,如果照片数量较多可能耗时较久,请耐心等待......';

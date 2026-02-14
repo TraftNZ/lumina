@@ -425,17 +425,41 @@ abstract class AppLocalizations {
   /// **'Current path'**
   String get currentPath;
 
-  /// No description provided for @baiduNetdisk.
+  /// No description provided for @s3Storage.
   ///
   /// In en, this message translates to:
-  /// **'Baidu Netdisk'**
-  String get baiduNetdisk;
+  /// **'S3 Storage'**
+  String get s3Storage;
 
-  /// No description provided for @baiduNetdiskLogin.
+  /// No description provided for @s3Endpoint.
   ///
   /// In en, this message translates to:
-  /// **'Baidu Netdisk Login'**
-  String get baiduNetdiskLogin;
+  /// **'Endpoint'**
+  String get s3Endpoint;
+
+  /// No description provided for @s3Region.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get s3Region;
+
+  /// No description provided for @s3AccessKeyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Key ID'**
+  String get s3AccessKeyId;
+
+  /// No description provided for @s3SecretAccessKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret Access Key'**
+  String get s3SecretAccessKey;
+
+  /// No description provided for @s3Bucket.
+  ///
+  /// In en, this message translates to:
+  /// **'Bucket'**
+  String get s3Bucket;
 
   /// No description provided for @refreshingPleaseWait.
   ///

@@ -17,13 +17,13 @@ SettingModel settingModel = SettingModel();
 AssetModel assetModel = AssetModel();
 StateModel stateModel = StateModel();
 
-enum Drive { smb, webDav, nfs, baiduNetdisk }
+enum Drive { smb, webDav, nfs, s3 }
 
 Map<Drive, String> driveName = {
   Drive.smb: 'SMB',
   Drive.webDav: 'WebDAV',
   Drive.nfs: 'NFS',
-  Drive.baiduNetdisk: 'BaiduNetdisk',
+  Drive.s3: 'S3',
 };
 
 class SettingModel extends ChangeNotifier {
