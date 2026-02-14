@@ -760,6 +760,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cache'**
   String get cacheManagement;
+
+  /// No description provided for @deviceAlbums.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Albums'**
+  String get deviceAlbums;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

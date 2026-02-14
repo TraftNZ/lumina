@@ -350,4 +350,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cacheManagement => '缓存';
+
+  @override
+  String get deviceAlbums => '设备相册';
 }

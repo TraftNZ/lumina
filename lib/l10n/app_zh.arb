@@ -109,5 +109,6 @@
     "rebuildIndex": "重建照片索引",
     "rebuildingIndex": "正在重建索引...",
     "indexRebuilt": "索引重建完成：已索引 {count} 张照片",
-    "cacheManagement": "缓存"
+    "cacheManagement": "缓存",
+    "deviceAlbums": "设备相册"
 }

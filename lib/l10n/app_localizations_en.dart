@@ -356,4 +356,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cacheManagement => 'Cache';
+
+  @override
+  String get deviceAlbums => 'Device Albums';
 }

@@ -144,5 +144,6 @@
       }
     }
   },
-  "cacheManagement": "Cache"
+  "cacheManagement": "Cache",
+  "deviceAlbums": "Device Albums"
 }
