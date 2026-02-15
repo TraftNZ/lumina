@@ -379,4 +379,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get yearInReview => '年度回顾';
+
+  @override
+  String get years => '年';
+
+  @override
+  String get months => '月';
+
+  @override
+  String get all => '全部';
 }

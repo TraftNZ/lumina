@@ -39,11 +39,6 @@ Lumina 是一款无服务端的照片同步和查看应用。它使用 Flutter �
 
 [下载 APK](https://github.com/zhupengjia/pho/releases)
 
-### 截图
-
-<p align="left">
-<img src="assets/screenshot/Screenshots.png" >
-</p>
 
 ### 构建
 
@@ -134,4 +129,4 @@ docker compose -f test/docker-compose.yml up -d    # 手动启动测试服务
 
 ### License
 
-[MIT](LICENSE)
+[GPL](LICENSE)

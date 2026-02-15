@@ -39,12 +39,6 @@ The app is designed to replace the native photo gallery on your phone while prov
 
 [Download APK](https://github.com/zhupengjia/pho/releases)
 
-### Screenshots
-
-<p align="left">
-<img src="assets/screenshot/Screenshots.png" >
-</p>
-
 ### Build
 
 ```bash
@@ -134,4 +128,4 @@ This project is based on [fregie/pho](https://github.com/fregie/pho). Thanks to 
 
 ### License
 
-[MIT](LICENSE)
+[GPL](LICENSE)

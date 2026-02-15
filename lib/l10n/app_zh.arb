@@ -118,5 +118,8 @@
     "scanningPhotos": "正在扫描照片位置...",
     "noLocationData": "没有包含位置信息的照片",
     "photosInCity": "{count} 张照片",
-    "yearInReview": "年度回顾"
+    "yearInReview": "年度回顾",
+    "years": "年",
+    "months": "月",
+    "all": "全部"
 }

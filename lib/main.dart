@@ -94,6 +94,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedTab = 0;
+  GalleryViewMode _viewMode = GalleryViewMode.all;
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +108,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             IndexedStack(
               index: _selectedTab,
-              children: const [
-                GalleryBody(),
-                CollectionsBody(),
+              children: [
+                GalleryBody(viewMode: _viewMode),
+                const CollectionsBody(),
               ],
             ),
             Consumer<StateModel>(
@@ -123,6 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTabChanged: (index) {
                       setState(() {
                         _selectedTab = index;
+                      });
+                    },
+                    viewMode: _selectedTab == 0 ? _viewMode : null,
+                    onViewModeChanged: (mode) {
+                      setState(() {
+                        _viewMode = mode;
                       });
                     },
                   ),
@@ -139,10 +146,14 @@ class _MyHomePageState extends State<MyHomePage> {
 class _FloatingBottomBar extends StatelessWidget {
   final int selectedTab;
   final ValueChanged<int> onTabChanged;
+  final GalleryViewMode? viewMode;
+  final ValueChanged<GalleryViewMode>? onViewModeChanged;
 
   const _FloatingBottomBar({
     required this.selectedTab,
     required this.onTabChanged,
+    this.viewMode,
+    this.onViewModeChanged,
   });
 
   @override
@@ -174,6 +185,49 @@ class _FloatingBottomBar extends StatelessWidget {
             colorScheme: colorScheme,
             textTheme: textTheme,
           ),
+          if (viewMode != null) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: SizedBox(
+                height: 20,
+                child: VerticalDivider(
+                  width: 1,
+                  thickness: 1,
+                  color: colorScheme.outlineVariant,
+                ),
+              ),
+            ),
+            ...GalleryViewMode.values.map((mode) {
+              final selected = viewMode == mode;
+              final label = switch (mode) {
+                GalleryViewMode.years => l10n.years,
+                GalleryViewMode.months => l10n.months,
+                GalleryViewMode.all => l10n.all,
+              };
+              return GestureDetector(
+                onTap: () => onViewModeChanged?.call(mode),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? colorScheme.primaryContainer
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Text(
+                    label,
+                    style: selected
+                        ? textTheme.labelLarge
+                            ?.copyWith(color: colorScheme.onPrimaryContainer)
+                        : textTheme.labelLarge
+                            ?.copyWith(color: colorScheme.onSurfaceVariant),
+                  ),
+                ),
+              );
+            }),
+          ],
         ],
       ),
     );

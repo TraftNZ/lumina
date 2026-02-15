@@ -17,14 +17,21 @@ import 'package:image_picker/image_picker.dart';
 import 'package:img_syncer/global.dart';
 import 'package:img_syncer/setting_body.dart';
 import 'package:img_syncer/theme.dart';
+import 'package:img_syncer/year_detail_body.dart';
+import 'package:img_syncer/month_detail_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:vibration/vibration.dart';
 import 'package:local_auth/local_auth.dart';
 
+enum GalleryViewMode { years, months, all }
+
 class GalleryBody extends StatefulWidget {
-  const GalleryBody({Key? key}) : super(key: key);
+  final GalleryViewMode viewMode;
+
+  const GalleryBody({Key? key, this.viewMode = GalleryViewMode.all})
+      : super(key: key);
 
   @override
   GalleryBodyState createState() => GalleryBodyState();
@@ -956,6 +963,119 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
+  Widget _buildYearsGrid(BuildContext context, AssetModel model) {
+    final all = model.getUnifiedAssets();
+    if (all.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final Map<int, _GroupInfo> yearMap = {};
+    for (final asset in all) {
+      if (asset.name() == null) continue;
+      final year = asset.dateCreated().year;
+      if (!yearMap.containsKey(year)) {
+        yearMap[year] = _GroupInfo(asset: asset);
+      }
+      yearMap[year]!.count++;
+    }
+
+    final years = yearMap.keys.toList()..sort((a, b) => b.compareTo(a));
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(4),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          childAspectRatio: 1,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final year = years[index];
+            final info = yearMap[year]!;
+            return _TimeGroupTile(
+              asset: info.asset,
+              label: '$year',
+              count: info.count,
+              colorScheme: colorScheme,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => YearDetailBody(year: year),
+                  ),
+                );
+              },
+            );
+          },
+          childCount: years.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthsGrid(BuildContext context, AssetModel model) {
+    final all = model.getUnifiedAssets();
+    if (all.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final Map<int, _GroupInfo> monthMap = {};
+    for (final asset in all) {
+      if (asset.name() == null) continue;
+      final date = asset.dateCreated();
+      final key = date.year * 100 + date.month;
+      if (!monthMap.containsKey(key)) {
+        monthMap[key] = _GroupInfo(asset: asset);
+      }
+      monthMap[key]!.count++;
+    }
+
+    final keys = monthMap.keys.toList()..sort((a, b) => b.compareTo(a));
+    final colorScheme = Theme.of(context).colorScheme;
+    final locale = Localizations.localeOf(context).languageCode;
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(4),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          childAspectRatio: 1,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final key = keys[index];
+            final year = key ~/ 100;
+            final month = key % 100;
+            final info = monthMap[key]!;
+            final label = DateFormat('MMMM yyyy', locale)
+                .format(DateTime(year, month));
+            return _TimeGroupTile(
+              asset: info.asset,
+              label: label,
+              count: info.count,
+              colorScheme: colorScheme,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        MonthDetailBody(year: year, month: month),
+                  ),
+                );
+              },
+            );
+          },
+          childCount: keys.length,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -970,7 +1090,18 @@ class GalleryBodyState extends State<GalleryBody>
               slivers: [
                 _buildToolbar(),
                 _buildSyncPanel(),
-                Consumer<AssetModel>(builder: contentBuilder),
+                Consumer<AssetModel>(
+                  builder: (context, model, child) {
+                    switch (widget.viewMode) {
+                      case GalleryViewMode.years:
+                        return _buildYearsGrid(context, model);
+                      case GalleryViewMode.months:
+                        return _buildMonthsGrid(context, model);
+                      case GalleryViewMode.all:
+                        return contentBuilder(context, model, child);
+                    }
+                  },
+                ),
               ]),
         ),
         Positioned(
@@ -999,6 +1130,113 @@ class GalleryBodyState extends State<GalleryBody>
             ),
           ),
       ],
+    );
+  }
+}
+
+class _GroupInfo {
+  final Asset asset;
+  int count = 0;
+
+  _GroupInfo({required this.asset});
+}
+
+class _TimeGroupTile extends StatefulWidget {
+  final Asset asset;
+  final String label;
+  final int count;
+  final ColorScheme colorScheme;
+  final VoidCallback onTap;
+
+  const _TimeGroupTile({
+    required this.asset,
+    required this.label,
+    required this.count,
+    required this.colorScheme,
+    required this.onTap,
+  });
+
+  @override
+  State<_TimeGroupTile> createState() => _TimeGroupTileState();
+}
+
+class _TimeGroupTileState extends State<_TimeGroupTile> {
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.asset.loadThumbnailFinished()) {
+      widget.asset.thumbnailDataAsync().then((_) {
+        if (mounted) setState(() => _loaded = true);
+      });
+    } else {
+      _loaded = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _loaded && widget.asset.loadThumbnailFinished()
+                ? Image(
+                    image: widget.asset.thumbnailProvider(),
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    color: widget.colorScheme.surfaceContainerHighest),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.6),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 10,
+              bottom: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        Shadow(blurRadius: 4, color: Colors.black54)
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${widget.count} ${l10n.photos}',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 12,
+                      shadows: const [
+                        Shadow(blurRadius: 4, color: Colors.black54)
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

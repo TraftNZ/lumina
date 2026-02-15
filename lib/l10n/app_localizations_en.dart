@@ -385,4 +385,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yearInReview => 'Year in Review';
+
+  @override
+  String get years => 'Years';
+
+  @override
+  String get months => 'Months';
+
+  @override
+  String get all => 'All';
 }
