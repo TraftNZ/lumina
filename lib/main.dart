@@ -95,7 +95,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedTab = 0;
-  GalleryViewMode _viewMode = GalleryViewMode.all;
+  GalleryViewMode? _viewMode;
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
             IndexedStack(
               index: _selectedTab,
               children: [
-                GalleryBody(viewMode: _viewMode),
+                GalleryBody(viewMode: _viewMode ?? GalleryViewMode.all),
                 const CollectionsBody(),
               ],
             ),
@@ -119,14 +119,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (model.isSelectionMode) return const SizedBox.shrink();
                 return Positioned(
                   left: 16,
+                  right: _selectedTab == 0 ? 16 : null,
                   bottom: 12,
                   child: _FloatingBottomBar(
                     selectedTab: _selectedTab,
                     onTabChanged: (index) {
                       setState(() {
                         _selectedTab = index;
+                        if (index == 1) _viewMode = null;
                       });
                     },
+                    showViewModes: _selectedTab == 0,
                     viewMode: _selectedTab == 0 ? _viewMode : null,
                     onViewModeChanged: (mode) {
                       setState(() {
@@ -147,12 +150,14 @@ class _MyHomePageState extends State<MyHomePage> {
 class _FloatingBottomBar extends StatelessWidget {
   final int selectedTab;
   final ValueChanged<int> onTabChanged;
+  final bool showViewModes;
   final GalleryViewMode? viewMode;
   final ValueChanged<GalleryViewMode>? onViewModeChanged;
 
   const _FloatingBottomBar({
     required this.selectedTab,
     required this.onTabChanged,
+    this.showViewModes = false,
     this.viewMode,
     this.onViewModeChanged,
   });
@@ -165,14 +170,14 @@ class _FloatingBottomBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(28),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: showViewModes ? MainAxisSize.max : MainAxisSize.min,
         children: [
           _buildTabChip(
             context: context,
             icon: Icons.photo_library,
             label: l10n.photos,
             isSelected: selectedTab == 0,
-            showLabel: selectedTab != 0,
+            showLabel: viewMode == null,
             onTap: () => onTabChanged(0),
             colorScheme: colorScheme,
             textTheme: textTheme,
@@ -187,18 +192,8 @@ class _FloatingBottomBar extends StatelessWidget {
             colorScheme: colorScheme,
             textTheme: textTheme,
           ),
-          if (viewMode != null) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: SizedBox(
-                height: 20,
-                child: VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: colorScheme.outlineVariant,
-                ),
-              ),
-            ),
+          if (showViewModes) ...[
+            const Spacer(),
             ...GalleryViewMode.values.map((mode) {
               final selected = viewMode == mode;
               final fullLabel = switch (mode) {
@@ -209,7 +204,7 @@ class _FloatingBottomBar extends StatelessWidget {
               final shortLabel = switch (mode) {
                 GalleryViewMode.years => 'Y',
                 GalleryViewMode.months => 'M',
-                GalleryViewMode.all => l10n.all,
+                GalleryViewMode.all => 'A',
               };
               return GestureDetector(
                 onTap: () => onViewModeChanged?.call(mode),
