@@ -8,7 +8,7 @@ Lumina - A serverless photo sync and viewing app
   <img src="https://github.com/zhupengjia/pho/actions/workflows/go_test.yml/badge.svg">
 </p>
 <p align="center">
-  <a href="README.md">中文</a> | <a href="README_EN.md">English</a>
+  <a href="README_CN.md">中文</a> | <a href="README.md">English</a>
 </p>
 
 ### Introduction

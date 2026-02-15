@@ -8,7 +8,7 @@ Lumina - 一个用于查看和同步照片的无服务端应用
   <img src="https://github.com/zhupengjia/pho/actions/workflows/go_test.yml/badge.svg">
 </p>
 <p align="center">
-  <a href="README.md">中文</a> | <a href="README_EN.md">English</a>
+  <a href="README_CN.md">中文</a> | <a href="README.md">English</a>
 </p>
 
 ### 介绍
