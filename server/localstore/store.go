@@ -19,6 +19,9 @@ type photoEntry struct {
 	Filename  string
 	Size      int64
 	IndexedAt int64
+	Labels    []string
+	FaceIDs   []string
+	Text      string
 }
 
 type thumbEntry struct {
@@ -168,6 +171,9 @@ type syncIndexEntry struct {
 	Path     string
 	Filename string
 	Size     int64
+	Labels   []string
+	FaceIDs  []string
+	Text     string
 }
 
 // ExportIndex serializes the photo index for uploading to remote storage.
@@ -183,6 +189,9 @@ func (s *LocalStore) ExportIndex() ([]byte, error) {
 			Path:     p.Path,
 			Filename: p.Filename,
 			Size:     p.Size,
+			Labels:   p.Labels,
+			FaceIDs:  p.FaceIDs,
+			Text:     p.Text,
 		})
 	}
 	var buf bytes.Buffer
@@ -217,6 +226,9 @@ func (s *LocalStore) MergeIndex(data []byte) {
 			Filename:  e.Filename,
 			Size:      e.Size,
 			IndexedAt: now,
+			Labels:    e.Labels,
+			FaceIDs:   e.FaceIDs,
+			Text:      e.Text,
 		}
 		s.data.FilenameIndex[e.Filename] = append(s.data.FilenameIndex[e.Filename], e.Path)
 		added++
@@ -247,6 +259,9 @@ func (s *LocalStore) ImportIndex(data []byte) error {
 			Filename:  e.Filename,
 			Size:      e.Size,
 			IndexedAt: now,
+			Labels:    e.Labels,
+			FaceIDs:   e.FaceIDs,
+			Text:      e.Text,
 		}
 		s.data.FilenameIndex[e.Filename] = append(s.data.FilenameIndex[e.Filename], e.Path)
 	}

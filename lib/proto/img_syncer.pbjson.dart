@@ -730,3 +730,92 @@ final $typed_data.Uint8List clearThumbnailCacheResponseDescriptor =
         'ChtDbGVhclRodW1ibmFpbENhY2hlUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2Vzcx'
         'IYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlEh4KCmZyZWVkQnl0ZXMYAyABKANSCmZyZWVkQnl0'
         'ZXM=');
+
+@$core.Deprecated('Use updatePhotoLabelsRequestDescriptor instead')
+const UpdatePhotoLabelsRequest$json = {
+  '1': 'UpdatePhotoLabelsRequest',
+  '2': [
+    {'1': 'path', '3': 1, '4': 1, '5': 9, '10': 'path'},
+    {'1': 'labels', '3': 2, '4': 3, '5': 9, '10': 'labels'},
+    {'1': 'faceIDs', '3': 3, '4': 3, '5': 9, '10': 'faceIDs'},
+    {'1': 'text', '3': 4, '4': 1, '5': 9, '10': 'text'},
+  ],
+};
+
+/// Descriptor for `UpdatePhotoLabelsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updatePhotoLabelsRequestDescriptor = $convert.base64Decode(
+    'ChhVcGRhdGVQaG90b0xhYmVsc1JlcXVlc3QSEgoEcGF0aBgBIAEoCVIEcGF0aBIWCgZsYWJlbH'
+    'MYAiADKAlSBmxhYmVscxIYCgdmYWNlSURzGAMgAygJUgdmYWNlSURzEhIKBHRleHQYBCABKAlS'
+    'BHRleHQ=');
+
+@$core.Deprecated('Use updatePhotoLabelsResponseDescriptor instead')
+const UpdatePhotoLabelsResponse$json = {
+  '1': 'UpdatePhotoLabelsResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `UpdatePhotoLabelsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updatePhotoLabelsResponseDescriptor =
+    $convert.base64Decode(
+        'ChlVcGRhdGVQaG90b0xhYmVsc1Jlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSGA'
+        'oHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZQ==');
+
+@$core.Deprecated('Use searchPhotosRequestDescriptor instead')
+const SearchPhotosRequest$json = {
+  '1': 'SearchPhotosRequest',
+  '2': [
+    {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
+  ],
+};
+
+/// Descriptor for `SearchPhotosRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List searchPhotosRequestDescriptor =
+    $convert.base64Decode(
+        'ChNTZWFyY2hQaG90b3NSZXF1ZXN0EhQKBXF1ZXJ5GAEgASgJUgVxdWVyeQ==');
+
+@$core.Deprecated('Use searchPhotosResponseDescriptor instead')
+const SearchPhotosResponse$json = {
+  '1': 'SearchPhotosResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'paths', '3': 3, '4': 3, '5': 9, '10': 'paths'},
+  ],
+};
+
+/// Descriptor for `SearchPhotosResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List searchPhotosResponseDescriptor = $convert.base64Decode(
+    'ChRTZWFyY2hQaG90b3NSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB21lc3'
+    'NhZ2UYAiABKAlSB21lc3NhZ2USFAoFcGF0aHMYAyADKAlSBXBhdGhz');
+
+@$core.Deprecated('Use getUnlabeledPhotosRequestDescriptor instead')
+const GetUnlabeledPhotosRequest$json = {
+  '1': 'GetUnlabeledPhotosRequest',
+  '2': [
+    {'1': 'limit', '3': 1, '4': 1, '5': 5, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `GetUnlabeledPhotosRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getUnlabeledPhotosRequestDescriptor =
+    $convert.base64Decode(
+        'ChlHZXRVbmxhYmVsZWRQaG90b3NSZXF1ZXN0EhQKBWxpbWl0GAEgASgFUgVsaW1pdA==');
+
+@$core.Deprecated('Use getUnlabeledPhotosResponseDescriptor instead')
+const GetUnlabeledPhotosResponse$json = {
+  '1': 'GetUnlabeledPhotosResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'paths', '3': 3, '4': 3, '5': 9, '10': 'paths'},
+  ],
+};
+
+/// Descriptor for `GetUnlabeledPhotosResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getUnlabeledPhotosResponseDescriptor =
+    $convert.base64Decode(
+        'ChpHZXRVbmxhYmVsZWRQaG90b3NSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEh'
+        'gKB21lc3NhZ2UYAiABKAlSB21lc3NhZ2USFAoFcGF0aHMYAyADKAlSBXBhdGhz');

@@ -34,6 +34,10 @@ service ImgSyncer {
   rpc RebuildIndex (RebuildIndexRequest) returns (stream RebuildIndexResponse) {}
   rpc GetIndexStats (GetIndexStatsRequest) returns (GetIndexStatsResponse) {}
   rpc ClearThumbnailCache (ClearThumbnailCacheRequest) returns (ClearThumbnailCacheResponse) {}
+  // ML Photo Search
+  rpc UpdatePhotoLabels (UpdatePhotoLabelsRequest) returns (UpdatePhotoLabelsResponse) {}
+  rpc SearchPhotos (SearchPhotosRequest) returns (SearchPhotosResponse) {}
+  rpc GetUnlabeledPhotos (GetUnlabeledPhotosRequest) returns (GetUnlabeledPhotosResponse) {}
 }
 
 // enum ContentType {
@@ -261,4 +265,33 @@ message ClearThumbnailCacheResponse {
   bool success = 1;
   string message = 2;
   int64 freedBytes = 3;
+}
+
+message UpdatePhotoLabelsRequest {
+  string path = 1;
+  repeated string labels = 2;
+  repeated string faceIDs = 3;
+  string text = 4;
+}
+message UpdatePhotoLabelsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SearchPhotosRequest {
+  string query = 1;
+}
+message SearchPhotosResponse {
+  bool success = 1;
+  string message = 2;
+  repeated string paths = 3;
+}
+
+message GetUnlabeledPhotosRequest {
+  int32 limit = 1;
+}
+message GetUnlabeledPhotosResponse {
+  bool success = 1;
+  string message = 2;
+  repeated string paths = 3;
 }

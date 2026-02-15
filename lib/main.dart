@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:img_syncer/state_model.dart';
 import 'gallery_body.dart';
 import 'collections_body.dart';
+import 'search_body.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:img_syncer/logger.dart';
@@ -171,6 +172,7 @@ class _FloatingBottomBar extends StatelessWidget {
             icon: Icons.photo_library,
             label: l10n.photos,
             isSelected: selectedTab == 0,
+            showLabel: selectedTab != 0,
             onTap: () => onTabChanged(0),
             colorScheme: colorScheme,
             textTheme: textTheme,
@@ -199,9 +201,14 @@ class _FloatingBottomBar extends StatelessWidget {
             ),
             ...GalleryViewMode.values.map((mode) {
               final selected = viewMode == mode;
-              final label = switch (mode) {
+              final fullLabel = switch (mode) {
                 GalleryViewMode.years => l10n.years,
                 GalleryViewMode.months => l10n.months,
+                GalleryViewMode.all => l10n.all,
+              };
+              final shortLabel = switch (mode) {
+                GalleryViewMode.years => 'Y',
+                GalleryViewMode.months => 'M',
                 GalleryViewMode.all => l10n.all,
               };
               return GestureDetector(
@@ -209,7 +216,7 @@ class _FloatingBottomBar extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
                     color: selected
                         ? colorScheme.primaryContainer
@@ -217,7 +224,7 @@ class _FloatingBottomBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: Text(
-                    label,
+                    selected ? fullLabel : shortLabel,
                     style: selected
                         ? textTheme.labelLarge
                             ?.copyWith(color: colorScheme.onPrimaryContainer)
@@ -227,6 +234,17 @@ class _FloatingBottomBar extends StatelessWidget {
                 ),
               );
             }),
+            IconButton(
+              icon: Icon(Icons.search, size: 20, color: colorScheme.onSurfaceVariant),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SearchBody()),
+                );
+              },
+            ),
           ],
         ],
       ),
@@ -238,6 +256,7 @@ class _FloatingBottomBar extends StatelessWidget {
     required IconData icon,
     required String label,
     required bool isSelected,
+    bool showLabel = true,
     required VoidCallback onTap,
     required ColorScheme colorScheme,
     required TextTheme textTheme,
@@ -246,7 +265,7 @@ class _FloatingBottomBar extends StatelessWidget {
       return GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: showLabel ? 16 : 12, vertical: 8),
           decoration: BoxDecoration(
             color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(28),
@@ -255,11 +274,13 @@ class _FloatingBottomBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 20, color: colorScheme.onPrimaryContainer),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimaryContainer),
-              ),
+              if (showLabel) ...[
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimaryContainer),
+                ),
+              ],
             ],
           ),
         ),

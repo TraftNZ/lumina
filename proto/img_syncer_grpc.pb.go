@@ -42,6 +42,9 @@ const (
 	ImgSyncer_RebuildIndex_FullMethodName        = "/img_syncer.ImgSyncer/RebuildIndex"
 	ImgSyncer_GetIndexStats_FullMethodName       = "/img_syncer.ImgSyncer/GetIndexStats"
 	ImgSyncer_ClearThumbnailCache_FullMethodName = "/img_syncer.ImgSyncer/ClearThumbnailCache"
+	ImgSyncer_UpdatePhotoLabels_FullMethodName   = "/img_syncer.ImgSyncer/UpdatePhotoLabels"
+	ImgSyncer_SearchPhotos_FullMethodName        = "/img_syncer.ImgSyncer/SearchPhotos"
+	ImgSyncer_GetUnlabeledPhotos_FullMethodName  = "/img_syncer.ImgSyncer/GetUnlabeledPhotos"
 )
 
 // ImgSyncerClient is the client API for ImgSyncer service.
@@ -78,6 +81,10 @@ type ImgSyncerClient interface {
 	RebuildIndex(ctx context.Context, in *RebuildIndexRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RebuildIndexResponse], error)
 	GetIndexStats(ctx context.Context, in *GetIndexStatsRequest, opts ...grpc.CallOption) (*GetIndexStatsResponse, error)
 	ClearThumbnailCache(ctx context.Context, in *ClearThumbnailCacheRequest, opts ...grpc.CallOption) (*ClearThumbnailCacheResponse, error)
+	// ML Photo Search
+	UpdatePhotoLabels(ctx context.Context, in *UpdatePhotoLabelsRequest, opts ...grpc.CallOption) (*UpdatePhotoLabelsResponse, error)
+	SearchPhotos(ctx context.Context, in *SearchPhotosRequest, opts ...grpc.CallOption) (*SearchPhotosResponse, error)
+	GetUnlabeledPhotos(ctx context.Context, in *GetUnlabeledPhotosRequest, opts ...grpc.CallOption) (*GetUnlabeledPhotosResponse, error)
 }
 
 type imgSyncerClient struct {
@@ -330,6 +337,36 @@ func (c *imgSyncerClient) ClearThumbnailCache(ctx context.Context, in *ClearThum
 	return out, nil
 }
 
+func (c *imgSyncerClient) UpdatePhotoLabels(ctx context.Context, in *UpdatePhotoLabelsRequest, opts ...grpc.CallOption) (*UpdatePhotoLabelsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdatePhotoLabelsResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_UpdatePhotoLabels_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) SearchPhotos(ctx context.Context, in *SearchPhotosRequest, opts ...grpc.CallOption) (*SearchPhotosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchPhotosResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_SearchPhotos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) GetUnlabeledPhotos(ctx context.Context, in *GetUnlabeledPhotosRequest, opts ...grpc.CallOption) (*GetUnlabeledPhotosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUnlabeledPhotosResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_GetUnlabeledPhotos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImgSyncerServer is the server API for ImgSyncer service.
 // All implementations must embed UnimplementedImgSyncerServer
 // for forward compatibility.
@@ -364,6 +401,10 @@ type ImgSyncerServer interface {
 	RebuildIndex(*RebuildIndexRequest, grpc.ServerStreamingServer[RebuildIndexResponse]) error
 	GetIndexStats(context.Context, *GetIndexStatsRequest) (*GetIndexStatsResponse, error)
 	ClearThumbnailCache(context.Context, *ClearThumbnailCacheRequest) (*ClearThumbnailCacheResponse, error)
+	// ML Photo Search
+	UpdatePhotoLabels(context.Context, *UpdatePhotoLabelsRequest) (*UpdatePhotoLabelsResponse, error)
+	SearchPhotos(context.Context, *SearchPhotosRequest) (*SearchPhotosResponse, error)
+	GetUnlabeledPhotos(context.Context, *GetUnlabeledPhotosRequest) (*GetUnlabeledPhotosResponse, error)
 	mustEmbedUnimplementedImgSyncerServer()
 }
 
@@ -442,6 +483,15 @@ func (UnimplementedImgSyncerServer) GetIndexStats(context.Context, *GetIndexStat
 }
 func (UnimplementedImgSyncerServer) ClearThumbnailCache(context.Context, *ClearThumbnailCacheRequest) (*ClearThumbnailCacheResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ClearThumbnailCache not implemented")
+}
+func (UnimplementedImgSyncerServer) UpdatePhotoLabels(context.Context, *UpdatePhotoLabelsRequest) (*UpdatePhotoLabelsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdatePhotoLabels not implemented")
+}
+func (UnimplementedImgSyncerServer) SearchPhotos(context.Context, *SearchPhotosRequest) (*SearchPhotosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchPhotos not implemented")
+}
+func (UnimplementedImgSyncerServer) GetUnlabeledPhotos(context.Context, *GetUnlabeledPhotosRequest) (*GetUnlabeledPhotosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUnlabeledPhotos not implemented")
 }
 func (UnimplementedImgSyncerServer) mustEmbedUnimplementedImgSyncerServer() {}
 func (UnimplementedImgSyncerServer) testEmbeddedByValue()                   {}
@@ -860,6 +910,60 @@ func _ImgSyncer_ClearThumbnailCache_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImgSyncer_UpdatePhotoLabels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePhotoLabelsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).UpdatePhotoLabels(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_UpdatePhotoLabels_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).UpdatePhotoLabels(ctx, req.(*UpdatePhotoLabelsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_SearchPhotos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchPhotosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).SearchPhotos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_SearchPhotos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).SearchPhotos(ctx, req.(*SearchPhotosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_GetUnlabeledPhotos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUnlabeledPhotosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).GetUnlabeledPhotos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_GetUnlabeledPhotos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).GetUnlabeledPhotos(ctx, req.(*GetUnlabeledPhotosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ImgSyncer_ServiceDesc is the grpc.ServiceDesc for ImgSyncer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -950,6 +1054,18 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClearThumbnailCache",
 			Handler:    _ImgSyncer_ClearThumbnailCache_Handler,
+		},
+		{
+			MethodName: "UpdatePhotoLabels",
+			Handler:    _ImgSyncer_UpdatePhotoLabels_Handler,
+		},
+		{
+			MethodName: "SearchPhotos",
+			Handler:    _ImgSyncer_SearchPhotos_Handler,
+		},
+		{
+			MethodName: "GetUnlabeledPhotos",
+			Handler:    _ImgSyncer_GetUnlabeledPhotos_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

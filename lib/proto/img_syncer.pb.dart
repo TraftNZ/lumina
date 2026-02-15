@@ -3229,6 +3229,407 @@ class ClearThumbnailCacheResponse extends $pb.GeneratedMessage {
   void clearFreedBytes() => $_clearField(3);
 }
 
+class UpdatePhotoLabelsRequest extends $pb.GeneratedMessage {
+  factory UpdatePhotoLabelsRequest({
+    $core.String? path,
+    $core.Iterable<$core.String>? labels,
+    $core.Iterable<$core.String>? faceIDs,
+    $core.String? text,
+  }) {
+    final result = create();
+    if (path != null) result.path = path;
+    if (labels != null) result.labels.addAll(labels);
+    if (faceIDs != null) result.faceIDs.addAll(faceIDs);
+    if (text != null) result.text = text;
+    return result;
+  }
+
+  UpdatePhotoLabelsRequest._();
+
+  factory UpdatePhotoLabelsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory UpdatePhotoLabelsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UpdatePhotoLabelsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'path')
+    ..pPS(2, _omitFieldNames ? '' : 'labels')
+    ..pPS(3, _omitFieldNames ? '' : 'faceIDs', protoName: 'faceIDs')
+    ..aOS(4, _omitFieldNames ? '' : 'text')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UpdatePhotoLabelsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UpdatePhotoLabelsRequest copyWith(
+          void Function(UpdatePhotoLabelsRequest) updates) =>
+      super.copyWith((message) => updates(message as UpdatePhotoLabelsRequest))
+          as UpdatePhotoLabelsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static UpdatePhotoLabelsRequest create() => UpdatePhotoLabelsRequest._();
+  @$core.override
+  UpdatePhotoLabelsRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static UpdatePhotoLabelsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<UpdatePhotoLabelsRequest>(create);
+  static UpdatePhotoLabelsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get path => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set path($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<$core.String> get labels => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$core.String> get faceIDs => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $core.String get text => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set text($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasText() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearText() => $_clearField(4);
+}
+
+class UpdatePhotoLabelsResponse extends $pb.GeneratedMessage {
+  factory UpdatePhotoLabelsResponse({
+    $core.bool? success,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  UpdatePhotoLabelsResponse._();
+
+  factory UpdatePhotoLabelsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory UpdatePhotoLabelsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UpdatePhotoLabelsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UpdatePhotoLabelsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UpdatePhotoLabelsResponse copyWith(
+          void Function(UpdatePhotoLabelsResponse) updates) =>
+      super.copyWith((message) => updates(message as UpdatePhotoLabelsResponse))
+          as UpdatePhotoLabelsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static UpdatePhotoLabelsResponse create() => UpdatePhotoLabelsResponse._();
+  @$core.override
+  UpdatePhotoLabelsResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static UpdatePhotoLabelsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<UpdatePhotoLabelsResponse>(create);
+  static UpdatePhotoLabelsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
+class SearchPhotosRequest extends $pb.GeneratedMessage {
+  factory SearchPhotosRequest({
+    $core.String? query,
+  }) {
+    final result = create();
+    if (query != null) result.query = query;
+    return result;
+  }
+
+  SearchPhotosRequest._();
+
+  factory SearchPhotosRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SearchPhotosRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SearchPhotosRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'query')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SearchPhotosRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SearchPhotosRequest copyWith(void Function(SearchPhotosRequest) updates) =>
+      super.copyWith((message) => updates(message as SearchPhotosRequest))
+          as SearchPhotosRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SearchPhotosRequest create() => SearchPhotosRequest._();
+  @$core.override
+  SearchPhotosRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SearchPhotosRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SearchPhotosRequest>(create);
+  static SearchPhotosRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get query => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set query($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasQuery() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearQuery() => $_clearField(1);
+}
+
+class SearchPhotosResponse extends $pb.GeneratedMessage {
+  factory SearchPhotosResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.Iterable<$core.String>? paths,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (paths != null) result.paths.addAll(paths);
+    return result;
+  }
+
+  SearchPhotosResponse._();
+
+  factory SearchPhotosResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SearchPhotosResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SearchPhotosResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'paths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SearchPhotosResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SearchPhotosResponse copyWith(void Function(SearchPhotosResponse) updates) =>
+      super.copyWith((message) => updates(message as SearchPhotosResponse))
+          as SearchPhotosResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SearchPhotosResponse create() => SearchPhotosResponse._();
+  @$core.override
+  SearchPhotosResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SearchPhotosResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SearchPhotosResponse>(create);
+  static SearchPhotosResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$core.String> get paths => $_getList(2);
+}
+
+class GetUnlabeledPhotosRequest extends $pb.GeneratedMessage {
+  factory GetUnlabeledPhotosRequest({
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  GetUnlabeledPhotosRequest._();
+
+  factory GetUnlabeledPhotosRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetUnlabeledPhotosRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetUnlabeledPhotosRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'limit')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUnlabeledPhotosRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUnlabeledPhotosRequest copyWith(
+          void Function(GetUnlabeledPhotosRequest) updates) =>
+      super.copyWith((message) => updates(message as GetUnlabeledPhotosRequest))
+          as GetUnlabeledPhotosRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetUnlabeledPhotosRequest create() => GetUnlabeledPhotosRequest._();
+  @$core.override
+  GetUnlabeledPhotosRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetUnlabeledPhotosRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetUnlabeledPhotosRequest>(create);
+  static GetUnlabeledPhotosRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get limit => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set limit($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasLimit() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearLimit() => $_clearField(1);
+}
+
+class GetUnlabeledPhotosResponse extends $pb.GeneratedMessage {
+  factory GetUnlabeledPhotosResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.Iterable<$core.String>? paths,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (paths != null) result.paths.addAll(paths);
+    return result;
+  }
+
+  GetUnlabeledPhotosResponse._();
+
+  factory GetUnlabeledPhotosResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetUnlabeledPhotosResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetUnlabeledPhotosResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'paths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUnlabeledPhotosResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUnlabeledPhotosResponse copyWith(
+          void Function(GetUnlabeledPhotosResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetUnlabeledPhotosResponse))
+          as GetUnlabeledPhotosResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetUnlabeledPhotosResponse create() => GetUnlabeledPhotosResponse._();
+  @$core.override
+  GetUnlabeledPhotosResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetUnlabeledPhotosResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetUnlabeledPhotosResponse>(create);
+  static GetUnlabeledPhotosResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$core.String> get paths => $_getList(2);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

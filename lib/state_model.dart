@@ -177,6 +177,7 @@ class AssetModel extends ChangeNotifier {
   List<Asset> localAssets = [];
   List<Asset> remoteAssets = [];
   List<Asset> _unifiedAssets = [];
+  List<Asset>? _searchResults;
   bool _unifiedDirty = true;
   int columCount = 4;
   int pageSize = 500;
@@ -190,6 +191,7 @@ class AssetModel extends ChangeNotifier {
   bool get hasMore => localHasMore || remoteHasMore;
 
   List<Asset> getUnifiedAssets() {
+    if (_searchResults != null) return _searchResults!;
     if (_unifiedDirty) _rebuildUnifiedList();
     return _unifiedAssets;
   }
@@ -225,6 +227,16 @@ class AssetModel extends ChangeNotifier {
     _unifiedAssets = [...localAssets, ...cloudOnly];
     _unifiedAssets.sort((a, b) => b.dateCreated().compareTo(a.dateCreated()));
     _unifiedDirty = false;
+  }
+
+  void setSearchResults(List<Asset> results) {
+    _searchResults = results;
+    notifyListeners();
+  }
+
+  void clearSearchResults() {
+    _searchResults = null;
+    notifyListeners();
   }
 
   Future<void> getMorePhotos() async {

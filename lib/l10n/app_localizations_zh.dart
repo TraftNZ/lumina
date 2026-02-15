@@ -388,4 +388,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get all => '全部';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get searchPhotos => '搜索照片';
+
+  @override
+  String get noResults => '无结果';
+
+  @override
+  String get searchHint => '搜索照片中的物体、场景或文字';
+
+  @override
+  String get indexingPhotos => '正在索引照片...';
+
+  @override
+  String indexingProgress(int indexed, int total) {
+    return '已索引 $indexed/$total 张照片';
+  }
+
+  @override
+  String get tapToPlay => '点击播放';
+
+  @override
+  String get savedToGallery => '已保存到相册';
 }

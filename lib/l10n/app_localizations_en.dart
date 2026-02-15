@@ -394,4 +394,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get all => 'All';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get searchPhotos => 'Search photos';
+
+  @override
+  String get noResults => 'No results';
+
+  @override
+  String get searchHint => 'Search by objects, scenes, or text in photos';
+
+  @override
+  String get indexingPhotos => 'Indexing photos...';
+
+  @override
+  String indexingProgress(int indexed, int total) {
+    return '$indexed of $total photos indexed';
+  }
+
+  @override
+  String get tapToPlay => 'Tap to play';
+
+  @override
+  String get savedToGallery => 'Saved to gallery';
 }

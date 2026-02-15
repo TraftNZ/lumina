@@ -121,5 +121,13 @@
     "yearInReview": "年度回顾",
     "years": "年",
     "months": "月",
-    "all": "全部"
+    "all": "全部",
+    "search": "搜索",
+    "searchPhotos": "搜索照片",
+    "noResults": "无结果",
+    "searchHint": "搜索照片中的物体、场景或文字",
+    "indexingPhotos": "正在索引照片...",
+    "indexingProgress": "已索引 {indexed}/{total} 张照片",
+    "tapToPlay": "点击播放",
+    "savedToGallery": "已保存到相册"
 }

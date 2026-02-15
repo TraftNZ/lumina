@@ -310,6 +310,52 @@ func (a *api) ClearThumbnailCache(ctx context.Context, req *pb.ClearThumbnailCac
 	return
 }
 
+func (a *api) UpdatePhotoLabels(ctx context.Context, req *pb.UpdatePhotoLabelsRequest) (rsp *pb.UpdatePhotoLabelsResponse, err error) {
+	rsp = &pb.UpdatePhotoLabelsResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		rsp.Message = "local store not available"
+		return
+	}
+	if updateErr := store.UpdateLabels(req.Path, req.Labels, req.FaceIDs, req.Text); updateErr != nil {
+		rsp.Success = false
+		rsp.Message = updateErr.Error()
+		return
+	}
+	// Trigger debounced sync state write to persist labels to remote
+	a.im.DebouncedWriteSyncState()
+	return
+}
+
+func (a *api) SearchPhotos(ctx context.Context, req *pb.SearchPhotosRequest) (rsp *pb.SearchPhotosResponse, err error) {
+	rsp = &pb.SearchPhotosResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		rsp.Message = "local store not available"
+		return
+	}
+	rsp.Paths = store.SearchLabels(req.Query)
+	return
+}
+
+func (a *api) GetUnlabeledPhotos(ctx context.Context, req *pb.GetUnlabeledPhotosRequest) (rsp *pb.GetUnlabeledPhotosResponse, err error) {
+	rsp = &pb.GetUnlabeledPhotosResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		rsp.Message = "local store not available"
+		return
+	}
+	limit := int(req.Limit)
+	if limit <= 0 {
+		limit = 50
+	}
+	rsp.Paths = store.GetUnlabeledPaths(limit)
+	return
+}
+
 func isVideo(name string) bool {
 	ext := filepath.Ext(name)
 	switch ext {

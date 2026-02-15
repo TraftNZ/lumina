@@ -832,6 +832,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get all;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @searchPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Search photos'**
+  String get searchPhotos;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get noResults;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by objects, scenes, or text in photos'**
+  String get searchHint;
+
+  /// No description provided for @indexingPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Indexing photos...'**
+  String get indexingPhotos;
+
+  /// No description provided for @indexingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{indexed} of {total} photos indexed'**
+  String indexingProgress(int indexed, int total);
+
+  /// No description provided for @tapToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to play'**
+  String get tapToPlay;
+
+  /// No description provided for @savedToGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to gallery'**
+  String get savedToGallery;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

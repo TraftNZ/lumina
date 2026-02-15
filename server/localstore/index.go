@@ -2,6 +2,7 @@ package localstore
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -153,4 +154,84 @@ func (s *LocalStore) LastIndexTimestamp() int64 {
 		return 0
 	}
 	return s.data.LastFullIndex
+}
+
+// UpdateLabels sets ML labels for a photo that's already indexed.
+func (s *LocalStore) UpdateLabels(path string, labels []string, faceIDs []string, text string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.initialized {
+		return fmt.Errorf("store not initialized")
+	}
+	entry, exists := s.data.Photos[path]
+	if !exists {
+		return fmt.Errorf("photo not found: %s", path)
+	}
+	entry.Labels = labels
+	entry.FaceIDs = faceIDs
+	entry.Text = text
+	s.data.Photos[path] = entry
+	s.saveLocked()
+	return nil
+}
+
+// SearchLabels returns paths whose labels or text contain any of the query terms (case-insensitive substring match).
+func (s *LocalStore) SearchLabels(query string) []string {
+	if query == "" {
+		return nil
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if !s.initialized {
+		return nil
+	}
+	query = strings.ToLower(query)
+	queryTerms := strings.Fields(query)
+	var results []string
+	for path, entry := range s.data.Photos {
+		// Search in labels (skip internal sentinel labels starting with _)
+		for _, label := range entry.Labels {
+			if strings.HasPrefix(label, "_") {
+				continue
+			}
+			labelLower := strings.ToLower(label)
+			for _, term := range queryTerms {
+				if strings.Contains(labelLower, term) {
+					results = append(results, path)
+					goto nextPhoto
+				}
+			}
+		}
+		// Search in text (OCR)
+		if entry.Text != "" {
+			textLower := strings.ToLower(entry.Text)
+			for _, term := range queryTerms {
+				if strings.Contains(textLower, term) {
+					results = append(results, path)
+					goto nextPhoto
+				}
+			}
+		}
+	nextPhoto:
+	}
+	return results
+}
+
+// GetUnlabeledPaths returns paths that have no ML labels yet (for batch indexing).
+func (s *LocalStore) GetUnlabeledPaths(limit int) []string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if !s.initialized {
+		return nil
+	}
+	var results []string
+	for path, entry := range s.data.Photos {
+		if len(entry.Labels) == 0 && entry.Text == "" {
+			results = append(results, path)
+			if limit > 0 && len(results) >= limit {
+				break
+			}
+		}
+	}
+	return results
 }

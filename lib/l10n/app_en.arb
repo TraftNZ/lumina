@@ -163,5 +163,23 @@
   "yearInReview": "Year in Review",
   "years": "Years",
   "months": "Months",
-  "all": "All"
+  "all": "All",
+  "search": "Search",
+  "searchPhotos": "Search photos",
+  "noResults": "No results",
+  "searchHint": "Search by objects, scenes, or text in photos",
+  "indexingPhotos": "Indexing photos...",
+  "indexingProgress": "{indexed} of {total} photos indexed",
+  "@indexingProgress": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToPlay": "Tap to play",
+  "savedToGallery": "Saved to gallery"
 }

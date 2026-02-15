@@ -202,6 +202,28 @@ class ImgSyncerClient extends $grpc.Client {
     return $createUnaryCall(_$clearThumbnailCache, request, options: options);
   }
 
+  /// ML Photo Search
+  $grpc.ResponseFuture<$0.UpdatePhotoLabelsResponse> updatePhotoLabels(
+    $0.UpdatePhotoLabelsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$updatePhotoLabels, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.SearchPhotosResponse> searchPhotos(
+    $0.SearchPhotosRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$searchPhotos, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.GetUnlabeledPhotosResponse> getUnlabeledPhotos(
+    $0.GetUnlabeledPhotosRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getUnlabeledPhotos, request, options: options);
+  }
+
   // method descriptors
 
   static final _$listByDate =
@@ -319,6 +341,21 @@ class ImgSyncerClient extends $grpc.Client {
       '/img_syncer.ImgSyncer/ClearThumbnailCache',
       ($0.ClearThumbnailCacheRequest value) => value.writeToBuffer(),
       $0.ClearThumbnailCacheResponse.fromBuffer);
+  static final _$updatePhotoLabels = $grpc.ClientMethod<
+          $0.UpdatePhotoLabelsRequest, $0.UpdatePhotoLabelsResponse>(
+      '/img_syncer.ImgSyncer/UpdatePhotoLabels',
+      ($0.UpdatePhotoLabelsRequest value) => value.writeToBuffer(),
+      $0.UpdatePhotoLabelsResponse.fromBuffer);
+  static final _$searchPhotos =
+      $grpc.ClientMethod<$0.SearchPhotosRequest, $0.SearchPhotosResponse>(
+          '/img_syncer.ImgSyncer/SearchPhotos',
+          ($0.SearchPhotosRequest value) => value.writeToBuffer(),
+          $0.SearchPhotosResponse.fromBuffer);
+  static final _$getUnlabeledPhotos = $grpc.ClientMethod<
+          $0.GetUnlabeledPhotosRequest, $0.GetUnlabeledPhotosResponse>(
+      '/img_syncer.ImgSyncer/GetUnlabeledPhotos',
+      ($0.GetUnlabeledPhotosRequest value) => value.writeToBuffer(),
+      $0.GetUnlabeledPhotosResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('img_syncer.ImgSyncer')
@@ -521,6 +558,33 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.ClearThumbnailCacheRequest.fromBuffer(value),
         ($0.ClearThumbnailCacheResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.UpdatePhotoLabelsRequest,
+            $0.UpdatePhotoLabelsResponse>(
+        'UpdatePhotoLabels',
+        updatePhotoLabels_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.UpdatePhotoLabelsRequest.fromBuffer(value),
+        ($0.UpdatePhotoLabelsResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.SearchPhotosRequest, $0.SearchPhotosResponse>(
+            'SearchPhotos',
+            searchPhotos_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.SearchPhotosRequest.fromBuffer(value),
+            ($0.SearchPhotosResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetUnlabeledPhotosRequest,
+            $0.GetUnlabeledPhotosResponse>(
+        'GetUnlabeledPhotos',
+        getUnlabeledPhotos_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetUnlabeledPhotosRequest.fromBuffer(value),
+        ($0.GetUnlabeledPhotosResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall $call,
@@ -715,4 +779,31 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
 
   $async.Future<$0.ClearThumbnailCacheResponse> clearThumbnailCache(
       $grpc.ServiceCall call, $0.ClearThumbnailCacheRequest request);
+
+  $async.Future<$0.UpdatePhotoLabelsResponse> updatePhotoLabels_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.UpdatePhotoLabelsRequest> $request) async {
+    return updatePhotoLabels($call, await $request);
+  }
+
+  $async.Future<$0.UpdatePhotoLabelsResponse> updatePhotoLabels(
+      $grpc.ServiceCall call, $0.UpdatePhotoLabelsRequest request);
+
+  $async.Future<$0.SearchPhotosResponse> searchPhotos_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.SearchPhotosRequest> $request) async {
+    return searchPhotos($call, await $request);
+  }
+
+  $async.Future<$0.SearchPhotosResponse> searchPhotos(
+      $grpc.ServiceCall call, $0.SearchPhotosRequest request);
+
+  $async.Future<$0.GetUnlabeledPhotosResponse> getUnlabeledPhotos_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetUnlabeledPhotosRequest> $request) async {
+    return getUnlabeledPhotos($call, await $request);
+  }
+
+  $async.Future<$0.GetUnlabeledPhotosResponse> getUnlabeledPhotos(
+      $grpc.ServiceCall call, $0.GetUnlabeledPhotosRequest request);
 }

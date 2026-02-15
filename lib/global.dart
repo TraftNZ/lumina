@@ -4,6 +4,7 @@ import 'package:img_syncer/run_server.dart';
 import 'package:img_syncer/sync_timer.dart';
 import 'package:img_syncer/state_model.dart';
 import 'package:img_syncer/storage/storage.dart';
+import 'package:img_syncer/ml_indexer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:img_syncer/logger.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -57,6 +58,7 @@ class Global {
       await resolveLocalFolderAbsPath();
       await initDrive();
       _rebuildIndexIfEmpty();
+      initMLIndexer();
       reloadAutoSyncTimer();
     });
   }
@@ -201,6 +203,8 @@ Future<void> _rebuildIndexIfEmpty() async {
         }
       }
     }
+    // Start ML indexing after index is ready
+    startMLIndexingIfNeeded();
   } catch (e) {
     logger.e("Auto-rebuild index failed: $e");
   }
