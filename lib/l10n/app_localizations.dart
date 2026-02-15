@@ -626,7 +626,7 @@ abstract class AppLocalizations {
   /// No description provided for @moveToLockedFolder.
   ///
   /// In en, this message translates to:
-  /// **'Move to Locked Folder'**
+  /// **'Hide'**
   String get moveToLockedFolder;
 
   /// No description provided for @removeFromLockedFolder.

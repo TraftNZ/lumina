@@ -15,6 +15,8 @@ class PlacesBody extends StatefulWidget {
 class _PlacesBodyState extends State<PlacesBody> {
   List<CityGroup>? _groups;
   bool _loading = true;
+
+
   int _scanned = 0;
   int _total = 0;
   int _withLocation = 0;
@@ -78,6 +80,60 @@ class _PlacesBodyState extends State<PlacesBody> {
     );
   }
 
+  Widget _buildMap(ColorScheme colorScheme) {
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCameraFit: _computeBounds(_groups!) != null
+            ? CameraFit.bounds(
+                bounds: _computeBounds(_groups!)!,
+                padding: const EdgeInsets.all(32),
+              )
+            : null,
+        interactionOptions: const InteractionOptions(
+          flags: InteractiveFlag.all,
+          scrollWheelVelocity: 0.005,
+        ),
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.pho',
+        ),
+        MarkerLayer(
+          markers: _groups!.map((group) {
+            final size = _markerSize(group.photoCount);
+            return Marker(
+              point: LatLng(group.lat, group.lng),
+              width: size,
+              height: size,
+              child: GestureDetector(
+                onTap: () => _openCity(group),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: colorScheme.onPrimary, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${group.photoCount}',
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
+                      fontSize: size * 0.32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -121,55 +177,7 @@ class _PlacesBodyState extends State<PlacesBody> {
                   children: [
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.4,
-                      child: FlutterMap(
-                        mapController: _mapController,
-                        options: MapOptions(
-                          initialCameraFit: _computeBounds(_groups!) != null
-                              ? CameraFit.bounds(
-                                  bounds: _computeBounds(_groups!)!,
-                                  padding: const EdgeInsets.all(32),
-                                )
-                              : null,
-                        ),
-                        children: [
-                          TileLayer(
-                            urlTemplate:
-                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            userAgentPackageName: 'com.example.pho',
-                          ),
-                          MarkerLayer(
-                            markers: _groups!.map((group) {
-                              final size = _markerSize(group.photoCount);
-                              return Marker(
-                                point: LatLng(group.lat, group.lng),
-                                width: size,
-                                height: size,
-                                child: GestureDetector(
-                                  onTap: () => _openCity(group),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: colorScheme.onPrimary,
-                                          width: 2),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      '${group.photoCount}',
-                                      style: TextStyle(
-                                        color: colorScheme.onPrimary,
-                                        fontSize: size * 0.32,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
+                      child: _buildMap(colorScheme),
                     ),
                     Expanded(
                       child: ListView.builder(

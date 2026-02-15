@@ -117,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (model.isSelectionMode) return const SizedBox.shrink();
                 return Positioned(
                   left: 16,
-                  right: 16,
                   bottom: 12,
                   child: _FloatingBottomBar(
                     selectedTab: _selectedTab,
@@ -154,34 +153,31 @@ class _FloatingBottomBar extends StatelessWidget {
       elevation: 3,
       shape: const StadiumBorder(),
       color: colorScheme.surfaceContainerHigh,
-      child: SizedBox(
-        height: 56,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            children: [
-              _buildTabChip(
-                context: context,
-                icon: Icons.photo_library,
-                label: l10n.photos,
-                isSelected: selectedTab == 0,
-                onTap: () => onTabChanged(0),
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-              ),
-              const SizedBox(width: 8),
-              _buildTabChip(
-                context: context,
-                icon: Icons.collections_bookmark,
-                label: l10n.collections,
-                isSelected: selectedTab == 1,
-                onTap: () => onTabChanged(1),
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-              ),
-              const Spacer(),
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTabChip(
+              context: context,
+              icon: Icons.photo_library,
+              label: l10n.photos,
+              isSelected: selectedTab == 0,
+              onTap: () => onTabChanged(0),
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            ),
+            const SizedBox(width: 4),
+            _buildTabChip(
+              context: context,
+              icon: Icons.collections_bookmark,
+              label: l10n.collections,
+              isSelected: selectedTab == 1,
+              onTap: () => onTabChanged(1),
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            ),
+          ],
         ),
       ),
     );

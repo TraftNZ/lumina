@@ -216,39 +216,20 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
     ).then((value) => _isShowingImageInfo = false);
   }
 
-  void deleteCurrent(BuildContext context) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text('${l10n.deleteThisPhoto}?'),
-        content: Text(l10n.cantBeUndone),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              all[currentIndex].delete().then((value) {
-                try {
-                  if (all[currentIndex].hasLocal) {
-                    eventBus.fire(LocalRefreshEvent());
-                  }
-                  if (all[currentIndex].hasRemote) {
-                    eventBus.fire(RemoteRefreshEvent());
-                  }
-                } catch (e) {
-                  SnackBarManager.showSnackBar(e.toString());
-                }
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              });
-            },
-            child: Text(l10n.yes),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-        ],
-      ),
-    );
+  void deleteCurrent(BuildContext context) async {
+    final asset = all[currentIndex];
+    try {
+      await asset.delete();
+      if (asset.hasLocal) {
+        await assetModel.refreshLocal();
+      }
+      if (asset.hasRemote) {
+        await assetModel.refreshRemote();
+      }
+    } catch (e) {
+      SnackBarManager.showSnackBar(e.toString());
+    }
+    if (mounted) Navigator.of(context).pop();
   }
 
   void download(Asset asset) async {

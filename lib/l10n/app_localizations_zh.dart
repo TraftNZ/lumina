@@ -279,7 +279,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authenticationFailed => '身份验证失败';
 
   @override
-  String get moveToLockedFolder => '移至已锁定的文件夹';
+  String get moveToLockedFolder => '隐藏';
 
   @override
   String get removeFromLockedFolder => '从已锁定的文件夹移除';

@@ -108,7 +108,7 @@
   "lockedFolderDescription": "Photos moved here are hidden and require authentication to view",
   "authenticate": "Authenticate",
   "authenticationFailed": "Authentication failed",
-  "moveToLockedFolder": "Move to Locked Folder",
+  "moveToLockedFolder": "Hide",
   "removeFromLockedFolder": "Remove from Locked Folder",
   "lockedFolderPin": "Locked Folder PIN",
   "lockedFolderPinDescription": "Set a PIN for the Locked Folder when biometrics are unavailable",

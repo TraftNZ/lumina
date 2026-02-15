@@ -34,9 +34,6 @@ Lumina 是一款无服务端的照片同步和查看应用。它使用 Flutter �
 - [x] WebDAV
 - [x] NFS
 - [x] S3 兼容存储 (AWS S3, MinIO, Backblaze B2 等)
-- [ ] OneDrive
-- [ ] Google Drive
-- [ ] Google Photos
 
 ### 安装
 

@@ -87,7 +87,7 @@
     "lockedFolderDescription": "移至此处的照片将被隐藏，需要验证身份才能查看",
     "authenticate": "验证身份",
     "authenticationFailed": "身份验证失败",
-    "moveToLockedFolder": "移至已锁定的文件夹",
+    "moveToLockedFolder": "隐藏",
     "removeFromLockedFolder": "从已锁定的文件夹移除",
     "lockedFolderPin": "锁定文件夹 PIN",
     "lockedFolderPinDescription": "当生物识别不可用时，使用 PIN 码访问锁定文件夹",

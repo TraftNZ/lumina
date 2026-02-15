@@ -34,9 +34,6 @@ The app is designed to replace the native photo gallery on your phone while prov
 - [x] WebDAV
 - [x] NFS
 - [x] S3-compatible storage (AWS S3, MinIO, Backblaze B2, etc.)
-- [ ] OneDrive
-- [ ] Google Drive
-- [ ] Google Photos
 
 ### Installation
 

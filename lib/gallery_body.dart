@@ -34,6 +34,7 @@ class GalleryBodyState extends State<GalleryBody>
     with AutomaticKeepAliveClientMixin {
   bool _showToTopBtn = false;
   bool _syncPanelExpanded = false;
+  bool _isDeleting = false;
   @override
   bool get wantKeepAlive => true;
   final ScrollController _scrollController = ScrollController();
@@ -195,54 +196,36 @@ class GalleryBodyState extends State<GalleryBody>
     });
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text("${l10n.deleteThisPhotos}?"),
-        content: Text(l10n.cantBeUndone),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              var toDelete = <Asset>[];
-              try {
-                final all = assetModel.getUnifiedAssets();
-                _selectedIndices.forEach((key, value) async {
-                  if (value) {
-                    toDelete.add(all[key]);
-                  }
-                });
-                final localToDelete = toDelete.where((e) => e.hasLocal).toList();
-                final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
-                if (localToDelete.isNotEmpty) {
-                  PhotoManager.editor
-                      .deleteWithIds(localToDelete.map((e) => e.local!.id).toList())
-                      .then((value) => eventBus.fire(LocalRefreshEvent()));
-                }
-                if (remoteToDelete.isNotEmpty) {
-                  storage.cli
-                      .moveToTrash(MoveToTrashRequest(
-                        paths: remoteToDelete.map((e) => e.remote!.path).toList(),
-                      ))
-                      .then((rsp) => eventBus.fire(RemoteRefreshEvent()));
-                }
-              } catch (e) {
-                SnackBarManager.showSnackBar(e.toString());
-              }
-              SnackBarManager.showSnackBar(l10n.movedToTrash);
-              clearSelection();
-              setState(() {});
-              Navigator.of(context).pop();
-            },
-            child: Text(l10n.yes),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-        ],
-      ),
-    );
+  void _deleteSelected() async {
+    if (_isDeleting) return;
+    setState(() => _isDeleting = true);
+    var toDelete = <Asset>[];
+    try {
+      final all = assetModel.getUnifiedAssets();
+      _selectedIndices.forEach((key, value) {
+        if (value) {
+          toDelete.add(all[key]);
+        }
+      });
+      clearSelection();
+      final localToDelete = toDelete.where((e) => e.hasLocal).toList();
+      final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
+      if (localToDelete.isNotEmpty) {
+        await PhotoManager.editor
+            .deleteWithIds(localToDelete.map((e) => e.local!.id).toList());
+        await assetModel.refreshLocal();
+      }
+      if (remoteToDelete.isNotEmpty) {
+        await storage.cli.moveToTrash(MoveToTrashRequest(
+          paths: remoteToDelete.map((e) => e.remote!.path).toList(),
+        ));
+        await assetModel.refreshRemote();
+      }
+      SnackBarManager.showSnackBar(l10n.movedToTrash);
+    } catch (e) {
+      SnackBarManager.showSnackBar(e.toString());
+    }
+    if (mounted) setState(() => _isDeleting = false);
   }
 
   void _shareAsset() async {
@@ -365,7 +348,7 @@ class GalleryBodyState extends State<GalleryBody>
                 _selectionBarButton(
                     Icons.share_outlined, l10n.share, _shareAsset),
                 _selectionBarButton(Icons.delete_outline, l10n.delete,
-                    () => _showDeleteDialog(context)),
+                    () => _deleteSelected()),
                 _selectionBarButton(
                     Icons.lock_outline,
                     l10n.moveToLockedFolder,
@@ -940,6 +923,13 @@ class GalleryBodyState extends State<GalleryBody>
           bottom: 0,
           child: _buildSelectionBar(),
         ),
+        if (_isDeleting)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black26,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
       ],
     );
   }

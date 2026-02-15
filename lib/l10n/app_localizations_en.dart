@@ -285,7 +285,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authenticationFailed => 'Authentication failed';
 
   @override
-  String get moveToLockedFolder => 'Move to Locked Folder';
+  String get moveToLockedFolder => 'Hide';
 
   @override
   String get removeFromLockedFolder => 'Remove from Locked Folder';

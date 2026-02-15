@@ -73,6 +73,21 @@ class _TrashBodyState extends State<TrashBody> {
     _loadTrash();
   }
 
+  Future<void> _restoreAll() async {
+    final paths = _items.map((i) => i.originalPath).toList();
+    try {
+      await storage.cli.restoreFromTrash(
+        RestoreFromTrashRequest(trashPaths: paths),
+      );
+      if (mounted) {
+        SnackBarManager.showSnackBar('${l10n.restore} ${paths.length} ${l10n.photos}');
+      }
+    } catch (e) {
+      if (mounted) SnackBarManager.showSnackBar(e.toString());
+    }
+    _loadTrash();
+  }
+
   Future<void> _deleteSelectedPermanently() async {
     showDialog(
       context: context,
@@ -175,12 +190,18 @@ class _TrashBodyState extends State<TrashBody> {
               onPressed: _deleteSelectedPermanently,
               tooltip: l10n.permanentlyDelete,
             ),
-          ] else if (_items.isNotEmpty)
+          ] else if (_items.isNotEmpty) ...[
+            IconButton(
+              icon: const Icon(Icons.restore),
+              onPressed: _restoreAll,
+              tooltip: l10n.restore,
+            ),
             IconButton(
               icon: const Icon(Icons.delete_sweep),
               onPressed: _emptyTrash,
               tooltip: l10n.emptyTrash,
             ),
+          ],
         ],
       ),
       body: _loading
@@ -227,11 +248,7 @@ class _TrashBodyState extends State<TrashBody> {
                           final isSelected = _selectedIndices.contains(index);
                           final thumb = _thumbnailCache[item.originalPath];
                           return GestureDetector(
-                            onTap: () {
-                              if (hasSelection) {
-                                _toggleSelection(index);
-                              }
-                            },
+                            onTap: () => _toggleSelection(index),
                             onLongPress: () => _toggleSelection(index),
                             child: Stack(
                               fit: StackFit.expand,
