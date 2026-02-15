@@ -10,6 +10,11 @@ import 'package:img_syncer/locked_folder_body.dart';
 import 'package:img_syncer/album_detail_body.dart';
 import 'package:img_syncer/places_body.dart';
 import 'package:img_syncer/year_detail_body.dart';
+import 'package:img_syncer/smart_album_body.dart';
+import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
+import 'package:img_syncer/storage/storage.dart';
+import 'package:img_syncer/state_model.dart';
+import 'package:img_syncer/search_body.dart';
 
 class _YearData {
   final int year;
@@ -26,15 +31,36 @@ class CollectionsBody extends StatefulWidget {
   State<CollectionsBody> createState() => _CollectionsBodyState();
 }
 
+class _SmartAlbumData {
+  final String label;
+  final String query;
+  final int count;
+  final String samplePath;
+  final IconData? icon;
+
+  _SmartAlbumData({
+    required this.label,
+    required this.query,
+    required this.count,
+    required this.samplePath,
+    this.icon,
+  });
+}
+
+const _petLabels = {'Dog', 'Cat', 'Bird', 'Fish', 'Horse', 'Rabbit'};
+
 class _CollectionsBodyState extends State<CollectionsBody> {
   List<AssetPathEntity> _albums = [];
   List<_YearData> _years = [];
+  List<_SmartAlbumData> _peoplePets = [];
+  List<_SmartAlbumData> _categories = [];
 
   @override
   void initState() {
     super.initState();
     _loadAlbums();
     _loadYears();
+    _loadSmartAlbums();
   }
 
   Future<void> _loadAlbums() async {
@@ -116,6 +142,62 @@ class _CollectionsBodyState extends State<CollectionsBody> {
 
     if (mounted) {
       setState(() => _years = years);
+    }
+  }
+
+  Future<void> _loadSmartAlbums() async {
+    // Wait for server and drive to be ready before calling gRPC
+    while (!isServerReady || !settingModel.isRemoteStorageSetted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+    }
+    try {
+      final response = await storage.cli
+          .getLabelSummary(GetLabelSummaryRequest())
+          .timeout(const Duration(seconds: 10));
+      if (!response.success || !mounted) return;
+
+      final peoplePets = <_SmartAlbumData>[];
+      final categories = <_SmartAlbumData>[];
+
+      if (response.faceCount > 0) {
+        peoplePets.add(_SmartAlbumData(
+          label: l10n.people,
+          query: '_faces',
+          count: response.faceCount,
+          samplePath: response.faceSamplePath,
+          icon: Icons.people,
+        ));
+      }
+
+      final sortedLabels = response.labels.toList()
+        ..sort((a, b) => b.count.compareTo(a.count));
+
+      for (final item in sortedLabels) {
+        if (_petLabels.contains(item.label)) {
+          peoplePets.add(_SmartAlbumData(
+            label: item.label,
+            query: item.label.toLowerCase(),
+            count: item.count,
+            samplePath: item.samplePath,
+            icon: Icons.pets,
+          ));
+        } else {
+          categories.add(_SmartAlbumData(
+            label: item.label,
+            query: item.label.toLowerCase(),
+            count: item.count,
+            samplePath: item.samplePath,
+          ));
+        }
+      }
+
+      setState(() {
+        _peoplePets = peoplePets;
+        _categories = categories.take(20).toList();
+      });
+    } catch (e) {
+      // Smart albums are optional, ignore errors
     }
   }
 
@@ -203,6 +285,86 @@ class _CollectionsBodyState extends State<CollectionsBody> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => YearDetailBody(year: yearData.year),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+        // People & Pets section
+        if (_peoplePets.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Text(
+                l10n.peoplePets,
+                style: textTheme.titleLarge,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _peoplePets.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final album = _peoplePets[index];
+                  return _SmartAlbumCard(
+                    album: album,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SmartAlbumBody(
+                            query: album.query,
+                            title: album.label,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+        // Categories section
+        if (_categories.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Text(
+                l10n.categories,
+                style: textTheme.titleLarge,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _categories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final album = _categories[index];
+                  return _SmartAlbumCard(
+                    album: album,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SmartAlbumBody(
+                            query: album.query,
+                            title: album.label,
+                          ),
                         ),
                       );
                     },
@@ -458,6 +620,111 @@ class _PlacesCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SmartAlbumCard extends StatefulWidget {
+  final _SmartAlbumData album;
+  final VoidCallback onTap;
+
+  const _SmartAlbumCard({required this.album, required this.onTap});
+
+  @override
+  State<_SmartAlbumCard> createState() => _SmartAlbumCardState();
+}
+
+class _SmartAlbumCardState extends State<_SmartAlbumCard> {
+  Uint8List? _thumbData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThumbnail();
+  }
+
+  Future<void> _loadThumbnail() async {
+    if (widget.album.samplePath.isEmpty) return;
+    var urlPath = widget.album.samplePath;
+    if (urlPath.startsWith('/')) {
+      urlPath = urlPath.substring(1);
+    }
+    final url = '$httpBaseUrl/thumbnail/$urlPath';
+    try {
+      final response = await httpGetWithTimeout(url);
+      if (response != null && mounted) {
+        setState(() => _thumbData = response);
+      }
+    } catch (e) {
+      // Ignore thumbnail load errors
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 120,
+      child: Card(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          onTap: widget.onTap,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (_thumbData != null)
+                Image.memory(_thumbData!, fit: BoxFit.cover)
+              else
+                Container(
+                  color: colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    widget.album.icon ?? Icons.photo_library_outlined,
+                    size: 40,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      widget.album.label,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${widget.album.count} ${l10n.pics}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

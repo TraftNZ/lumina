@@ -880,6 +880,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved to gallery'**
   String get savedToGallery;
+
+  /// No description provided for @people.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get people;
+
+  /// No description provided for @peoplePets.
+  ///
+  /// In en, this message translates to:
+  /// **'People & Pets'**
+  String get peoplePets;
+
+  /// No description provided for @categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categories;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

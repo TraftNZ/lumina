@@ -420,4 +420,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savedToGallery => 'Saved to gallery';
+
+  @override
+  String get people => 'People';
+
+  @override
+  String get peoplePets => 'People & Pets';
+
+  @override
+  String get categories => 'Categories';
 }

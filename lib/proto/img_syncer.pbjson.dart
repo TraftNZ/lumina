@@ -819,3 +819,52 @@ final $typed_data.Uint8List getUnlabeledPhotosResponseDescriptor =
     $convert.base64Decode(
         'ChpHZXRVbmxhYmVsZWRQaG90b3NSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEh'
         'gKB21lc3NhZ2UYAiABKAlSB21lc3NhZ2USFAoFcGF0aHMYAyADKAlSBXBhdGhz');
+
+@$core.Deprecated('Use getLabelSummaryRequestDescriptor instead')
+const GetLabelSummaryRequest$json = {
+  '1': 'GetLabelSummaryRequest',
+};
+
+/// Descriptor for `GetLabelSummaryRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getLabelSummaryRequestDescriptor =
+    $convert.base64Decode('ChZHZXRMYWJlbFN1bW1hcnlSZXF1ZXN0');
+
+@$core.Deprecated('Use labelSummaryItemDescriptor instead')
+const LabelSummaryItem$json = {
+  '1': 'LabelSummaryItem',
+  '2': [
+    {'1': 'label', '3': 1, '4': 1, '5': 9, '10': 'label'},
+    {'1': 'count', '3': 2, '4': 1, '5': 5, '10': 'count'},
+    {'1': 'samplePath', '3': 3, '4': 1, '5': 9, '10': 'samplePath'},
+  ],
+};
+
+/// Descriptor for `LabelSummaryItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List labelSummaryItemDescriptor = $convert.base64Decode(
+    'ChBMYWJlbFN1bW1hcnlJdGVtEhQKBWxhYmVsGAEgASgJUgVsYWJlbBIUCgVjb3VudBgCIAEoBV'
+    'IFY291bnQSHgoKc2FtcGxlUGF0aBgDIAEoCVIKc2FtcGxlUGF0aA==');
+
+@$core.Deprecated('Use getLabelSummaryResponseDescriptor instead')
+const GetLabelSummaryResponse$json = {
+  '1': 'GetLabelSummaryResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {
+      '1': 'labels',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.img_syncer.LabelSummaryItem',
+      '10': 'labels'
+    },
+    {'1': 'faceCount', '3': 3, '4': 1, '5': 5, '10': 'faceCount'},
+    {'1': 'faceSamplePath', '3': 4, '4': 1, '5': 9, '10': 'faceSamplePath'},
+  ],
+};
+
+/// Descriptor for `GetLabelSummaryResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getLabelSummaryResponseDescriptor = $convert.base64Decode(
+    'ChdHZXRMYWJlbFN1bW1hcnlSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEjQKBm'
+    'xhYmVscxgCIAMoCzIcLmltZ19zeW5jZXIuTGFiZWxTdW1tYXJ5SXRlbVIGbGFiZWxzEhwKCWZh'
+    'Y2VDb3VudBgDIAEoBVIJZmFjZUNvdW50EiYKDmZhY2VTYW1wbGVQYXRoGAQgASgJUg5mYWNlU2'
+    'FtcGxlUGF0aA==');

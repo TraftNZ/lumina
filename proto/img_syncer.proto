@@ -38,6 +38,7 @@ service ImgSyncer {
   rpc UpdatePhotoLabels (UpdatePhotoLabelsRequest) returns (UpdatePhotoLabelsResponse) {}
   rpc SearchPhotos (SearchPhotosRequest) returns (SearchPhotosResponse) {}
   rpc GetUnlabeledPhotos (GetUnlabeledPhotosRequest) returns (GetUnlabeledPhotosResponse) {}
+  rpc GetLabelSummary (GetLabelSummaryRequest) returns (GetLabelSummaryResponse) {}
 }
 
 // enum ContentType {
@@ -294,4 +295,17 @@ message GetUnlabeledPhotosResponse {
   bool success = 1;
   string message = 2;
   repeated string paths = 3;
+}
+
+message GetLabelSummaryRequest {}
+message LabelSummaryItem {
+  string label = 1;
+  int32 count = 2;
+  string samplePath = 3;
+}
+message GetLabelSummaryResponse {
+  bool success = 1;
+  repeated LabelSummaryItem labels = 2;
+  int32 faceCount = 3;
+  string faceSamplePath = 4;
 }

@@ -356,6 +356,27 @@ func (a *api) GetUnlabeledPhotos(ctx context.Context, req *pb.GetUnlabeledPhotos
 	return
 }
 
+func (a *api) GetLabelSummary(ctx context.Context, req *pb.GetLabelSummaryRequest) (rsp *pb.GetLabelSummaryResponse, err error) {
+	rsp = &pb.GetLabelSummaryResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		return
+	}
+	summary := store.GetLabelSummary()
+	rsp.FaceCount = int32(summary.FaceCount)
+	rsp.FaceSamplePath = summary.FaceSample
+	rsp.Labels = make([]*pb.LabelSummaryItem, 0, len(summary.Labels))
+	for _, l := range summary.Labels {
+		rsp.Labels = append(rsp.Labels, &pb.LabelSummaryItem{
+			Label:      l.Label,
+			Count:      int32(l.Count),
+			SamplePath: l.SamplePath,
+		})
+	}
+	return
+}
+
 func isVideo(name string) bool {
 	ext := filepath.Ext(name)
 	switch ext {

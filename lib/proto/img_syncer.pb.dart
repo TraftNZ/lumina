@@ -3630,6 +3630,210 @@ class GetUnlabeledPhotosResponse extends $pb.GeneratedMessage {
   $pb.PbList<$core.String> get paths => $_getList(2);
 }
 
+class GetLabelSummaryRequest extends $pb.GeneratedMessage {
+  factory GetLabelSummaryRequest() => create();
+
+  GetLabelSummaryRequest._();
+
+  factory GetLabelSummaryRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetLabelSummaryRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetLabelSummaryRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetLabelSummaryRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetLabelSummaryRequest copyWith(
+          void Function(GetLabelSummaryRequest) updates) =>
+      super.copyWith((message) => updates(message as GetLabelSummaryRequest))
+          as GetLabelSummaryRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetLabelSummaryRequest create() => GetLabelSummaryRequest._();
+  @$core.override
+  GetLabelSummaryRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetLabelSummaryRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetLabelSummaryRequest>(create);
+  static GetLabelSummaryRequest? _defaultInstance;
+}
+
+class LabelSummaryItem extends $pb.GeneratedMessage {
+  factory LabelSummaryItem({
+    $core.String? label,
+    $core.int? count,
+    $core.String? samplePath,
+  }) {
+    final result = create();
+    if (label != null) result.label = label;
+    if (count != null) result.count = count;
+    if (samplePath != null) result.samplePath = samplePath;
+    return result;
+  }
+
+  LabelSummaryItem._();
+
+  factory LabelSummaryItem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory LabelSummaryItem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LabelSummaryItem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'label')
+    ..aI(2, _omitFieldNames ? '' : 'count')
+    ..aOS(3, _omitFieldNames ? '' : 'samplePath', protoName: 'samplePath')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LabelSummaryItem clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LabelSummaryItem copyWith(void Function(LabelSummaryItem) updates) =>
+      super.copyWith((message) => updates(message as LabelSummaryItem))
+          as LabelSummaryItem;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LabelSummaryItem create() => LabelSummaryItem._();
+  @$core.override
+  LabelSummaryItem createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static LabelSummaryItem getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LabelSummaryItem>(create);
+  static LabelSummaryItem? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get label => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set label($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasLabel() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearLabel() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get count => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set count($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasCount() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCount() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get samplePath => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set samplePath($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSamplePath() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSamplePath() => $_clearField(3);
+}
+
+class GetLabelSummaryResponse extends $pb.GeneratedMessage {
+  factory GetLabelSummaryResponse({
+    $core.bool? success,
+    $core.Iterable<LabelSummaryItem>? labels,
+    $core.int? faceCount,
+    $core.String? faceSamplePath,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (labels != null) result.labels.addAll(labels);
+    if (faceCount != null) result.faceCount = faceCount;
+    if (faceSamplePath != null) result.faceSamplePath = faceSamplePath;
+    return result;
+  }
+
+  GetLabelSummaryResponse._();
+
+  factory GetLabelSummaryResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetLabelSummaryResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetLabelSummaryResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..pPM<LabelSummaryItem>(2, _omitFieldNames ? '' : 'labels',
+        subBuilder: LabelSummaryItem.create)
+    ..aI(3, _omitFieldNames ? '' : 'faceCount', protoName: 'faceCount')
+    ..aOS(4, _omitFieldNames ? '' : 'faceSamplePath',
+        protoName: 'faceSamplePath')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetLabelSummaryResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetLabelSummaryResponse copyWith(
+          void Function(GetLabelSummaryResponse) updates) =>
+      super.copyWith((message) => updates(message as GetLabelSummaryResponse))
+          as GetLabelSummaryResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetLabelSummaryResponse create() => GetLabelSummaryResponse._();
+  @$core.override
+  GetLabelSummaryResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetLabelSummaryResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetLabelSummaryResponse>(create);
+  static GetLabelSummaryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<LabelSummaryItem> get labels => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.int get faceCount => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set faceCount($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFaceCount() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFaceCount() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get faceSamplePath => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set faceSamplePath($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasFaceSamplePath() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearFaceSamplePath() => $_clearField(4);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

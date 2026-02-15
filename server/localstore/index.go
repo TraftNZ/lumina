@@ -175,7 +175,60 @@ func (s *LocalStore) UpdateLabels(path string, labels []string, faceIDs []string
 	return nil
 }
 
+// LabelSummary holds the count and a sample path for a label.
+type LabelSummary struct {
+	Label      string
+	Count      int
+	SamplePath string
+}
+
+// LabelSummaryResult holds aggregated label stats and face stats.
+type LabelSummaryResult struct {
+	Labels     []LabelSummary
+	FaceCount  int
+	FaceSample string
+}
+
+// GetLabelSummary scans all photos and returns per-label counts with a sample path, plus face stats.
+func (s *LocalStore) GetLabelSummary() LabelSummaryResult {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var result LabelSummaryResult
+	if !s.initialized {
+		return result
+	}
+	labelCounts := make(map[string]int)
+	labelSample := make(map[string]string)
+	for path, entry := range s.data.Photos {
+		for _, label := range entry.Labels {
+			if strings.HasPrefix(label, "_") {
+				continue
+			}
+			labelCounts[label]++
+			if _, ok := labelSample[label]; !ok {
+				labelSample[label] = path
+			}
+		}
+		if len(entry.FaceIDs) > 0 {
+			result.FaceCount++
+			if result.FaceSample == "" {
+				result.FaceSample = path
+			}
+		}
+	}
+	result.Labels = make([]LabelSummary, 0, len(labelCounts))
+	for label, count := range labelCounts {
+		result.Labels = append(result.Labels, LabelSummary{
+			Label:      label,
+			Count:      count,
+			SamplePath: labelSample[label],
+		})
+	}
+	return result
+}
+
 // SearchLabels returns paths whose labels or text contain any of the query terms (case-insensitive substring match).
+// Special query "_faces" returns all photos with detected faces.
 func (s *LocalStore) SearchLabels(query string) []string {
 	if query == "" {
 		return nil
@@ -184,6 +237,15 @@ func (s *LocalStore) SearchLabels(query string) []string {
 	defer s.mu.RUnlock()
 	if !s.initialized {
 		return nil
+	}
+	if query == "_faces" {
+		var results []string
+		for path, entry := range s.data.Photos {
+			if len(entry.FaceIDs) > 0 {
+				results = append(results, path)
+			}
+		}
+		return results
 	}
 	query = strings.ToLower(query)
 	queryTerms := strings.Fields(query)

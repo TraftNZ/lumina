@@ -224,6 +224,13 @@ class ImgSyncerClient extends $grpc.Client {
     return $createUnaryCall(_$getUnlabeledPhotos, request, options: options);
   }
 
+  $grpc.ResponseFuture<$0.GetLabelSummaryResponse> getLabelSummary(
+    $0.GetLabelSummaryRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getLabelSummary, request, options: options);
+  }
+
   // method descriptors
 
   static final _$listByDate =
@@ -356,6 +363,11 @@ class ImgSyncerClient extends $grpc.Client {
       '/img_syncer.ImgSyncer/GetUnlabeledPhotos',
       ($0.GetUnlabeledPhotosRequest value) => value.writeToBuffer(),
       $0.GetUnlabeledPhotosResponse.fromBuffer);
+  static final _$getLabelSummary =
+      $grpc.ClientMethod<$0.GetLabelSummaryRequest, $0.GetLabelSummaryResponse>(
+          '/img_syncer.ImgSyncer/GetLabelSummary',
+          ($0.GetLabelSummaryRequest value) => value.writeToBuffer(),
+          $0.GetLabelSummaryResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('img_syncer.ImgSyncer')
@@ -585,6 +597,15 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.GetUnlabeledPhotosRequest.fromBuffer(value),
         ($0.GetUnlabeledPhotosResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetLabelSummaryRequest,
+            $0.GetLabelSummaryResponse>(
+        'GetLabelSummary',
+        getLabelSummary_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetLabelSummaryRequest.fromBuffer(value),
+        ($0.GetLabelSummaryResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall $call,
@@ -806,4 +827,13 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
 
   $async.Future<$0.GetUnlabeledPhotosResponse> getUnlabeledPhotos(
       $grpc.ServiceCall call, $0.GetUnlabeledPhotosRequest request);
+
+  $async.Future<$0.GetLabelSummaryResponse> getLabelSummary_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetLabelSummaryRequest> $request) async {
+    return getLabelSummary($call, await $request);
+  }
+
+  $async.Future<$0.GetLabelSummaryResponse> getLabelSummary(
+      $grpc.ServiceCall call, $0.GetLabelSummaryRequest request);
 }

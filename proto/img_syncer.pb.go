@@ -2925,6 +2925,170 @@ func (x *GetUnlabeledPhotosResponse) GetPaths() []string {
 	return nil
 }
 
+type GetLabelSummaryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLabelSummaryRequest) Reset() {
+	*x = GetLabelSummaryRequest{}
+	mi := &file_proto_img_syncer_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLabelSummaryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLabelSummaryRequest) ProtoMessage() {}
+
+func (x *GetLabelSummaryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLabelSummaryRequest.ProtoReflect.Descriptor instead.
+func (*GetLabelSummaryRequest) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{54}
+}
+
+type LabelSummaryItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Label         string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	SamplePath    string                 `protobuf:"bytes,3,opt,name=samplePath,proto3" json:"samplePath,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LabelSummaryItem) Reset() {
+	*x = LabelSummaryItem{}
+	mi := &file_proto_img_syncer_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LabelSummaryItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LabelSummaryItem) ProtoMessage() {}
+
+func (x *LabelSummaryItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LabelSummaryItem.ProtoReflect.Descriptor instead.
+func (*LabelSummaryItem) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *LabelSummaryItem) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *LabelSummaryItem) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *LabelSummaryItem) GetSamplePath() string {
+	if x != nil {
+		return x.SamplePath
+	}
+	return ""
+}
+
+type GetLabelSummaryResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Success        bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Labels         []*LabelSummaryItem    `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels,omitempty"`
+	FaceCount      int32                  `protobuf:"varint,3,opt,name=faceCount,proto3" json:"faceCount,omitempty"`
+	FaceSamplePath string                 `protobuf:"bytes,4,opt,name=faceSamplePath,proto3" json:"faceSamplePath,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetLabelSummaryResponse) Reset() {
+	*x = GetLabelSummaryResponse{}
+	mi := &file_proto_img_syncer_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLabelSummaryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLabelSummaryResponse) ProtoMessage() {}
+
+func (x *GetLabelSummaryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_img_syncer_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLabelSummaryResponse.ProtoReflect.Descriptor instead.
+func (*GetLabelSummaryResponse) Descriptor() ([]byte, []int) {
+	return file_proto_img_syncer_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *GetLabelSummaryResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetLabelSummaryResponse) GetLabels() []*LabelSummaryItem {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+func (x *GetLabelSummaryResponse) GetFaceCount() int32 {
+	if x != nil {
+		return x.FaceCount
+	}
+	return 0
+}
+
+func (x *GetLabelSummaryResponse) GetFaceSamplePath() string {
+	if x != nil {
+		return x.FaceSamplePath
+	}
+	return ""
+}
+
 var File_proto_img_syncer_proto protoreflect.FileDescriptor
 
 const file_proto_img_syncer_proto_rawDesc = "" +
@@ -3116,7 +3280,19 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\x1aGetUnlabeledPhotosResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x14\n" +
-	"\x05paths\x18\x03 \x03(\tR\x05paths2\xb4\x12\n" +
+	"\x05paths\x18\x03 \x03(\tR\x05paths\"\x18\n" +
+	"\x16GetLabelSummaryRequest\"^\n" +
+	"\x10LabelSummaryItem\x12\x14\n" +
+	"\x05label\x18\x01 \x01(\tR\x05label\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x1e\n" +
+	"\n" +
+	"samplePath\x18\x03 \x01(\tR\n" +
+	"samplePath\"\xaf\x01\n" +
+	"\x17GetLabelSummaryResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x124\n" +
+	"\x06labels\x18\x02 \x03(\v2\x1c.img_syncer.LabelSummaryItemR\x06labels\x12\x1c\n" +
+	"\tfaceCount\x18\x03 \x01(\x05R\tfaceCount\x12&\n" +
+	"\x0efaceSamplePath\x18\x04 \x01(\tR\x0efaceSamplePath2\x92\x13\n" +
 	"\tImgSyncer\x12M\n" +
 	"\n" +
 	"ListByDate\x12\x1d.img_syncer.ListByDateRequest\x1a\x1e.img_syncer.ListByDateResponse\"\x00\x12A\n" +
@@ -3147,7 +3323,8 @@ const file_proto_img_syncer_proto_rawDesc = "" +
 	"\x13ClearThumbnailCache\x12&.img_syncer.ClearThumbnailCacheRequest\x1a'.img_syncer.ClearThumbnailCacheResponse\"\x00\x12b\n" +
 	"\x11UpdatePhotoLabels\x12$.img_syncer.UpdatePhotoLabelsRequest\x1a%.img_syncer.UpdatePhotoLabelsResponse\"\x00\x12S\n" +
 	"\fSearchPhotos\x12\x1f.img_syncer.SearchPhotosRequest\x1a .img_syncer.SearchPhotosResponse\"\x00\x12e\n" +
-	"\x12GetUnlabeledPhotos\x12%.img_syncer.GetUnlabeledPhotosRequest\x1a&.img_syncer.GetUnlabeledPhotosResponse\"\x00B$Z\"github.com/fregie/img_syncer/protob\x06proto3"
+	"\x12GetUnlabeledPhotos\x12%.img_syncer.GetUnlabeledPhotosRequest\x1a&.img_syncer.GetUnlabeledPhotosResponse\"\x00\x12\\\n" +
+	"\x0fGetLabelSummary\x12\".img_syncer.GetLabelSummaryRequest\x1a#.img_syncer.GetLabelSummaryResponse\"\x00B$Z\"github.com/fregie/img_syncer/protob\x06proto3"
 
 var (
 	file_proto_img_syncer_proto_rawDescOnce sync.Once
@@ -3161,7 +3338,7 @@ func file_proto_img_syncer_proto_rawDescGZIP() []byte {
 	return file_proto_img_syncer_proto_rawDescData
 }
 
-var file_proto_img_syncer_proto_msgTypes = make([]protoimpl.MessageInfo, 54)
+var file_proto_img_syncer_proto_msgTypes = make([]protoimpl.MessageInfo, 57)
 var file_proto_img_syncer_proto_goTypes = []any{
 	(*ListByDateRequest)(nil),            // 0: img_syncer.ListByDateRequest
 	(*ListByDateResponse)(nil),           // 1: img_syncer.ListByDateResponse
@@ -3217,68 +3394,74 @@ var file_proto_img_syncer_proto_goTypes = []any{
 	(*SearchPhotosResponse)(nil),         // 51: img_syncer.SearchPhotosResponse
 	(*GetUnlabeledPhotosRequest)(nil),    // 52: img_syncer.GetUnlabeledPhotosRequest
 	(*GetUnlabeledPhotosResponse)(nil),   // 53: img_syncer.GetUnlabeledPhotosResponse
+	(*GetLabelSummaryRequest)(nil),       // 54: img_syncer.GetLabelSummaryRequest
+	(*LabelSummaryItem)(nil),             // 55: img_syncer.LabelSummaryItem
+	(*GetLabelSummaryResponse)(nil),      // 56: img_syncer.GetLabelSummaryResponse
 }
 var file_proto_img_syncer_proto_depIdxs = []int32{
 	4,  // 0: img_syncer.FilterNotUploadedRequest.photos:type_name -> img_syncer.FilterNotUploadedRequestInfo
 	29, // 1: img_syncer.ListTrashResponse.items:type_name -> img_syncer.TrashItem
 	29, // 2: img_syncer.ListLockedResponse.items:type_name -> img_syncer.TrashItem
-	0,  // 3: img_syncer.ImgSyncer.ListByDate:input_type -> img_syncer.ListByDateRequest
-	2,  // 4: img_syncer.ImgSyncer.Delete:input_type -> img_syncer.DeleteRequest
-	5,  // 5: img_syncer.ImgSyncer.FilterNotUploaded:input_type -> img_syncer.FilterNotUploadedRequest
-	7,  // 6: img_syncer.ImgSyncer.SetDriveSMB:input_type -> img_syncer.SetDriveSMBRequest
-	9,  // 7: img_syncer.ImgSyncer.ListDriveSMBShares:input_type -> img_syncer.ListDriveSMBSharesRequest
-	11, // 8: img_syncer.ImgSyncer.ListDriveSMBDir:input_type -> img_syncer.ListDriveSMBDirRequest
-	13, // 9: img_syncer.ImgSyncer.SetDriveSMBShare:input_type -> img_syncer.SetDriveSMBShareRequest
-	15, // 10: img_syncer.ImgSyncer.SetDriveWebdav:input_type -> img_syncer.SetDriveWebdavRequest
-	17, // 11: img_syncer.ImgSyncer.ListDriveWebdavDir:input_type -> img_syncer.ListDriveWebdavDirRequest
-	19, // 12: img_syncer.ImgSyncer.SetDriveNFS:input_type -> img_syncer.SetDriveNFSRequest
-	21, // 13: img_syncer.ImgSyncer.ListDriveNFSDir:input_type -> img_syncer.ListDriveNFSDirRequest
-	23, // 14: img_syncer.ImgSyncer.SetDriveS3:input_type -> img_syncer.SetDriveS3Request
-	25, // 15: img_syncer.ImgSyncer.ListDriveS3Buckets:input_type -> img_syncer.ListDriveS3BucketsRequest
-	27, // 16: img_syncer.ImgSyncer.MoveToTrash:input_type -> img_syncer.MoveToTrashRequest
-	30, // 17: img_syncer.ImgSyncer.ListTrash:input_type -> img_syncer.ListTrashRequest
-	32, // 18: img_syncer.ImgSyncer.RestoreFromTrash:input_type -> img_syncer.RestoreFromTrashRequest
-	34, // 19: img_syncer.ImgSyncer.EmptyTrash:input_type -> img_syncer.EmptyTrashRequest
-	36, // 20: img_syncer.ImgSyncer.MoveToLocked:input_type -> img_syncer.MoveToLockedRequest
-	40, // 21: img_syncer.ImgSyncer.ListLocked:input_type -> img_syncer.ListLockedRequest
-	38, // 22: img_syncer.ImgSyncer.RestoreFromLocked:input_type -> img_syncer.RestoreFromLockedRequest
-	42, // 23: img_syncer.ImgSyncer.RebuildIndex:input_type -> img_syncer.RebuildIndexRequest
-	44, // 24: img_syncer.ImgSyncer.GetIndexStats:input_type -> img_syncer.GetIndexStatsRequest
-	46, // 25: img_syncer.ImgSyncer.ClearThumbnailCache:input_type -> img_syncer.ClearThumbnailCacheRequest
-	48, // 26: img_syncer.ImgSyncer.UpdatePhotoLabels:input_type -> img_syncer.UpdatePhotoLabelsRequest
-	50, // 27: img_syncer.ImgSyncer.SearchPhotos:input_type -> img_syncer.SearchPhotosRequest
-	52, // 28: img_syncer.ImgSyncer.GetUnlabeledPhotos:input_type -> img_syncer.GetUnlabeledPhotosRequest
-	1,  // 29: img_syncer.ImgSyncer.ListByDate:output_type -> img_syncer.ListByDateResponse
-	3,  // 30: img_syncer.ImgSyncer.Delete:output_type -> img_syncer.DeleteResponse
-	6,  // 31: img_syncer.ImgSyncer.FilterNotUploaded:output_type -> img_syncer.FilterNotUploadedResponse
-	8,  // 32: img_syncer.ImgSyncer.SetDriveSMB:output_type -> img_syncer.SetDriveSMBResponse
-	10, // 33: img_syncer.ImgSyncer.ListDriveSMBShares:output_type -> img_syncer.ListDriveSMBSharesResponse
-	12, // 34: img_syncer.ImgSyncer.ListDriveSMBDir:output_type -> img_syncer.ListDriveSMBDirResponse
-	14, // 35: img_syncer.ImgSyncer.SetDriveSMBShare:output_type -> img_syncer.SetDriveSMBShareResponse
-	16, // 36: img_syncer.ImgSyncer.SetDriveWebdav:output_type -> img_syncer.SetDriveWebdavResponse
-	18, // 37: img_syncer.ImgSyncer.ListDriveWebdavDir:output_type -> img_syncer.ListDriveWebdavDirResponse
-	20, // 38: img_syncer.ImgSyncer.SetDriveNFS:output_type -> img_syncer.SetDriveNFSResponse
-	22, // 39: img_syncer.ImgSyncer.ListDriveNFSDir:output_type -> img_syncer.ListDriveNFSDirResponse
-	24, // 40: img_syncer.ImgSyncer.SetDriveS3:output_type -> img_syncer.SetDriveS3Response
-	26, // 41: img_syncer.ImgSyncer.ListDriveS3Buckets:output_type -> img_syncer.ListDriveS3BucketsResponse
-	28, // 42: img_syncer.ImgSyncer.MoveToTrash:output_type -> img_syncer.MoveToTrashResponse
-	31, // 43: img_syncer.ImgSyncer.ListTrash:output_type -> img_syncer.ListTrashResponse
-	33, // 44: img_syncer.ImgSyncer.RestoreFromTrash:output_type -> img_syncer.RestoreFromTrashResponse
-	35, // 45: img_syncer.ImgSyncer.EmptyTrash:output_type -> img_syncer.EmptyTrashResponse
-	37, // 46: img_syncer.ImgSyncer.MoveToLocked:output_type -> img_syncer.MoveToLockedResponse
-	41, // 47: img_syncer.ImgSyncer.ListLocked:output_type -> img_syncer.ListLockedResponse
-	39, // 48: img_syncer.ImgSyncer.RestoreFromLocked:output_type -> img_syncer.RestoreFromLockedResponse
-	43, // 49: img_syncer.ImgSyncer.RebuildIndex:output_type -> img_syncer.RebuildIndexResponse
-	45, // 50: img_syncer.ImgSyncer.GetIndexStats:output_type -> img_syncer.GetIndexStatsResponse
-	47, // 51: img_syncer.ImgSyncer.ClearThumbnailCache:output_type -> img_syncer.ClearThumbnailCacheResponse
-	49, // 52: img_syncer.ImgSyncer.UpdatePhotoLabels:output_type -> img_syncer.UpdatePhotoLabelsResponse
-	51, // 53: img_syncer.ImgSyncer.SearchPhotos:output_type -> img_syncer.SearchPhotosResponse
-	53, // 54: img_syncer.ImgSyncer.GetUnlabeledPhotos:output_type -> img_syncer.GetUnlabeledPhotosResponse
-	29, // [29:55] is the sub-list for method output_type
-	3,  // [3:29] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	55, // 3: img_syncer.GetLabelSummaryResponse.labels:type_name -> img_syncer.LabelSummaryItem
+	0,  // 4: img_syncer.ImgSyncer.ListByDate:input_type -> img_syncer.ListByDateRequest
+	2,  // 5: img_syncer.ImgSyncer.Delete:input_type -> img_syncer.DeleteRequest
+	5,  // 6: img_syncer.ImgSyncer.FilterNotUploaded:input_type -> img_syncer.FilterNotUploadedRequest
+	7,  // 7: img_syncer.ImgSyncer.SetDriveSMB:input_type -> img_syncer.SetDriveSMBRequest
+	9,  // 8: img_syncer.ImgSyncer.ListDriveSMBShares:input_type -> img_syncer.ListDriveSMBSharesRequest
+	11, // 9: img_syncer.ImgSyncer.ListDriveSMBDir:input_type -> img_syncer.ListDriveSMBDirRequest
+	13, // 10: img_syncer.ImgSyncer.SetDriveSMBShare:input_type -> img_syncer.SetDriveSMBShareRequest
+	15, // 11: img_syncer.ImgSyncer.SetDriveWebdav:input_type -> img_syncer.SetDriveWebdavRequest
+	17, // 12: img_syncer.ImgSyncer.ListDriveWebdavDir:input_type -> img_syncer.ListDriveWebdavDirRequest
+	19, // 13: img_syncer.ImgSyncer.SetDriveNFS:input_type -> img_syncer.SetDriveNFSRequest
+	21, // 14: img_syncer.ImgSyncer.ListDriveNFSDir:input_type -> img_syncer.ListDriveNFSDirRequest
+	23, // 15: img_syncer.ImgSyncer.SetDriveS3:input_type -> img_syncer.SetDriveS3Request
+	25, // 16: img_syncer.ImgSyncer.ListDriveS3Buckets:input_type -> img_syncer.ListDriveS3BucketsRequest
+	27, // 17: img_syncer.ImgSyncer.MoveToTrash:input_type -> img_syncer.MoveToTrashRequest
+	30, // 18: img_syncer.ImgSyncer.ListTrash:input_type -> img_syncer.ListTrashRequest
+	32, // 19: img_syncer.ImgSyncer.RestoreFromTrash:input_type -> img_syncer.RestoreFromTrashRequest
+	34, // 20: img_syncer.ImgSyncer.EmptyTrash:input_type -> img_syncer.EmptyTrashRequest
+	36, // 21: img_syncer.ImgSyncer.MoveToLocked:input_type -> img_syncer.MoveToLockedRequest
+	40, // 22: img_syncer.ImgSyncer.ListLocked:input_type -> img_syncer.ListLockedRequest
+	38, // 23: img_syncer.ImgSyncer.RestoreFromLocked:input_type -> img_syncer.RestoreFromLockedRequest
+	42, // 24: img_syncer.ImgSyncer.RebuildIndex:input_type -> img_syncer.RebuildIndexRequest
+	44, // 25: img_syncer.ImgSyncer.GetIndexStats:input_type -> img_syncer.GetIndexStatsRequest
+	46, // 26: img_syncer.ImgSyncer.ClearThumbnailCache:input_type -> img_syncer.ClearThumbnailCacheRequest
+	48, // 27: img_syncer.ImgSyncer.UpdatePhotoLabels:input_type -> img_syncer.UpdatePhotoLabelsRequest
+	50, // 28: img_syncer.ImgSyncer.SearchPhotos:input_type -> img_syncer.SearchPhotosRequest
+	52, // 29: img_syncer.ImgSyncer.GetUnlabeledPhotos:input_type -> img_syncer.GetUnlabeledPhotosRequest
+	54, // 30: img_syncer.ImgSyncer.GetLabelSummary:input_type -> img_syncer.GetLabelSummaryRequest
+	1,  // 31: img_syncer.ImgSyncer.ListByDate:output_type -> img_syncer.ListByDateResponse
+	3,  // 32: img_syncer.ImgSyncer.Delete:output_type -> img_syncer.DeleteResponse
+	6,  // 33: img_syncer.ImgSyncer.FilterNotUploaded:output_type -> img_syncer.FilterNotUploadedResponse
+	8,  // 34: img_syncer.ImgSyncer.SetDriveSMB:output_type -> img_syncer.SetDriveSMBResponse
+	10, // 35: img_syncer.ImgSyncer.ListDriveSMBShares:output_type -> img_syncer.ListDriveSMBSharesResponse
+	12, // 36: img_syncer.ImgSyncer.ListDriveSMBDir:output_type -> img_syncer.ListDriveSMBDirResponse
+	14, // 37: img_syncer.ImgSyncer.SetDriveSMBShare:output_type -> img_syncer.SetDriveSMBShareResponse
+	16, // 38: img_syncer.ImgSyncer.SetDriveWebdav:output_type -> img_syncer.SetDriveWebdavResponse
+	18, // 39: img_syncer.ImgSyncer.ListDriveWebdavDir:output_type -> img_syncer.ListDriveWebdavDirResponse
+	20, // 40: img_syncer.ImgSyncer.SetDriveNFS:output_type -> img_syncer.SetDriveNFSResponse
+	22, // 41: img_syncer.ImgSyncer.ListDriveNFSDir:output_type -> img_syncer.ListDriveNFSDirResponse
+	24, // 42: img_syncer.ImgSyncer.SetDriveS3:output_type -> img_syncer.SetDriveS3Response
+	26, // 43: img_syncer.ImgSyncer.ListDriveS3Buckets:output_type -> img_syncer.ListDriveS3BucketsResponse
+	28, // 44: img_syncer.ImgSyncer.MoveToTrash:output_type -> img_syncer.MoveToTrashResponse
+	31, // 45: img_syncer.ImgSyncer.ListTrash:output_type -> img_syncer.ListTrashResponse
+	33, // 46: img_syncer.ImgSyncer.RestoreFromTrash:output_type -> img_syncer.RestoreFromTrashResponse
+	35, // 47: img_syncer.ImgSyncer.EmptyTrash:output_type -> img_syncer.EmptyTrashResponse
+	37, // 48: img_syncer.ImgSyncer.MoveToLocked:output_type -> img_syncer.MoveToLockedResponse
+	41, // 49: img_syncer.ImgSyncer.ListLocked:output_type -> img_syncer.ListLockedResponse
+	39, // 50: img_syncer.ImgSyncer.RestoreFromLocked:output_type -> img_syncer.RestoreFromLockedResponse
+	43, // 51: img_syncer.ImgSyncer.RebuildIndex:output_type -> img_syncer.RebuildIndexResponse
+	45, // 52: img_syncer.ImgSyncer.GetIndexStats:output_type -> img_syncer.GetIndexStatsResponse
+	47, // 53: img_syncer.ImgSyncer.ClearThumbnailCache:output_type -> img_syncer.ClearThumbnailCacheResponse
+	49, // 54: img_syncer.ImgSyncer.UpdatePhotoLabels:output_type -> img_syncer.UpdatePhotoLabelsResponse
+	51, // 55: img_syncer.ImgSyncer.SearchPhotos:output_type -> img_syncer.SearchPhotosResponse
+	53, // 56: img_syncer.ImgSyncer.GetUnlabeledPhotos:output_type -> img_syncer.GetUnlabeledPhotosResponse
+	56, // 57: img_syncer.ImgSyncer.GetLabelSummary:output_type -> img_syncer.GetLabelSummaryResponse
+	31, // [31:58] is the sub-list for method output_type
+	4,  // [4:31] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_img_syncer_proto_init() }
@@ -3292,7 +3475,7 @@ func file_proto_img_syncer_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_img_syncer_proto_rawDesc), len(file_proto_img_syncer_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   54,
+			NumMessages:   57,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -181,5 +181,8 @@
     }
   },
   "tapToPlay": "Tap to play",
-  "savedToGallery": "Saved to gallery"
+  "savedToGallery": "Saved to gallery",
+  "people": "People",
+  "peoplePets": "People & Pets",
+  "categories": "Categories"
 }

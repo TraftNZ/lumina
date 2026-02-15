@@ -45,6 +45,7 @@ const (
 	ImgSyncer_UpdatePhotoLabels_FullMethodName   = "/img_syncer.ImgSyncer/UpdatePhotoLabels"
 	ImgSyncer_SearchPhotos_FullMethodName        = "/img_syncer.ImgSyncer/SearchPhotos"
 	ImgSyncer_GetUnlabeledPhotos_FullMethodName  = "/img_syncer.ImgSyncer/GetUnlabeledPhotos"
+	ImgSyncer_GetLabelSummary_FullMethodName     = "/img_syncer.ImgSyncer/GetLabelSummary"
 )
 
 // ImgSyncerClient is the client API for ImgSyncer service.
@@ -85,6 +86,7 @@ type ImgSyncerClient interface {
 	UpdatePhotoLabels(ctx context.Context, in *UpdatePhotoLabelsRequest, opts ...grpc.CallOption) (*UpdatePhotoLabelsResponse, error)
 	SearchPhotos(ctx context.Context, in *SearchPhotosRequest, opts ...grpc.CallOption) (*SearchPhotosResponse, error)
 	GetUnlabeledPhotos(ctx context.Context, in *GetUnlabeledPhotosRequest, opts ...grpc.CallOption) (*GetUnlabeledPhotosResponse, error)
+	GetLabelSummary(ctx context.Context, in *GetLabelSummaryRequest, opts ...grpc.CallOption) (*GetLabelSummaryResponse, error)
 }
 
 type imgSyncerClient struct {
@@ -367,6 +369,16 @@ func (c *imgSyncerClient) GetUnlabeledPhotos(ctx context.Context, in *GetUnlabel
 	return out, nil
 }
 
+func (c *imgSyncerClient) GetLabelSummary(ctx context.Context, in *GetLabelSummaryRequest, opts ...grpc.CallOption) (*GetLabelSummaryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLabelSummaryResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_GetLabelSummary_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImgSyncerServer is the server API for ImgSyncer service.
 // All implementations must embed UnimplementedImgSyncerServer
 // for forward compatibility.
@@ -405,6 +417,7 @@ type ImgSyncerServer interface {
 	UpdatePhotoLabels(context.Context, *UpdatePhotoLabelsRequest) (*UpdatePhotoLabelsResponse, error)
 	SearchPhotos(context.Context, *SearchPhotosRequest) (*SearchPhotosResponse, error)
 	GetUnlabeledPhotos(context.Context, *GetUnlabeledPhotosRequest) (*GetUnlabeledPhotosResponse, error)
+	GetLabelSummary(context.Context, *GetLabelSummaryRequest) (*GetLabelSummaryResponse, error)
 	mustEmbedUnimplementedImgSyncerServer()
 }
 
@@ -492,6 +505,9 @@ func (UnimplementedImgSyncerServer) SearchPhotos(context.Context, *SearchPhotosR
 }
 func (UnimplementedImgSyncerServer) GetUnlabeledPhotos(context.Context, *GetUnlabeledPhotosRequest) (*GetUnlabeledPhotosResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUnlabeledPhotos not implemented")
+}
+func (UnimplementedImgSyncerServer) GetLabelSummary(context.Context, *GetLabelSummaryRequest) (*GetLabelSummaryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetLabelSummary not implemented")
 }
 func (UnimplementedImgSyncerServer) mustEmbedUnimplementedImgSyncerServer() {}
 func (UnimplementedImgSyncerServer) testEmbeddedByValue()                   {}
@@ -964,6 +980,24 @@ func _ImgSyncer_GetUnlabeledPhotos_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImgSyncer_GetLabelSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLabelSummaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).GetLabelSummary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_GetLabelSummary_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).GetLabelSummary(ctx, req.(*GetLabelSummaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ImgSyncer_ServiceDesc is the grpc.ServiceDesc for ImgSyncer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1066,6 +1100,10 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUnlabeledPhotos",
 			Handler:    _ImgSyncer_GetUnlabeledPhotos_Handler,
+		},
+		{
+			MethodName: "GetLabelSummary",
+			Handler:    _ImgSyncer_GetLabelSummary_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

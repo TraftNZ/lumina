@@ -414,4 +414,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get savedToGallery => '已保存到相册';
+
+  @override
+  String get people => '人物';
+
+  @override
+  String get peoplePets => '人物与宠物';
+
+  @override
+  String get categories => '分类';
 }
