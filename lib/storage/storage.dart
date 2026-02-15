@@ -235,29 +235,36 @@ class RemoteImage {
   }
 
   Stream<Uint8List> dataStream() async* {
-    if (path[0] == '/') {
-      path = path.substring(1);
+    var urlPath = path;
+    if (urlPath[0] == '/') {
+      urlPath = urlPath.substring(1);
     }
-    final url = '$httpBaseUrl/$path';
+    final url = '$httpBaseUrl/$urlPath';
     final client = http.Client();
     final request = http.Request('GET', Uri.parse(url));
     final response = await client.send(request);
     if (response.statusCode != 200) {
-      throw Exception("get image failed: ${response.statusCode}");
+      final body = await response.stream.bytesToString();
+      throw Exception("get image failed: [${response.statusCode}] $body");
     }
-    stateModel.updateDownloadProgress(
-        basename(path), 0, response.contentLength!);
+    final totalLength = response.contentLength ?? 0;
+    if (totalLength > 0) {
+      stateModel.updateDownloadProgress(basename(path), 0, totalLength);
+    }
     int downloaded = 0;
     await for (var data in response.stream) {
-      stateModel.updateDownloadProgress(
-          basename(path), downloaded += data.length, response.contentLength!);
+      downloaded += data.length;
+      if (totalLength > 0) {
+        stateModel.updateDownloadProgress(
+            basename(path), downloaded, totalLength);
+      }
       yield data as Uint8List;
     }
     stateModel.finishDownload(basename(path), true);
   }
 
   Future<Uint8List> imageData() async {
-    if (data != null) {
+    if (data != null && data!.isNotEmpty) {
       return data!;
     }
     var currentData = BytesBuilder();
@@ -265,7 +272,10 @@ class RemoteImage {
     await for (var d in stream) {
       currentData.add(d);
     }
-    data = currentData.takeBytes();
-    return data!;
+    final result = currentData.takeBytes();
+    if (result.isNotEmpty) {
+      data = result;
+    }
+    return result;
   }
 }

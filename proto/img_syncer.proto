@@ -26,6 +26,10 @@ service ImgSyncer {
   rpc ListTrash (ListTrashRequest) returns (ListTrashResponse) {}
   rpc RestoreFromTrash (RestoreFromTrashRequest) returns (RestoreFromTrashResponse) {}
   rpc EmptyTrash (EmptyTrashRequest) returns (EmptyTrashResponse) {}
+  // Locked folder
+  rpc MoveToLocked (MoveToLockedRequest) returns (MoveToLockedResponse) {}
+  rpc ListLocked (ListLockedRequest) returns (ListLockedResponse) {}
+  rpc RestoreFromLocked (RestoreFromLockedRequest) returns (RestoreFromLockedResponse) {}
   // Index management
   rpc RebuildIndex (RebuildIndexRequest) returns (stream RebuildIndexResponse) {}
   rpc GetIndexStats (GetIndexStatsRequest) returns (GetIndexStatsResponse) {}
@@ -207,6 +211,32 @@ message EmptyTrashRequest {}
 message EmptyTrashResponse {
   bool success = 1;
   string message = 2;
+}
+
+message MoveToLockedRequest {
+  repeated string paths = 1;
+}
+message MoveToLockedResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RestoreFromLockedRequest {
+  repeated string lockedPaths = 1;
+}
+message RestoreFromLockedResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListLockedRequest {
+  int32 offset = 1;
+  int32 maxReturn = 2;
+}
+message ListLockedResponse {
+  bool success = 1;
+  string message = 2;
+  repeated TrashItem items = 3;
 }
 
 message RebuildIndexRequest {}

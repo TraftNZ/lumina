@@ -285,7 +285,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authenticationFailed => 'Authentication failed';
 
   @override
+  String get biometricNotAvailable => 'Biometric authentication not available';
+
+  @override
   String get moveToLockedFolder => 'Hide';
+
+  @override
+  String get noPhotosSelected => 'No photos selected';
+
+  @override
+  String get stillInGallery => 'still in gallery';
 
   @override
   String get removeFromLockedFolder => 'Remove from Locked Folder';

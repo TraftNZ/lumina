@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:img_syncer/global.dart';
 import 'package:img_syncer/proto/img_syncer.pb.dart';
 import 'package:img_syncer/storage/storage.dart';
+import 'package:img_syncer/event_bus.dart';
 
 class TrashBody extends StatefulWidget {
   const TrashBody({Key? key}) : super(key: key);
@@ -71,6 +72,7 @@ class _TrashBodyState extends State<TrashBody> {
     }
     _clearSelection();
     _loadTrash();
+    eventBus.fire(RemoteRefreshEvent());
   }
 
   Future<void> _restoreAll() async {
@@ -86,6 +88,7 @@ class _TrashBodyState extends State<TrashBody> {
       if (mounted) SnackBarManager.showSnackBar(e.toString());
     }
     _loadTrash();
+    eventBus.fire(RemoteRefreshEvent());
   }
 
   Future<void> _deleteSelectedPermanently() async {

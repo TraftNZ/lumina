@@ -149,36 +149,32 @@ class _FloatingBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    return Material(
-      elevation: 3,
-      shape: const StadiumBorder(),
-      color: colorScheme.surfaceContainerHigh,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTabChip(
-              context: context,
-              icon: Icons.photo_library,
-              label: l10n.photos,
-              isSelected: selectedTab == 0,
-              onTap: () => onTabChanged(0),
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-            ),
-            const SizedBox(width: 4),
-            _buildTabChip(
-              context: context,
-              icon: Icons.collections_bookmark,
-              label: l10n.collections,
-              isSelected: selectedTab == 1,
-              onTap: () => onTabChanged(1),
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-            ),
-          ],
-        ),
+    return GlassContainer(
+      borderRadius: BorderRadius.circular(28),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTabChip(
+            context: context,
+            icon: Icons.photo_library,
+            label: l10n.photos,
+            isSelected: selectedTab == 0,
+            onTap: () => onTabChanged(0),
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+          const SizedBox(width: 4),
+          _buildTabChip(
+            context: context,
+            icon: Icons.collections_bookmark,
+            label: l10n.collections,
+            isSelected: selectedTab == 1,
+            onTap: () => onTabChanged(1),
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+        ],
       ),
     );
   }

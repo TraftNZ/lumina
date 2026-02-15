@@ -36,6 +36,9 @@ const (
 	ImgSyncer_ListTrash_FullMethodName           = "/img_syncer.ImgSyncer/ListTrash"
 	ImgSyncer_RestoreFromTrash_FullMethodName    = "/img_syncer.ImgSyncer/RestoreFromTrash"
 	ImgSyncer_EmptyTrash_FullMethodName          = "/img_syncer.ImgSyncer/EmptyTrash"
+	ImgSyncer_MoveToLocked_FullMethodName        = "/img_syncer.ImgSyncer/MoveToLocked"
+	ImgSyncer_ListLocked_FullMethodName          = "/img_syncer.ImgSyncer/ListLocked"
+	ImgSyncer_RestoreFromLocked_FullMethodName   = "/img_syncer.ImgSyncer/RestoreFromLocked"
 	ImgSyncer_RebuildIndex_FullMethodName        = "/img_syncer.ImgSyncer/RebuildIndex"
 	ImgSyncer_GetIndexStats_FullMethodName       = "/img_syncer.ImgSyncer/GetIndexStats"
 	ImgSyncer_ClearThumbnailCache_FullMethodName = "/img_syncer.ImgSyncer/ClearThumbnailCache"
@@ -67,6 +70,10 @@ type ImgSyncerClient interface {
 	ListTrash(ctx context.Context, in *ListTrashRequest, opts ...grpc.CallOption) (*ListTrashResponse, error)
 	RestoreFromTrash(ctx context.Context, in *RestoreFromTrashRequest, opts ...grpc.CallOption) (*RestoreFromTrashResponse, error)
 	EmptyTrash(ctx context.Context, in *EmptyTrashRequest, opts ...grpc.CallOption) (*EmptyTrashResponse, error)
+	// Locked folder
+	MoveToLocked(ctx context.Context, in *MoveToLockedRequest, opts ...grpc.CallOption) (*MoveToLockedResponse, error)
+	ListLocked(ctx context.Context, in *ListLockedRequest, opts ...grpc.CallOption) (*ListLockedResponse, error)
+	RestoreFromLocked(ctx context.Context, in *RestoreFromLockedRequest, opts ...grpc.CallOption) (*RestoreFromLockedResponse, error)
 	// Index management
 	RebuildIndex(ctx context.Context, in *RebuildIndexRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RebuildIndexResponse], error)
 	GetIndexStats(ctx context.Context, in *GetIndexStatsRequest, opts ...grpc.CallOption) (*GetIndexStatsResponse, error)
@@ -254,6 +261,36 @@ func (c *imgSyncerClient) EmptyTrash(ctx context.Context, in *EmptyTrashRequest,
 	return out, nil
 }
 
+func (c *imgSyncerClient) MoveToLocked(ctx context.Context, in *MoveToLockedRequest, opts ...grpc.CallOption) (*MoveToLockedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MoveToLockedResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_MoveToLocked_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) ListLocked(ctx context.Context, in *ListLockedRequest, opts ...grpc.CallOption) (*ListLockedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListLockedResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_ListLocked_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imgSyncerClient) RestoreFromLocked(ctx context.Context, in *RestoreFromLockedRequest, opts ...grpc.CallOption) (*RestoreFromLockedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RestoreFromLockedResponse)
+	err := c.cc.Invoke(ctx, ImgSyncer_RestoreFromLocked_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *imgSyncerClient) RebuildIndex(ctx context.Context, in *RebuildIndexRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RebuildIndexResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &ImgSyncer_ServiceDesc.Streams[1], ImgSyncer_RebuildIndex_FullMethodName, cOpts...)
@@ -319,6 +356,10 @@ type ImgSyncerServer interface {
 	ListTrash(context.Context, *ListTrashRequest) (*ListTrashResponse, error)
 	RestoreFromTrash(context.Context, *RestoreFromTrashRequest) (*RestoreFromTrashResponse, error)
 	EmptyTrash(context.Context, *EmptyTrashRequest) (*EmptyTrashResponse, error)
+	// Locked folder
+	MoveToLocked(context.Context, *MoveToLockedRequest) (*MoveToLockedResponse, error)
+	ListLocked(context.Context, *ListLockedRequest) (*ListLockedResponse, error)
+	RestoreFromLocked(context.Context, *RestoreFromLockedRequest) (*RestoreFromLockedResponse, error)
 	// Index management
 	RebuildIndex(*RebuildIndexRequest, grpc.ServerStreamingServer[RebuildIndexResponse]) error
 	GetIndexStats(context.Context, *GetIndexStatsRequest) (*GetIndexStatsResponse, error)
@@ -383,6 +424,15 @@ func (UnimplementedImgSyncerServer) RestoreFromTrash(context.Context, *RestoreFr
 }
 func (UnimplementedImgSyncerServer) EmptyTrash(context.Context, *EmptyTrashRequest) (*EmptyTrashResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method EmptyTrash not implemented")
+}
+func (UnimplementedImgSyncerServer) MoveToLocked(context.Context, *MoveToLockedRequest) (*MoveToLockedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MoveToLocked not implemented")
+}
+func (UnimplementedImgSyncerServer) ListLocked(context.Context, *ListLockedRequest) (*ListLockedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListLocked not implemented")
+}
+func (UnimplementedImgSyncerServer) RestoreFromLocked(context.Context, *RestoreFromLockedRequest) (*RestoreFromLockedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RestoreFromLocked not implemented")
 }
 func (UnimplementedImgSyncerServer) RebuildIndex(*RebuildIndexRequest, grpc.ServerStreamingServer[RebuildIndexResponse]) error {
 	return status.Error(codes.Unimplemented, "method RebuildIndex not implemented")
@@ -709,6 +759,60 @@ func _ImgSyncer_EmptyTrash_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImgSyncer_MoveToLocked_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveToLockedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).MoveToLocked(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_MoveToLocked_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).MoveToLocked(ctx, req.(*MoveToLockedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_ListLocked_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLockedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).ListLocked(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_ListLocked_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).ListLocked(ctx, req.(*ListLockedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImgSyncer_RestoreFromLocked_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RestoreFromLockedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImgSyncerServer).RestoreFromLocked(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImgSyncer_RestoreFromLocked_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImgSyncerServer).RestoreFromLocked(ctx, req.(*RestoreFromLockedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ImgSyncer_RebuildIndex_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(RebuildIndexRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -826,6 +930,18 @@ var ImgSyncer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EmptyTrash",
 			Handler:    _ImgSyncer_EmptyTrash_Handler,
+		},
+		{
+			MethodName: "MoveToLocked",
+			Handler:    _ImgSyncer_MoveToLocked_Handler,
+		},
+		{
+			MethodName: "ListLocked",
+			Handler:    _ImgSyncer_ListLocked_Handler,
+		},
+		{
+			MethodName: "RestoreFromLocked",
+			Handler:    _ImgSyncer_RestoreFromLocked_Handler,
 		},
 		{
 			MethodName: "GetIndexStats",

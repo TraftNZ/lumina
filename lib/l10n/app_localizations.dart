@@ -623,11 +623,29 @@ abstract class AppLocalizations {
   /// **'Authentication failed'**
   String get authenticationFailed;
 
+  /// No description provided for @biometricNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication not available'**
+  String get biometricNotAvailable;
+
   /// No description provided for @moveToLockedFolder.
   ///
   /// In en, this message translates to:
   /// **'Hide'**
   String get moveToLockedFolder;
+
+  /// No description provided for @noPhotosSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No photos selected'**
+  String get noPhotosSelected;
+
+  /// No description provided for @stillInGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'still in gallery'**
+  String get stillInGallery;
 
   /// No description provided for @removeFromLockedFolder.
   ///

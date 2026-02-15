@@ -279,7 +279,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authenticationFailed => '身份验证失败';
 
   @override
+  String get biometricNotAvailable => '生物识别不可用';
+
+  @override
   String get moveToLockedFolder => '隐藏';
+
+  @override
+  String get noPhotosSelected => '未选择照片';
+
+  @override
+  String get stillInGallery => '仍在相册中';
 
   @override
   String get removeFromLockedFolder => '从已锁定的文件夹移除';

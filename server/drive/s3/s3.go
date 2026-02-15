@@ -68,6 +68,7 @@ func (d *S3Drive) fullKey(path string) string {
 	if path == "." || path == "" {
 		return d.rootPath
 	}
+	path = strings.TrimLeft(path, "/")
 	return d.rootPath + path
 }
 

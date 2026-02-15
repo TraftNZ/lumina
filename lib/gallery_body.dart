@@ -16,12 +16,12 @@ import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:img_syncer/global.dart';
 import 'package:img_syncer/setting_body.dart';
+import 'package:img_syncer/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:vibration/vibration.dart';
 import 'package:local_auth/local_auth.dart';
-import 'dart:convert';
 
 class GalleryBody extends StatefulWidget {
   const GalleryBody({Key? key}) : super(key: key);
@@ -337,9 +337,8 @@ class GalleryBodyState extends State<GalleryBody>
     return Consumer<StateModel>(
       builder: (context, model, child) {
         if (!model.isSelectionMode) return const SizedBox.shrink();
-        return Material(
-          elevation: 3,
-          color: Theme.of(context).colorScheme.surface,
+        return GlassContainer(
+          borderRadius: BorderRadius.zero,
           child: SizedBox(
             height: 80,
             child: Row(
@@ -442,61 +441,130 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
-  void _moveToLockedFolder() async {
-    if (!stateModel.isSelectionMode) return;
+  Future<bool> _tryBiometricAuth() async {
     final localAuth = LocalAuthentication();
     try {
-      final authenticated = await localAuth.authenticate(
+      final canCheck = await localAuth.canCheckBiometrics;
+      final isSupported = await localAuth.isDeviceSupported();
+      print("canCheckBiometrics: $canCheck, isDeviceSupported: $isSupported");
+      final canAuth = canCheck || isSupported;
+      if (!canAuth) return false;
+      final result = await localAuth.authenticate(
         localizedReason: l10n.authenticate,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: false,
+        ),
       );
-      if (!authenticated) {
-        SnackBarManager.showSnackBar(l10n.authenticationFailed);
-        return;
-      }
+      print("Authenticate result: $result");
+      return result;
     } catch (e) {
-      SnackBarManager.showSnackBar(l10n.authenticationFailed);
+      print("Biometric auth error: $e");
+      return false;
+    }
+  }
+
+  Future<bool> _showPinDialog(String correctPin) async {
+    final controller = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.enterPin),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          obscureText: true,
+          maxLength: 6,
+          decoration: InputDecoration(hintText: l10n.enterPin),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          TextButton(onPressed: () => Navigator.pop(ctx, controller.text == correctPin), child: Text(l10n.yes)),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  void _moveToLockedFolder() async {
+    print("_moveToLockedFolder called, isSelectionMode: ${stateModel.isSelectionMode}");
+    if (!stateModel.isSelectionMode) return;
+
+    // Try biometric auth first
+    final biometricOk = await _tryBiometricAuth();
+    print("Biometric auth result: $biometricOk");
+    if (biometricOk) {
+      _performMoveToLockedFolder();
       return;
     }
 
+    if (!mounted) return;
+
+    // Fallback to PIN
+    final prefs = await SharedPreferences.getInstance();
+    final storedPin = prefs.getString('locked_folder_pin');
+    print("Stored PIN: ${storedPin != null ? 'exists' : 'null'}");
+
+    if (storedPin != null && storedPin.isNotEmpty) {
+      final pinOk = await _showPinDialog(storedPin);
+      if (!mounted) return;
+      if (pinOk) {
+        _performMoveToLockedFolder();
+      } else {
+        SnackBarManager.showSnackBar(l10n.incorrectPin);
+      }
+      return;
+    }
+
+    // No biometric and no PIN configured
+    print("No biometric and no PIN - showing pinRequired");
+    SnackBarManager.showSnackBar(l10n.pinRequired);
+  }
+
+  void _performMoveToLockedFolder() async {
     final all = assetModel.getUnifiedAssets();
     final assets = <Asset>[];
+
     _selectedIndices.forEach((key, isSelected) {
-      if (isSelected && all[key].hasLocal) {
+      if (isSelected) {
         assets.add(all[key]);
       }
     });
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final lockedDir = Directory('${appDir.path}/locked_photos');
-    if (!await lockedDir.exists()) {
-      await lockedDir.create(recursive: true);
+    if (assets.isEmpty) {
+      SnackBarManager.showSnackBar(l10n.noPhotosSelected);
+      clearSelection();
+      return;
     }
-
-    final prefs = await SharedPreferences.getInstance();
-    final existingJson = prefs.getString('locked_photos') ?? '[]';
-    final List<dynamic> metadata = json.decode(existingJson);
-
-    for (final asset in assets) {
-      final data = await asset.imageDataAsync();
-      final filename = '${DateTime.now().millisecondsSinceEpoch}_${asset.name()}';
-      final file = File('${lockedDir.path}/$filename');
-      await file.writeAsBytes(data);
-      metadata.add({
-        'filename': filename,
-        'originalName': asset.name(),
-        'dateAdded': DateTime.now().toIso8601String(),
-      });
-    }
-    await prefs.setString('locked_photos', json.encode(metadata));
 
     // Delete local copies
-    final localIds = assets.map((e) => e.local!.id).toList();
-    await PhotoManager.editor.deleteWithIds(localIds);
-    eventBus.fire(LocalRefreshEvent());
+    final localIds = assets.where((e) => e.hasLocal).map((e) => e.local!.id).toList();
+    if (localIds.isNotEmpty) {
+      try {
+        await PhotoManager.editor.deleteWithIds(localIds);
+      } catch (e) {
+        print("Failed to delete local photos: $e");
+      }
+    }
+
+    // Move remote copies to locked folder on server
+    final remotePaths = assets.where((e) => e.hasRemote).map((e) => e.remote!.path).toList();
+    if (remotePaths.isNotEmpty) {
+      try {
+        final rsp = await storage.cli.moveToLocked(MoveToLockedRequest(paths: remotePaths));
+        if (!rsp.success) {
+          print("Move to locked failed: ${rsp.message}");
+        }
+      } catch (e) {
+        print("Failed to move remote photos to locked: $e");
+      }
+    }
 
     clearSelection();
-    SnackBarManager.showSnackBar(
-        '${assets.length} ${l10n.photos} ${l10n.moveToLockedFolder}');
+    eventBus.fire(LocalRefreshEvent());
+    eventBus.fire(RemoteRefreshEvent());
+    SnackBarManager.showSnackBar('${assets.length} ${l10n.photos} ${l10n.moveToLockedFolder}');
   }
 
   Widget _buildToolbar() {

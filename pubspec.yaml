@@ -130,7 +130,10 @@ flutter_native_splash:
   image: "assets/icon/lumina_icon.png"
   color: "#ffffff"
   color_dark: "#1a1a1a"
+  android_screen_orientation: portrait
   android_12:
-    image: "assets/icon/lumina_icon.png"
+    image: "assets/icon/lumina_splash.png"
     color: "#ffffff"
     color_dark: "#1a1a1a"
+    icon_background_color: "#ffffff"
+    icon_background_color_dark: "#1a1a1a"

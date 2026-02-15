@@ -552,6 +552,99 @@ final $typed_data.Uint8List emptyTrashResponseDescriptor = $convert.base64Decode
     'ChJFbXB0eVRyYXNoUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZXNzYW'
     'dlGAIgASgJUgdtZXNzYWdl');
 
+@$core.Deprecated('Use moveToLockedRequestDescriptor instead')
+const MoveToLockedRequest$json = {
+  '1': 'MoveToLockedRequest',
+  '2': [
+    {'1': 'paths', '3': 1, '4': 3, '5': 9, '10': 'paths'},
+  ],
+};
+
+/// Descriptor for `MoveToLockedRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List moveToLockedRequestDescriptor =
+    $convert.base64Decode(
+        'ChNNb3ZlVG9Mb2NrZWRSZXF1ZXN0EhQKBXBhdGhzGAEgAygJUgVwYXRocw==');
+
+@$core.Deprecated('Use moveToLockedResponseDescriptor instead')
+const MoveToLockedResponse$json = {
+  '1': 'MoveToLockedResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `MoveToLockedResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List moveToLockedResponseDescriptor = $convert.base64Decode(
+    'ChRNb3ZlVG9Mb2NrZWRSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB21lc3'
+    'NhZ2UYAiABKAlSB21lc3NhZ2U=');
+
+@$core.Deprecated('Use restoreFromLockedRequestDescriptor instead')
+const RestoreFromLockedRequest$json = {
+  '1': 'RestoreFromLockedRequest',
+  '2': [
+    {'1': 'lockedPaths', '3': 1, '4': 3, '5': 9, '10': 'lockedPaths'},
+  ],
+};
+
+/// Descriptor for `RestoreFromLockedRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List restoreFromLockedRequestDescriptor =
+    $convert.base64Decode(
+        'ChhSZXN0b3JlRnJvbUxvY2tlZFJlcXVlc3QSIAoLbG9ja2VkUGF0aHMYASADKAlSC2xvY2tlZF'
+        'BhdGhz');
+
+@$core.Deprecated('Use restoreFromLockedResponseDescriptor instead')
+const RestoreFromLockedResponse$json = {
+  '1': 'RestoreFromLockedResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `RestoreFromLockedResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List restoreFromLockedResponseDescriptor =
+    $convert.base64Decode(
+        'ChlSZXN0b3JlRnJvbUxvY2tlZFJlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSGA'
+        'oHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZQ==');
+
+@$core.Deprecated('Use listLockedRequestDescriptor instead')
+const ListLockedRequest$json = {
+  '1': 'ListLockedRequest',
+  '2': [
+    {'1': 'offset', '3': 1, '4': 1, '5': 5, '10': 'offset'},
+    {'1': 'maxReturn', '3': 2, '4': 1, '5': 5, '10': 'maxReturn'},
+  ],
+};
+
+/// Descriptor for `ListLockedRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listLockedRequestDescriptor = $convert.base64Decode(
+    'ChFMaXN0TG9ja2VkUmVxdWVzdBIWCgZvZmZzZXQYASABKAVSBm9mZnNldBIcCgltYXhSZXR1cm'
+    '4YAiABKAVSCW1heFJldHVybg==');
+
+@$core.Deprecated('Use listLockedResponseDescriptor instead')
+const ListLockedResponse$json = {
+  '1': 'ListLockedResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {
+      '1': 'items',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.img_syncer.TrashItem',
+      '10': 'items'
+    },
+  ],
+};
+
+/// Descriptor for `ListLockedResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listLockedResponseDescriptor = $convert.base64Decode(
+    'ChJMaXN0TG9ja2VkUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZXNzYW'
+    'dlGAIgASgJUgdtZXNzYWdlEisKBWl0ZW1zGAMgAygLMhUuaW1nX3N5bmNlci5UcmFzaEl0ZW1S'
+    'BWl0ZW1z');
+
 @$core.Deprecated('Use rebuildIndexRequestDescriptor instead')
 const RebuildIndexRequest$json = {
   '1': 'RebuildIndexRequest',

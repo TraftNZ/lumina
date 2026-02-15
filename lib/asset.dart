@@ -280,6 +280,7 @@ class Asset extends ImageProvider<Asset> {
     if (data == null || data.isEmpty) {
       final brokenData = await rootBundle.load("assets/images/broken.png");
       _dataAsyncCompleter!.complete(brokenData.buffer.asUint8List());
+      _dataAsyncCompleter = null;
       return brokenData.buffer.asUint8List();
     } else {
       _dataAsyncCompleter!.complete(data);

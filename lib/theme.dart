@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class AppSpacing {
@@ -216,6 +217,51 @@ ThemeData buildDarkTheme(ColorScheme baseScheme) {
       space: 1,
     ),
   );
+}
+
+class GlassContainer extends StatelessWidget {
+  final Widget child;
+  final BorderRadius borderRadius;
+  final double blurSigma;
+  final EdgeInsetsGeometry padding;
+
+  const GlassContainer({
+    super.key,
+    required this.child,
+    this.borderRadius = const BorderRadius.all(Radius.circular(16)),
+    this.blurSigma = 15,
+    this.padding = EdgeInsets.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final surface = Theme.of(context).colorScheme.surface;
+    final isDark = brightness == Brightness.dark;
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: isDark
+                ? surface.withValues(alpha: 0.4)
+                : surface.withValues(alpha: 0.6),
+            borderRadius: borderRadius,
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.white.withValues(alpha: 0.3),
+              ),
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
 }
 
 TextTheme _buildTextTheme(ColorScheme colorScheme) {

@@ -212,6 +212,50 @@ func (a *api) EmptyTrash(ctx context.Context, req *pb.EmptyTrashRequest) (rsp *p
 	return
 }
 
+func (a *api) MoveToLocked(ctx context.Context, req *pb.MoveToLockedRequest) (rsp *pb.MoveToLockedResponse, err error) {
+	rsp = &pb.MoveToLockedResponse{Success: true}
+	for _, path := range req.Paths {
+		if e := a.im.MoveToLocked(path); e != nil {
+			rsp.Success = false
+			rsp.Message = fmt.Sprintf("move to locked error: %v", e)
+			return
+		}
+	}
+	return
+}
+
+func (a *api) ListLocked(ctx context.Context, req *pb.ListLockedRequest) (rsp *pb.ListLockedResponse, err error) {
+	rsp = &pb.ListLockedResponse{Success: true}
+	items, e := a.im.ListLocked(int(req.Offset), int(req.MaxReturn))
+	if e != nil {
+		rsp.Success = false
+		rsp.Message = e.Error()
+		return
+	}
+	rsp.Items = make([]*pb.TrashItem, len(items))
+	for i, item := range items {
+		rsp.Items[i] = &pb.TrashItem{
+			OriginalPath: item.OriginalPath,
+			TrashPath:    item.TrashPath,
+			TrashedAt:    item.TrashedAt.Unix(),
+			Size:         item.Size,
+		}
+	}
+	return
+}
+
+func (a *api) RestoreFromLocked(ctx context.Context, req *pb.RestoreFromLockedRequest) (rsp *pb.RestoreFromLockedResponse, err error) {
+	rsp = &pb.RestoreFromLockedResponse{Success: true}
+	for _, lockedPath := range req.LockedPaths {
+		if e := a.im.RestoreFromLocked(lockedPath); e != nil {
+			rsp.Success = false
+			rsp.Message = fmt.Sprintf("restore from locked error: %v", e)
+			return
+		}
+	}
+	return
+}
+
 func (a *api) RebuildIndex(req *pb.RebuildIndexRequest, stream pb.ImgSyncer_RebuildIndexServer) error {
 	err := a.im.RebuildIndex(func(found int) {
 		stream.Send(&pb.RebuildIndexResponse{

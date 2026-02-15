@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:img_syncer/asset.dart';
@@ -10,6 +11,7 @@ import 'event_bus.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:img_syncer/video_route.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 
@@ -72,11 +74,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
     final textTheme = Theme.of(context).textTheme;
     showModalBottomSheet(
       context: context,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      clipBehavior: Clip.antiAliasWithSaveLayer,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         List<Widget> columns = [];
         columns.add(
@@ -207,9 +205,13 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
           ),
         ));
 
-        return IntrinsicHeight(
-          child: Column(
-            children: columns,
+        return GlassContainer(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          padding: const EdgeInsets.only(top: 12),
+          child: IntrinsicHeight(
+            child: Column(
+              children: columns,
+            ),
           ),
         );
       },
@@ -331,15 +333,11 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
           ? AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              flexibleSpace: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x80000000),
-                      Colors.transparent,
-                    ],
+              flexibleSpace: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    color: Colors.black.withValues(alpha: 0.3),
                   ),
                 ),
               ),

@@ -2467,6 +2467,375 @@ class EmptyTrashResponse extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(2);
 }
 
+class MoveToLockedRequest extends $pb.GeneratedMessage {
+  factory MoveToLockedRequest({
+    $core.Iterable<$core.String>? paths,
+  }) {
+    final result = create();
+    if (paths != null) result.paths.addAll(paths);
+    return result;
+  }
+
+  MoveToLockedRequest._();
+
+  factory MoveToLockedRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MoveToLockedRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MoveToLockedRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'paths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToLockedRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToLockedRequest copyWith(void Function(MoveToLockedRequest) updates) =>
+      super.copyWith((message) => updates(message as MoveToLockedRequest))
+          as MoveToLockedRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MoveToLockedRequest create() => MoveToLockedRequest._();
+  @$core.override
+  MoveToLockedRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MoveToLockedRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MoveToLockedRequest>(create);
+  static MoveToLockedRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get paths => $_getList(0);
+}
+
+class MoveToLockedResponse extends $pb.GeneratedMessage {
+  factory MoveToLockedResponse({
+    $core.bool? success,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  MoveToLockedResponse._();
+
+  factory MoveToLockedResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MoveToLockedResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MoveToLockedResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToLockedResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MoveToLockedResponse copyWith(void Function(MoveToLockedResponse) updates) =>
+      super.copyWith((message) => updates(message as MoveToLockedResponse))
+          as MoveToLockedResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MoveToLockedResponse create() => MoveToLockedResponse._();
+  @$core.override
+  MoveToLockedResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MoveToLockedResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MoveToLockedResponse>(create);
+  static MoveToLockedResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
+class RestoreFromLockedRequest extends $pb.GeneratedMessage {
+  factory RestoreFromLockedRequest({
+    $core.Iterable<$core.String>? lockedPaths,
+  }) {
+    final result = create();
+    if (lockedPaths != null) result.lockedPaths.addAll(lockedPaths);
+    return result;
+  }
+
+  RestoreFromLockedRequest._();
+
+  factory RestoreFromLockedRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RestoreFromLockedRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RestoreFromLockedRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'lockedPaths', protoName: 'lockedPaths')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromLockedRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromLockedRequest copyWith(
+          void Function(RestoreFromLockedRequest) updates) =>
+      super.copyWith((message) => updates(message as RestoreFromLockedRequest))
+          as RestoreFromLockedRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromLockedRequest create() => RestoreFromLockedRequest._();
+  @$core.override
+  RestoreFromLockedRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromLockedRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RestoreFromLockedRequest>(create);
+  static RestoreFromLockedRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get lockedPaths => $_getList(0);
+}
+
+class RestoreFromLockedResponse extends $pb.GeneratedMessage {
+  factory RestoreFromLockedResponse({
+    $core.bool? success,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  RestoreFromLockedResponse._();
+
+  factory RestoreFromLockedResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RestoreFromLockedResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RestoreFromLockedResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromLockedResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreFromLockedResponse copyWith(
+          void Function(RestoreFromLockedResponse) updates) =>
+      super.copyWith((message) => updates(message as RestoreFromLockedResponse))
+          as RestoreFromLockedResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromLockedResponse create() => RestoreFromLockedResponse._();
+  @$core.override
+  RestoreFromLockedResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RestoreFromLockedResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RestoreFromLockedResponse>(create);
+  static RestoreFromLockedResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
+class ListLockedRequest extends $pb.GeneratedMessage {
+  factory ListLockedRequest({
+    $core.int? offset,
+    $core.int? maxReturn,
+  }) {
+    final result = create();
+    if (offset != null) result.offset = offset;
+    if (maxReturn != null) result.maxReturn = maxReturn;
+    return result;
+  }
+
+  ListLockedRequest._();
+
+  factory ListLockedRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListLockedRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListLockedRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'offset')
+    ..aI(2, _omitFieldNames ? '' : 'maxReturn', protoName: 'maxReturn')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListLockedRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListLockedRequest copyWith(void Function(ListLockedRequest) updates) =>
+      super.copyWith((message) => updates(message as ListLockedRequest))
+          as ListLockedRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ListLockedRequest create() => ListLockedRequest._();
+  @$core.override
+  ListLockedRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ListLockedRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListLockedRequest>(create);
+  static ListLockedRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get offset => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set offset($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasOffset() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOffset() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get maxReturn => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set maxReturn($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMaxReturn() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMaxReturn() => $_clearField(2);
+}
+
+class ListLockedResponse extends $pb.GeneratedMessage {
+  factory ListLockedResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.Iterable<TrashItem>? items,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (items != null) result.items.addAll(items);
+    return result;
+  }
+
+  ListLockedResponse._();
+
+  factory ListLockedResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListLockedResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListLockedResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPM<TrashItem>(3, _omitFieldNames ? '' : 'items',
+        subBuilder: TrashItem.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListLockedResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListLockedResponse copyWith(void Function(ListLockedResponse) updates) =>
+      super.copyWith((message) => updates(message as ListLockedResponse))
+          as ListLockedResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ListLockedResponse create() => ListLockedResponse._();
+  @$core.override
+  ListLockedResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ListLockedResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListLockedResponse>(create);
+  static ListLockedResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<TrashItem> get items => $_getList(2);
+}
+
 class RebuildIndexRequest extends $pb.GeneratedMessage {
   factory RebuildIndexRequest() => create();
 

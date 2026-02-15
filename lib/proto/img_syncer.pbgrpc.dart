@@ -156,6 +156,28 @@ class ImgSyncerClient extends $grpc.Client {
     return $createUnaryCall(_$emptyTrash, request, options: options);
   }
 
+  /// Locked folder
+  $grpc.ResponseFuture<$0.MoveToLockedResponse> moveToLocked(
+    $0.MoveToLockedRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$moveToLocked, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ListLockedResponse> listLocked(
+    $0.ListLockedRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listLocked, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.RestoreFromLockedResponse> restoreFromLocked(
+    $0.RestoreFromLockedRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$restoreFromLocked, request, options: options);
+  }
+
   /// Index management
   $grpc.ResponseStream<$0.RebuildIndexResponse> rebuildIndex(
     $0.RebuildIndexRequest request, {
@@ -267,6 +289,21 @@ class ImgSyncerClient extends $grpc.Client {
           '/img_syncer.ImgSyncer/EmptyTrash',
           ($0.EmptyTrashRequest value) => value.writeToBuffer(),
           $0.EmptyTrashResponse.fromBuffer);
+  static final _$moveToLocked =
+      $grpc.ClientMethod<$0.MoveToLockedRequest, $0.MoveToLockedResponse>(
+          '/img_syncer.ImgSyncer/MoveToLocked',
+          ($0.MoveToLockedRequest value) => value.writeToBuffer(),
+          $0.MoveToLockedResponse.fromBuffer);
+  static final _$listLocked =
+      $grpc.ClientMethod<$0.ListLockedRequest, $0.ListLockedResponse>(
+          '/img_syncer.ImgSyncer/ListLocked',
+          ($0.ListLockedRequest value) => value.writeToBuffer(),
+          $0.ListLockedResponse.fromBuffer);
+  static final _$restoreFromLocked = $grpc.ClientMethod<
+          $0.RestoreFromLockedRequest, $0.RestoreFromLockedResponse>(
+      '/img_syncer.ImgSyncer/RestoreFromLocked',
+      ($0.RestoreFromLockedRequest value) => value.writeToBuffer(),
+      $0.RestoreFromLockedResponse.fromBuffer);
   static final _$rebuildIndex =
       $grpc.ClientMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
           '/img_syncer.ImgSyncer/RebuildIndex',
@@ -432,6 +469,31 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.EmptyTrashRequest.fromBuffer(value),
         ($0.EmptyTrashResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.MoveToLockedRequest, $0.MoveToLockedResponse>(
+            'MoveToLocked',
+            moveToLocked_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.MoveToLockedRequest.fromBuffer(value),
+            ($0.MoveToLockedResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ListLockedRequest, $0.ListLockedResponse>(
+        'ListLocked',
+        listLocked_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.ListLockedRequest.fromBuffer(value),
+        ($0.ListLockedResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.RestoreFromLockedRequest,
+            $0.RestoreFromLockedResponse>(
+        'RestoreFromLocked',
+        restoreFromLocked_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.RestoreFromLockedRequest.fromBuffer(value),
+        ($0.RestoreFromLockedResponse value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
             'RebuildIndex',
@@ -600,6 +662,32 @@ abstract class ImgSyncerServiceBase extends $grpc.Service {
 
   $async.Future<$0.EmptyTrashResponse> emptyTrash(
       $grpc.ServiceCall call, $0.EmptyTrashRequest request);
+
+  $async.Future<$0.MoveToLockedResponse> moveToLocked_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.MoveToLockedRequest> $request) async {
+    return moveToLocked($call, await $request);
+  }
+
+  $async.Future<$0.MoveToLockedResponse> moveToLocked(
+      $grpc.ServiceCall call, $0.MoveToLockedRequest request);
+
+  $async.Future<$0.ListLockedResponse> listLocked_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.ListLockedRequest> $request) async {
+    return listLocked($call, await $request);
+  }
+
+  $async.Future<$0.ListLockedResponse> listLocked(
+      $grpc.ServiceCall call, $0.ListLockedRequest request);
+
+  $async.Future<$0.RestoreFromLockedResponse> restoreFromLocked_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.RestoreFromLockedRequest> $request) async {
+    return restoreFromLocked($call, await $request);
+  }
+
+  $async.Future<$0.RestoreFromLockedResponse> restoreFromLocked(
+      $grpc.ServiceCall call, $0.RestoreFromLockedRequest request);
 
   $async.Stream<$0.RebuildIndexResponse> rebuildIndex_Pre(
       $grpc.ServiceCall $call,

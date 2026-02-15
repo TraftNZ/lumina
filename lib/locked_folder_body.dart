@@ -1,10 +1,12 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:img_syncer/event_bus.dart';
 import 'package:img_syncer/global.dart';
+import 'package:img_syncer/proto/img_syncer.pb.dart';
+import 'package:img_syncer/storage/storage.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LockedFolderBody extends StatefulWidget {
@@ -17,9 +19,10 @@ class LockedFolderBody extends StatefulWidget {
 class _LockedFolderBodyState extends State<LockedFolderBody> {
   bool _authenticated = false;
   bool _authenticating = true;
-  List<Map<String, dynamic>> _metadata = [];
-  String _lockedDirPath = '';
+  List<TrashItem> _items = [];
+  bool _loading = true;
   final Set<int> _selectedIndices = {};
+  final Map<String, Uint8List?> _thumbnailCache = {};
 
   @override
   void initState() {
@@ -27,51 +30,6 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _authenticate());
   }
 
-  Future<void> _authenticate() async {
-    if (!mounted) return;
-    setState(() => _authenticating = true);
-
-    // Try biometric/device auth first
-    if (await _tryBiometricAuth()) {
-      _authenticated = true;
-      await _loadPhotos();
-      if (mounted) setState(() => _authenticating = false);
-      return;
-    }
-
-    if (!mounted) return;
-
-    // Fallback to app PIN
-    final prefs = await SharedPreferences.getInstance();
-    final storedPin = prefs.getString('locked_folder_pin');
-
-    if (storedPin != null && storedPin.isNotEmpty) {
-      if (!mounted) return;
-      setState(() => _authenticating = false);
-      final pinOk = await _showPinDialog(storedPin);
-      if (!mounted) return;
-      if (pinOk) {
-        _authenticated = true;
-        await _loadPhotos();
-        if (mounted) setState(() {});
-      } else {
-        if (mounted) Navigator.of(context).pop();
-      }
-      return;
-    }
-
-    // No biometric and no PIN — tell user to set up PIN
-    if (!mounted) return;
-    setState(() => _authenticating = false);
-    SnackBarManager.showSnackBar(l10n.pinRequired);
-    if (mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
-      });
-    }
-  }
-
-  /// Returns true if biometric auth succeeded, false if unavailable or failed.
   Future<bool> _tryBiometricAuth() async {
     final localAuth = LocalAuthentication();
     try {
@@ -89,7 +47,6 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
     }
   }
 
-  /// Shows PIN entry dialog. Returns true if correct PIN entered.
   Future<bool> _showPinDialog(String correctPin) async {
     final controller = TextEditingController();
     final result = await showDialog<bool>(
@@ -137,27 +94,88 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
     return result ?? false;
   }
 
-  Future<void> _loadPhotos() async {
-    final appDir = await getApplicationDocumentsDirectory();
-    _lockedDirPath = '${appDir.path}/locked_photos';
-    final dir = Directory(_lockedDirPath);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    final prefs = await SharedPreferences.getInstance();
-    final existingJson = prefs.getString('locked_photos') ?? '[]';
-    _metadata = List<Map<String, dynamic>>.from(json.decode(existingJson));
+  Future<void> _authenticate() async {
+    if (!mounted) return;
+    setState(() => _authenticating = true);
 
-    // Remove entries where file no longer exists
-    final validMetadata = <Map<String, dynamic>>[];
-    for (final item in _metadata) {
-      final file = File('$_lockedDirPath/${item['filename']}');
-      if (await file.exists()) {
-        validMetadata.add(item);
-      }
+    // Try biometric/device auth first
+    if (await _tryBiometricAuth()) {
+      _authenticated = true;
+      await _loadLocked();
+      if (mounted) setState(() => _authenticating = false);
+      return;
     }
-    _metadata = validMetadata;
-    await prefs.setString('locked_photos', json.encode(_metadata));
+
+    if (!mounted) return;
+
+    // Fallback to app PIN
+    final prefs = await SharedPreferences.getInstance();
+    final storedPin = prefs.getString('locked_folder_pin');
+
+    if (storedPin != null && storedPin.isNotEmpty) {
+      if (!mounted) return;
+      setState(() => _authenticating = false);
+      final pinOk = await _showPinDialog(storedPin);
+      if (!mounted) return;
+      if (pinOk) {
+        _authenticated = true;
+        await _loadLocked();
+        if (mounted) setState(() {});
+      } else {
+        if (mounted) Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    // No biometric and no PIN
+    if (!mounted) return;
+    setState(() => _authenticating = false);
+    SnackBarManager.showSnackBar(l10n.pinRequired);
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+    }
+  }
+
+  Future<void> _loadLocked() async {
+    setState(() => _loading = true);
+    try {
+      final rsp = await storage.cli.listLocked(
+        ListLockedRequest(offset: 0, maxReturn: 500),
+      );
+      if (rsp.success) {
+        _items = rsp.items;
+        for (final item in _items) {
+          _loadThumbnail(item.originalPath);
+        }
+      }
+    } catch (e) {
+      if (mounted) SnackBarManager.showSnackBar(e.toString());
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _loadThumbnail(String originalPath) async {
+    if (_thumbnailCache.containsKey(originalPath)) return;
+    try {
+      final client = HttpClient();
+      final request = await client.getUrl(
+        Uri.parse('$httpBaseUrl/locked/thumbnail/$originalPath'),
+      );
+      final response = await request.close();
+      if (response.statusCode == 200) {
+        final bytes = await response.fold<List<int>>(
+          <int>[],
+          (previous, element) => previous..addAll(element),
+        );
+        _thumbnailCache[originalPath] = Uint8List.fromList(bytes);
+      } else {
+        _thumbnailCache[originalPath] = null;
+      }
+    } catch (_) {
+      _thumbnailCache[originalPath] = null;
+    }
     if (mounted) setState(() {});
   }
 
@@ -171,23 +189,25 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
     });
   }
 
-  Future<void> _removeFromLockedFolder() async {
-    final prefs = await SharedPreferences.getInstance();
-    final toRemove = _selectedIndices.toList()..sort((a, b) => b.compareTo(a));
-    for (final index in toRemove) {
-      final item = _metadata[index];
-      final file = File('$_lockedDirPath/${item['filename']}');
-      if (await file.exists()) {
-        await file.delete();
+  void _clearSelection() {
+    setState(() => _selectedIndices.clear());
+  }
+
+  Future<void> _restoreSelected() async {
+    final paths = _selectedIndices.map((i) => _items[i].originalPath).toList();
+    try {
+      await storage.cli.restoreFromLocked(
+        RestoreFromLockedRequest(lockedPaths: paths),
+      );
+      if (mounted) {
+        SnackBarManager.showSnackBar('${l10n.restore} ${paths.length} ${l10n.photos}');
       }
-      _metadata.removeAt(index);
+    } catch (e) {
+      if (mounted) SnackBarManager.showSnackBar(e.toString());
     }
-    await prefs.setString('locked_photos', json.encode(_metadata));
-    _selectedIndices.clear();
-    if (mounted) {
-      setState(() {});
-      SnackBarManager.showSnackBar(l10n.removeFromLockedFolder);
-    }
+    _clearSelection();
+    _loadLocked();
+    eventBus.fire(RemoteRefreshEvent());
   }
 
   @override
@@ -228,75 +248,76 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
           if (hasSelection)
             IconButton(
               icon: const Icon(Icons.lock_open),
-              onPressed: _removeFromLockedFolder,
+              onPressed: _restoreSelected,
               tooltip: l10n.removeFromLockedFolder,
             ),
         ],
       ),
-      body: _metadata.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lock_outline, size: 64, color: colorScheme.onSurfaceVariant),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.lockedFolderDescription,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _items.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.lock_outline, size: 64, color: colorScheme.onSurfaceVariant),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.lockedFolderDescription,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            )
-          : GridView.builder(
-              padding: const EdgeInsets.all(2),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 2,
-              ),
-              itemCount: _metadata.length,
-              itemBuilder: (context, index) {
-                final item = _metadata[index];
-                final file = File('$_lockedDirPath/${item['filename']}');
-                final isSelected = _selectedIndices.contains(index);
-                return GestureDetector(
-                  onTap: () {
-                    if (hasSelection) {
-                      _toggleSelection(index);
-                    }
-                  },
-                  onLongPress: () => _toggleSelection(index),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.file(
-                        file,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: colorScheme.surfaceContainerHighest,
-                          child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant),
-                        ),
-                      ),
-                      if (isSelected)
-                        Container(
-                          color: colorScheme.primary.withAlpha(77),
-                          child: const Align(
-                            alignment: Alignment.topLeft,
-                            child: Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(Icons.check_circle, color: Colors.white, size: 24),
-                            ),
-                          ),
-                        ),
-                    ],
                   ),
-                );
-              },
-            ),
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(2),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 2,
+                    crossAxisSpacing: 2,
+                  ),
+                  itemCount: _items.length,
+                  itemBuilder: (context, index) {
+                    final item = _items[index];
+                    final isSelected = _selectedIndices.contains(index);
+                    final thumb = _thumbnailCache[item.originalPath];
+                    return GestureDetector(
+                      onTap: () {
+                        if (hasSelection) {
+                          _toggleSelection(index);
+                        }
+                      },
+                      onLongPress: () => _toggleSelection(index),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (thumb != null)
+                            Image.memory(thumb, fit: BoxFit.cover)
+                          else
+                            Container(
+                              color: colorScheme.surfaceContainerHighest,
+                              child: Icon(Icons.image, color: colorScheme.onSurfaceVariant),
+                            ),
+                          if (isSelected)
+                            Container(
+                              color: colorScheme.primary.withAlpha(77),
+                              child: const Align(
+                                alignment: Alignment.topLeft,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Icon(Icons.check_circle, color: Colors.white, size: 24),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }

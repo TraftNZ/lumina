@@ -28,6 +28,7 @@ const (
 	defaultThumbnailMaxHeight = 500
 	defaultThumbnailDir       = ".thumbnail"
 	defaultTrashDir           = ".trash"
+	defaultLockedDir           = ".locked"
 	trashAutoDeleteDays       = 30
 	syncMarkerFile            = ".sync_marker"
 	syncIndexFile             = ".sync_index"
@@ -794,6 +795,163 @@ func (im *ImgManager) GetTrashThumbnail(path string) (*Image, error) {
 	img.Content, img.Size, err = im.dri.Download(thumbnailPath)
 	if err != nil {
 		return img, fmt.Errorf("error downloading trash thumbnail: %w", err)
+	}
+	img.Path = thumbnailPath
+	return img, nil
+}
+
+// Locked folder functions
+
+func (im *ImgManager) MoveToLocked(path string) error {
+	lockedPath := filepath.Join(defaultLockedDir, path)
+	if err := im.dri.Rename(path, lockedPath); err != nil {
+		return fmt.Errorf("move to locked error: %w", err)
+	}
+	// Also move thumbnail (ignore error if not present)
+	thumbPath := filepath.Join(defaultThumbnailDir, path)
+	lockedThumbPath := filepath.Join(defaultLockedDir, defaultThumbnailDir, path)
+	_ = im.dri.Rename(thumbPath, lockedThumbPath)
+
+	if im.store != nil {
+		im.store.RemovePhoto(path)
+		im.store.RemoveThumb(path)
+	}
+	im.DebouncedWriteSyncState()
+	return nil
+}
+
+func (im *ImgManager) RestoreFromLocked(lockedPath string) error {
+	// lockedPath is relative to .locked/, e.g. "2024/01/15/photo.jpg"
+	originalPath := lockedPath
+	fullLockedPath := filepath.Join(defaultLockedDir, lockedPath)
+	if err := im.dri.Rename(fullLockedPath, originalPath); err != nil {
+		return fmt.Errorf("restore from locked error: %w", err)
+	}
+	// Also restore thumbnail (ignore error)
+	lockedThumbPath := filepath.Join(defaultLockedDir, defaultThumbnailDir, lockedPath)
+	thumbPath := filepath.Join(defaultThumbnailDir, lockedPath)
+	_ = im.dri.Rename(lockedThumbPath, thumbPath)
+
+	if im.store != nil {
+		var size int64
+		im.dri.Range(filepath.Dir(originalPath), func(info fs.FileInfo) bool {
+			if info.Name() == filepath.Base(originalPath) {
+				size = info.Size()
+				return false
+			}
+			return true
+		})
+		im.store.IndexPhoto(originalPath, filepath.Base(originalPath), size)
+	}
+	im.DebouncedWriteSyncState()
+	return nil
+}
+
+func (im *ImgManager) ListLocked(offset, maxReturn int) ([]TrashItem, error) {
+	if maxReturn <= 0 {
+		maxReturn = 100
+	}
+	items := make([]TrashItem, 0)
+	currentOffset := 0
+	now := time.Now()
+
+	im.rangeLockedByDate(now, func(path string, size int64, modTime time.Time) bool {
+		if currentOffset < offset {
+			currentOffset++
+			return true
+		}
+		items = append(items, TrashItem{
+			OriginalPath: path,
+			TrashPath:    filepath.Join(defaultLockedDir, path),
+			TrashedAt:    modTime,
+			Size:         size,
+		})
+		return len(items) < maxReturn
+	})
+	return items, nil
+}
+
+func (im *ImgManager) rangeLockedByDate(date time.Time, f func(path string, size int64, modTime time.Time) bool) {
+	t := date
+	if t.IsZero() {
+		t = time.Now()
+	}
+	year, month, day := t.Date()
+	yDir, err := im.listDir(defaultLockedDir)
+	if err != nil {
+		return
+	}
+	sort.Sort(desc(yDir))
+	for _, yinfo := range yDir {
+		if !yinfo.IsDir() {
+			continue
+		}
+		if yinfo.Name() == defaultThumbnailDir {
+			continue
+		}
+		yNum, err := strconv.Atoi(yinfo.Name())
+		if err != nil {
+			continue
+		}
+		if yNum > year {
+			continue
+		}
+		mDir, err := im.listDir(filepath.Join(defaultLockedDir, yinfo.Name()))
+		if err != nil {
+			continue
+		}
+		sort.Sort(desc(mDir))
+		for _, minfo := range mDir {
+			if !minfo.IsDir() {
+				continue
+			}
+			mNum, err := strconv.Atoi(minfo.Name())
+			if err != nil {
+				continue
+			}
+			if yNum == year && mNum > int(month) {
+				continue
+			}
+			dDir, err := im.listDir(filepath.Join(defaultLockedDir, yinfo.Name(), minfo.Name()))
+			if err != nil {
+				continue
+			}
+			sort.Sort(desc(dDir))
+			for _, dinfo := range dDir {
+				if !dinfo.IsDir() {
+					continue
+				}
+				dNum, err := strconv.Atoi(dinfo.Name())
+				if err != nil {
+					continue
+				}
+				if yNum == year && mNum == int(month) && dNum > day {
+					continue
+				}
+				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
+				goOn := true
+				im.dri.Range(filepath.Join(defaultLockedDir, dirPath), func(info fs.FileInfo) bool {
+					if info.IsDir() {
+						return true
+					}
+					goOn = f(filepath.Join(dirPath, info.Name()), info.Size(), info.ModTime())
+					return goOn
+				})
+				if !goOn {
+					return
+				}
+			}
+		}
+	}
+}
+
+func (im *ImgManager) GetLockedThumbnail(path string) (*Image, error) {
+	img := &Image{}
+	var err error
+	thumbnailPath := filepath.Join(defaultLockedDir, defaultThumbnailDir, path)
+	img.Content, img.Size, err = im.dri.Download(thumbnailPath)
+	if err != nil {
+		return img, fmt.Errorf("error downloading locked thumbnail: %w", err)
 	}
 	img.Path = thumbnailPath
 	return img, nil
