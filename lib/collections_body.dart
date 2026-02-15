@@ -1,12 +1,23 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:img_syncer/global.dart';
 import 'package:img_syncer/trash_body.dart';
 import 'package:img_syncer/locked_folder_body.dart';
 import 'package:img_syncer/album_detail_body.dart';
 import 'package:img_syncer/places_body.dart';
+import 'package:img_syncer/year_detail_body.dart';
+
+class _YearData {
+  final int year;
+  final int count;
+  final Uint8List? thumbnail;
+
+  _YearData({required this.year, required this.count, this.thumbnail});
+}
 
 class CollectionsBody extends StatefulWidget {
   const CollectionsBody({Key? key}) : super(key: key);
@@ -17,11 +28,13 @@ class CollectionsBody extends StatefulWidget {
 
 class _CollectionsBodyState extends State<CollectionsBody> {
   List<AssetPathEntity> _albums = [];
+  List<_YearData> _years = [];
 
   @override
   void initState() {
     super.initState();
     _loadAlbums();
+    _loadYears();
   }
 
   Future<void> _loadAlbums() async {
@@ -38,6 +51,71 @@ class _CollectionsBodyState extends State<CollectionsBody> {
     paths.sort((a, b) => (countMap[b] ?? 0).compareTo(countMap[a] ?? 0));
     if (mounted) {
       setState(() => _albums = paths);
+    }
+  }
+
+  Future<void> _loadYears() async {
+    final re = await requestPermission();
+    if (!re) return;
+
+    final paths = await PhotoManager.getAssetPathList(
+      type: RequestType.image,
+      hasAll: true,
+    );
+    if (paths.isEmpty) return;
+
+    final allPath = paths.firstWhere((p) => p.isAll, orElse: () => paths.first);
+    final totalCount = await allPath.assetCountAsync;
+    if (totalCount == 0) return;
+
+    final Map<int, List<AssetEntity>> yearMap = {};
+
+    const batchSize = 500;
+    for (int page = 0; page * batchSize < totalCount; page++) {
+      final assets = await allPath.getAssetListPaged(page: page, size: batchSize);
+      for (final asset in assets) {
+        final year = asset.createDateTime.year;
+        yearMap.putIfAbsent(year, () => []);
+        if (yearMap[year]!.isEmpty) {
+          yearMap[year]!.add(asset);
+        }
+      }
+    }
+
+    final years = <_YearData>[];
+    for (final entry in yearMap.entries) {
+      final filterOption = FilterOptionGroup(
+        createTimeCond: DateTimeCond(
+          min: DateTime(entry.key),
+          max: DateTime(entry.key + 1),
+        ),
+      );
+      final yearPaths = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        hasAll: true,
+        filterOption: filterOption,
+      );
+      int count = 0;
+      if (yearPaths.isNotEmpty) {
+        final yp = yearPaths.firstWhere((p) => p.isAll, orElse: () => yearPaths.first);
+        count = await yp.assetCountAsync;
+      }
+
+      Uint8List? thumb;
+      if (entry.value.isNotEmpty) {
+        thumb = await entry.value.first.thumbnailDataWithSize(
+          const ThumbnailSize.square(200),
+          quality: 80,
+        );
+      }
+
+      years.add(_YearData(year: entry.key, count: count, thumbnail: thumb));
+    }
+
+    years.sort((a, b) => b.year.compareTo(a.year));
+
+    if (mounted) {
+      setState(() => _years = years);
     }
   }
 
@@ -79,33 +157,14 @@ class _CollectionsBodyState extends State<CollectionsBody> {
             ),
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverGrid.count(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.2,
-            children: [
-              _CollectionCard(
-                icon: Icons.delete_outline,
-                label: l10n.trash,
-                color: colorScheme.errorContainer,
-                iconColor: colorScheme.onErrorContainer,
-                textColor: colorScheme.onErrorContainer,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TrashBody()),
-                  );
-                },
-              ),
-              _CollectionCard(
-                icon: Icons.place_outlined,
+        // Places card — full width
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              height: 120,
+              child: _PlacesCard(
                 label: l10n.places,
-                color: colorScheme.secondaryContainer,
-                iconColor: colorScheme.onSecondaryContainer,
-                textColor: colorScheme.onSecondaryContainer,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -113,22 +172,47 @@ class _CollectionsBodyState extends State<CollectionsBody> {
                   );
                 },
               ),
-              _CollectionCard(
-                icon: Icons.lock_outline,
-                label: l10n.lockedFolder,
-                color: colorScheme.tertiaryContainer,
-                iconColor: colorScheme.onTertiaryContainer,
-                textColor: colorScheme.onTertiaryContainer,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LockedFolderBody()),
+            ),
+          ),
+        ),
+        // Year in Review section
+        if (_years.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Text(
+                l10n.yearInReview,
+                style: textTheme.titleLarge,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _years.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final yearData = _years[index];
+                  return _YearCard(
+                    yearData: yearData,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => YearDetailBody(year: yearData.year),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
-            ],
+            ),
           ),
-        ),
+        ],
+        // Device Albums section
         if (_albums.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: Padding(
@@ -163,52 +247,217 @@ class _CollectionsBodyState extends State<CollectionsBody> {
             ),
           ),
         ],
+        // Trash & Locked Folder — bottom list tiles
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            child: Column(
+              children: [
+                _BottomListTile(
+                  icon: Icons.delete_outline,
+                  label: l10n.trash,
+                  iconColor: colorScheme.error,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TrashBody()),
+                    );
+                  },
+                ),
+                Divider(height: 1, color: colorScheme.outlineVariant),
+                _BottomListTile(
+                  icon: Icons.lock_outline,
+                  label: l10n.lockedFolder,
+                  iconColor: colorScheme.tertiary,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LockedFolderBody()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
   }
 }
 
-class _CollectionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Color iconColor;
-  final Color textColor;
+class _YearCard extends StatelessWidget {
+  final _YearData yearData;
   final VoidCallback onTap;
 
-  const _CollectionCard({
+  const _YearCard({required this.yearData, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 120,
+      child: Card(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          onTap: onTap,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (yearData.thumbnail != null)
+                Image.memory(yearData.thumbnail!, fit: BoxFit.cover)
+              else
+                Container(color: colorScheme.surfaceContainerHighest),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${yearData.year}',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${yearData.count} ${l10n.pics}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomListTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+  final VoidCallback onTap;
+
+  const _BottomListTile({
     required this.icon,
     required this.label,
-    required this.color,
     required this.iconColor,
-    required this.textColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Material(
-      color: color,
+    return ListTile(
+      leading: Icon(icon, color: iconColor),
+      title: Text(label, style: textTheme.bodyLarge),
+      trailing: Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+}
+
+class _PlacesCard extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _PlacesCard({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, size: 32, color: iconColor),
-              const Spacer(),
-              Text(
-                label,
-                style: textTheme.titleMedium?.copyWith(color: textColor),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCenter: const ll.LatLng(30, 10),
+                  initialZoom: 1.5,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.none,
+                  ),
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: isDark
+                        ? 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'
+                        : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+                    subdomains: const ['a', 'b', 'c', 'd'],
+                    retinaMode: true,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    (isDark ? Colors.black : Colors.white).withValues(alpha: 0.7),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: onTap,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.place_outlined, size: 32,
+                          color: isDark ? Colors.white : Colors.black87),
+                      const Spacer(),
+                      Text(
+                        label,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

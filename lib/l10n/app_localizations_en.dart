@@ -382,4 +382,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String photosInCity(int count) {
     return '$count photos';
   }
+
+  @override
+  String get yearInReview => 'Year in Review';
 }

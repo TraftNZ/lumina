@@ -808,6 +808,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} photos'**
   String photosInCity(int count);
+
+  /// No description provided for @yearInReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Year in Review'**
+  String get yearInReview;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

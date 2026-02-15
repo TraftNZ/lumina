@@ -376,4 +376,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String photosInCity(int count) {
     return '$count 张照片';
   }
+
+  @override
+  String get yearInReview => '年度回顾';
 }
