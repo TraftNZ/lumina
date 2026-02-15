@@ -766,6 +766,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Device Albums'**
   String get deviceAlbums;
+
+  /// No description provided for @places.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get places;
+
+  /// No description provided for @scanningPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning photos for locations...'**
+  String get scanningPhotos;
+
+  /// No description provided for @noLocationData.
+  ///
+  /// In en, this message translates to:
+  /// **'No photos with location data'**
+  String get noLocationData;
+
+  /// No description provided for @photosInCity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} photos'**
+  String photosInCity(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

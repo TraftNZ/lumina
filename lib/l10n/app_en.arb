@@ -145,5 +145,16 @@
     }
   },
   "cacheManagement": "Cache",
-  "deviceAlbums": "Device Albums"
+  "deviceAlbums": "Device Albums",
+  "places": "Places",
+  "scanningPhotos": "Scanning photos for locations...",
+  "noLocationData": "No photos with location data",
+  "photosInCity": "{count} photos",
+  "@photosInCity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -108,10 +108,20 @@ ThemeData buildLightTheme(ColorScheme colorScheme) {
   );
 }
 
-ThemeData buildDarkTheme(ColorScheme colorScheme) {
+ThemeData buildDarkTheme(ColorScheme baseScheme) {
+  final colorScheme = baseScheme.copyWith(
+    surface: Colors.black,
+    onSurface: Colors.white,
+    surfaceContainerLowest: Colors.black,
+    surfaceContainerLow: const Color(0xFF121212),
+    surfaceContainer: const Color(0xFF1E1E1E),
+    surfaceContainerHigh: const Color(0xFF2C2C2C),
+    surfaceContainerHighest: const Color(0xFF363636),
+  );
   final textTheme = _buildTextTheme(colorScheme);
   return ThemeData(
     colorScheme: colorScheme,
+    scaffoldBackgroundColor: Colors.black,
     useMaterial3: true,
     textTheme: textTheme,
     appBarTheme: AppBarTheme(

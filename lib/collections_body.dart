@@ -6,6 +6,7 @@ import 'package:img_syncer/global.dart';
 import 'package:img_syncer/trash_body.dart';
 import 'package:img_syncer/locked_folder_body.dart';
 import 'package:img_syncer/album_detail_body.dart';
+import 'package:img_syncer/places_body.dart';
 
 class CollectionsBody extends StatefulWidget {
   const CollectionsBody({Key? key}) : super(key: key);
@@ -96,6 +97,19 @@ class _CollectionsBodyState extends State<CollectionsBody> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const TrashBody()),
+                  );
+                },
+              ),
+              _CollectionCard(
+                icon: Icons.place_outlined,
+                label: l10n.places,
+                color: colorScheme.secondaryContainer,
+                iconColor: colorScheme.onSecondaryContainer,
+                textColor: colorScheme.onSecondaryContainer,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PlacesBody()),
                   );
                 },
               ),

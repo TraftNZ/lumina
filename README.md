@@ -2,7 +2,7 @@
 <img src="assets/icon/lumina_icon.png" width="150">
 </p>
 <h3 align="center">
-Lumina - 一个用于查看和同步照片的无服务端应用
+Lumina - A serverless photo sync and viewing app
 </h3>
 <p align="center">
   <img src="https://github.com/zhupengjia/pho/actions/workflows/go_test.yml/badge.svg">
@@ -11,81 +11,82 @@ Lumina - 一个用于查看和同步照片的无服务端应用
   <a href="README.md">中文</a> | <a href="README_EN.md">English</a>
 </p>
 
-### 介绍
+### Introduction
 
-Lumina 是一款无服务端的照片同步和查看应用。它使用 Flutter 前端与嵌入式 Go gRPC 服务器（通过 gomobile 编译为 Android AAR / iOS xcframework），服务器运行在本地 localhost 上，无需外部服务器或数据库。
+Lumina is a serverless photo sync and viewing app. It uses a Flutter frontend with an embedded Go gRPC server compiled via gomobile (AAR for Android, xcframework for iOS). The server runs on localhost with no external server or database required.
 
-该应用旨在替代手机自带的相册应用，并能够将照片增量同步到网络储存，试图做到简洁而优秀的体验。
+The app is designed to replace the native photo gallery on your phone while providing incremental photo sync to network storage, with a focus on simplicity and great user experience.
 
-### 功能
+### Features
 
-- 本地照片查看
-- 云端照片查看
-- 增量同步照片到云端
-- 后台定期同步
-- 无数据库，无服务端
-- 以时间组织云端存储的目录结构
-- 支持上传和浏览视频
+- Local photo browsing
+- Cloud photo browsing
+- Incremental photo synchronization to the cloud
+- Background periodic synchronization
+- No database, no server-side dependencies
+- Date-based cloud storage directory structure
+- Video upload and browsing support
+- Places — browse photos on a map, grouped by city (offline geocoding)
 
-### 支持的网络储存
+### Supported Storage Backends
 
 - [x] Samba (SMB)
 - [x] WebDAV
 - [x] NFS
-- [x] S3 兼容存储 (AWS S3, MinIO, Backblaze B2 等)
+- [x] S3-compatible storage (AWS S3, MinIO, Backblaze B2, etc.)
 - [ ] OneDrive
 - [ ] Google Drive
 - [ ] Google Photos
 
-### 安装
+### Installation
 
-[下载 APK](https://github.com/zhupengjia/pho/releases)
+[Download APK](https://github.com/zhupengjia/pho/releases)
 
-### 截图
+### Screenshots
 
 <p align="left">
 <img src="assets/screenshot/Screenshots.png" >
 </p>
 
-### 构建
+### Build
 
 ```bash
-# 安装 protobuf 代码生成器
+# Install protobuf code generators
 make prebuild
 
-# 从 proto 定义生成 gRPC 代码（Go 和 Dart）
+# Generate gRPC code from proto definitions (both Go and Dart)
 make protobuf
 
-# 构建独立的 Go 服务端
+# Build standalone Go server binary
 make server
 
-# 构建移动端库 (gomobile)
+# Build mobile libraries (gomobile)
 make server-aar    # Android AAR
 make server-ios    # iOS xcframework
 
-# 构建应用
+# Build apps
 make apk           # Android
 make ipa           # iOS
 ```
 
-### 测试
+### Testing
 
-测试为 Go 集成测试，需要 Docker Compose 服务（SMB、WebDAV、NFS 容器）：
+Tests are Go integration tests requiring Docker Compose services (SMB, WebDAV, NFS containers):
 
 ```bash
-make test                                          # 完整流程：启动服务、测试、关闭
-go test -v ./server/api -p 1 -failfast            # 仅 API 测试（需服务已运行）
-go test -v ./server/drive -p 1 -failfast           # 仅 Drive 测试
-docker compose -f test/docker-compose.yml up -d    # 手动启动测试服务
+make test                                          # Full: start services, test, teardown
+go test -v ./server/api -p 1 -failfast            # API tests only (services must be running)
+go test -v ./server/drive -p 1 -failfast           # Drive tests only
+docker compose -f test/docker-compose.yml up -d    # Start test services manually
 ```
 
-### 文件储存逻辑
+### File Storage Logic
 
-本着尽可能简单的逻辑来储存文件，以时间为目录结构，以文件名为文件名储存源文件。在根目录创建一个 `.thumbnail` 目录来储存生成的缩略图，缩略图的目录结构与源文件相同。
+Files are stored using a straightforward time-based directory structure, with the original filename preserved. A `.thumbnail` directory is created at the root to store generated thumbnails, mirroring the same directory structure as the source files.
 
-你可以随时以其他形式利用你备份上去的照片，而不用依赖此应用。
+You can access and use your backed-up photos in any other manner at any time, without depending on this app.
 
-目录结构示意图：
+Directory structure:
 ```bash
 ├── 2022
 │   ├── 07
@@ -118,21 +119,21 @@ docker compose -f test/docker-compose.yml up -d    # 手动启动测试服务
 
 ### Roadmap
 
-- [x] 支持放大/缩小图片
-- [x] 支持上传/浏览视频
-- [x] 支持 NFS
-- [x] 支持 S3 兼容存储
-- [x] 支持 iOS 端
-- [ ] 支持 Desktop 端
-- [x] 支持中英文
+- [x] Support zooming in/out of images
+- [x] Support uploading/browsing videos
+- [x] Support NFS
+- [x] Support S3-compatible storage
+- [x] Support iOS
+- [ ] Support Desktop
+- [x] Support Chinese and English
 
-### 贡献
+### Contributing
 
-欢迎在 issue 中沟通交流，提出你的 pull request。
+Feel free to communicate via issues and submit your pull requests.
 
-### 致谢
+### Acknowledgments
 
-本项目基于 [fregie/pho](https://github.com/fregie/pho) 开发，感谢 [fregie](https://github.com/fregie) 的出色工作和开源贡献。
+This project is based on [fregie/pho](https://github.com/fregie/pho). Thanks to [fregie](https://github.com/fregie) for the excellent work and open-source contribution.
 
 ### License
 

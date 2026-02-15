@@ -359,4 +359,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceAlbums => 'Device Albums';
+
+  @override
+  String get places => 'Places';
+
+  @override
+  String get scanningPhotos => 'Scanning photos for locations...';
+
+  @override
+  String get noLocationData => 'No photos with location data';
+
+  @override
+  String photosInCity(int count) {
+    return '$count photos';
+  }
 }

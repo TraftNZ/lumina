@@ -110,5 +110,9 @@
     "rebuildingIndex": "正在重建索引...",
     "indexRebuilt": "索引重建完成：已索引 {count} 张照片",
     "cacheManagement": "缓存",
-    "deviceAlbums": "设备相册"
+    "deviceAlbums": "设备相册",
+    "places": "地点",
+    "scanningPhotos": "正在扫描照片位置...",
+    "noLocationData": "没有包含位置信息的照片",
+    "photosInCity": "{count} 张照片"
 }

@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:img_syncer/l10n/app_localizations.dart';
 import 'package:img_syncer/theme.dart';
 
-const seedThemeColor = Color(0xFFFFAB40);
+const seedThemeColor = Color(0xFF5B9BD5);
 
 void main() {
   Global.init().then((e) => runApp(

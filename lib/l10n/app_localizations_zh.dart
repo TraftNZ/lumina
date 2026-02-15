@@ -353,4 +353,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceAlbums => '设备相册';
+
+  @override
+  String get places => '地点';
+
+  @override
+  String get scanningPhotos => '正在扫描照片位置...';
+
+  @override
+  String get noLocationData => '没有包含位置信息的照片';
+
+  @override
+  String photosInCity(int count) {
+    return '$count 张照片';
+  }
 }

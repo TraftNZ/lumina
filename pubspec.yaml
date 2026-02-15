@@ -65,6 +65,8 @@ dependencies:
   gal: ^2.3.2
   vibration: ^3.1.6
   local_auth: ^2.3.0
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_test:
@@ -96,6 +98,7 @@ flutter:
     - assets/icon/lumina_icon.png
     - assets/icon/lumina_icon_foreground.png
     - assets/icon/lumina_icon_transparent.png
+    - assets/data/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
