@@ -218,20 +218,22 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
     ).then((value) => _isShowingImageInfo = false);
   }
 
-  void deleteCurrent(BuildContext context) async {
+  void deleteCurrent(BuildContext context) {
     final asset = all[currentIndex];
-    try {
-      await asset.delete();
-      if (asset.hasLocal) {
-        await assetModel.refreshLocal();
-      }
-      if (asset.hasRemote) {
-        await assetModel.refreshRemote();
-      }
-    } catch (e) {
-      SnackBarManager.showSnackBar(e.toString());
-    }
+
+    // Optimistically remove from UI and pop immediately
+    assetModel.removeAssets([asset]);
+    SnackBarManager.showSnackBar(l10n.movedToTrash);
     if (mounted) Navigator.of(context).pop();
+
+    // Perform actual deletion in background (no refresh — optimistic removal is sufficient)
+    () async {
+      try {
+        await asset.delete();
+      } catch (e) {
+        SnackBarManager.showSnackBar(e.toString());
+      }
+    }();
   }
 
   void download(Asset asset) async {

@@ -74,6 +74,7 @@ class _CollectionsBodyState extends State<CollectionsBody> {
     await Future.wait(paths.map((p) async {
       countMap[p] = await p.assetCountAsync;
     }));
+    paths.removeWhere((p) => (countMap[p] ?? 0) == 0);
     paths.sort((a, b) => (countMap[b] ?? 0).compareTo(countMap[a] ?? 0));
     if (mounted) {
       setState(() => _albums = paths);

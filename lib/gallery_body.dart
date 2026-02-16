@@ -203,36 +203,41 @@ class GalleryBodyState extends State<GalleryBody>
     });
   }
 
-  void _deleteSelected() async {
+  void _deleteSelected() {
     if (_isDeleting) return;
-    setState(() => _isDeleting = true);
+    _isDeleting = true;
     var toDelete = <Asset>[];
-    try {
-      final all = assetModel.getUnifiedAssets();
-      _selectedIndices.forEach((key, value) {
-        if (value) {
-          toDelete.add(all[key]);
+    final all = assetModel.getUnifiedAssets();
+    _selectedIndices.forEach((key, value) {
+      if (value) {
+        toDelete.add(all[key]);
+      }
+    });
+    clearSelection();
+    final localToDelete = toDelete.where((e) => e.hasLocal).toList();
+    final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
+
+    // Optimistically remove from UI
+    assetModel.removeAssets(toDelete);
+    SnackBarManager.showSnackBar(l10n.movedToTrash);
+    _isDeleting = false;
+
+    // Perform actual deletion in background (no refresh — optimistic removal is sufficient)
+    () async {
+      try {
+        if (localToDelete.isNotEmpty) {
+          await PhotoManager.editor
+              .deleteWithIds(localToDelete.map((e) => e.local!.id).toList());
         }
-      });
-      clearSelection();
-      final localToDelete = toDelete.where((e) => e.hasLocal).toList();
-      final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
-      if (localToDelete.isNotEmpty) {
-        await PhotoManager.editor
-            .deleteWithIds(localToDelete.map((e) => e.local!.id).toList());
-        await assetModel.refreshLocal();
+        if (remoteToDelete.isNotEmpty) {
+          await storage.cli.moveToTrash(MoveToTrashRequest(
+            paths: remoteToDelete.map((e) => e.remote!.path).toList(),
+          ));
+        }
+      } catch (e) {
+        SnackBarManager.showSnackBar(e.toString());
       }
-      if (remoteToDelete.isNotEmpty) {
-        await storage.cli.moveToTrash(MoveToTrashRequest(
-          paths: remoteToDelete.map((e) => e.remote!.path).toList(),
-        ));
-        await assetModel.refreshRemote();
-      }
-      SnackBarManager.showSnackBar(l10n.movedToTrash);
-    } catch (e) {
-      SnackBarManager.showSnackBar(e.toString());
-    }
-    if (mounted) setState(() => _isDeleting = false);
+    }();
   }
 
   void _shareAsset() async {

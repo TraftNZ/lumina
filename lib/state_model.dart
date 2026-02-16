@@ -229,6 +229,15 @@ class AssetModel extends ChangeNotifier {
     _unifiedDirty = false;
   }
 
+  void removeAssets(List<Asset> assets) {
+    final toRemove = assets.toSet();
+    localAssets.removeWhere((a) => toRemove.contains(a));
+    remoteAssets.removeWhere((a) => toRemove.contains(a));
+    _unifiedAssets.removeWhere((a) => toRemove.contains(a));
+    _searchResults?.removeWhere((a) => toRemove.contains(a));
+    notifyListeners();
+  }
+
   void setSearchResults(List<Asset> results) {
     _searchResults = results;
     notifyListeners();
@@ -257,7 +266,6 @@ class AssetModel extends ChangeNotifier {
     localHasMore = true;
     localAssets = [];
     _unifiedDirty = true;
-    notifyListeners();
     stateModel.setNotSyncedPhotos([]);
     await getLocalPhotos();
   }
@@ -269,7 +277,6 @@ class AssetModel extends ChangeNotifier {
     remoteHasMore = true;
     remoteAssets = [];
     _unifiedDirty = true;
-    notifyListeners();
     remoteGetting = null;
     stateModel.setNotSyncedPhotos([]);
     await getRemotePhotos();
