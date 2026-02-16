@@ -2,18 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:img_syncer/asset.dart';
-import 'package:img_syncer/background_sync_route.dart';
-import 'package:img_syncer/event_bus.dart';
-import 'package:img_syncer/storage/storage.dart';
+import 'package:lumina/asset.dart';
+import 'package:lumina/background_sync_route.dart';
+import 'package:lumina/event_bus.dart';
+import 'package:lumina/storage/storage.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/state_model.dart';
+import 'package:lumina/state_model.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:img_syncer/choose_album_route.dart';
-import 'package:img_syncer/setting_storage_route.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/theme.dart';
+import 'package:lumina/choose_album_route.dart';
+import 'package:lumina/setting_storage_route.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/theme.dart';
 
 class SyncBody extends StatefulWidget {
   const SyncBody({

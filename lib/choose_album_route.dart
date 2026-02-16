@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'state_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 import 'package:flutter/services.dart';
 
 class ChooseAlbumRoute extends StatefulWidget {

@@ -1,22 +1,22 @@
 import 'dart:typed_data';
 import 'package:grpc/grpc.dart';
-import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:date_format/date_format.dart';
-import 'package:img_syncer/state_model.dart';
+import 'package:lumina/state_model.dart';
 import 'package:path/path.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:img_syncer/util.dart';
+import 'package:lumina/util.dart';
 
 RemoteStorage storage = RemoteStorage("127.0.0.1", 10000);
 
 class RemoteStorage {
   int bufferSize = 1024 * 1024;
-  ImgSyncerClient cli = ImgSyncerClient(ClientChannel(
+  LuminaClient cli = LuminaClient(ClientChannel(
     "127.0.0.1",
     port: 50051,
     options: const ChannelOptions(
@@ -31,7 +31,7 @@ class RemoteStorage {
         credentials: ChannelCredentials.insecure(),
       ),
     );
-    cli = ImgSyncerClient(channel);
+    cli = LuminaClient(channel);
   }
 
   Future<void> uploadXFile(XFile file) async {
@@ -171,7 +171,7 @@ class RemoteStorage {
 }
 
 class RemoteImage {
-  ImgSyncerClient cli;
+  LuminaClient cli;
   String path;
   Uint8List? data;
   Uint8List? thumbnailData;

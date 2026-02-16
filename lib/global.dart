@@ -1,15 +1,15 @@
-import 'package:img_syncer/setting_storage_route.dart';
-import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
-import 'package:img_syncer/run_server.dart';
-import 'package:img_syncer/sync_timer.dart';
-import 'package:img_syncer/state_model.dart';
-import 'package:img_syncer/storage/storage.dart';
-import 'package:img_syncer/ml_indexer.dart';
+import 'package:lumina/setting_storage_route.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/run_server.dart';
+import 'package:lumina/sync_timer.dart';
+import 'package:lumina/state_model.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:lumina/ml_indexer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:img_syncer/logger.dart';
+import 'package:lumina/logger.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:img_syncer/l10n/app_localizations.dart';
+import 'package:lumina/l10n/app_localizations.dart';
 import 'dart:async';
 import 'dart:io';
 

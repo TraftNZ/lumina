@@ -4,7 +4,7 @@ RUN \
   apt-get install -y ca-certificates && \
   apt-get clean
 
-ADD output/img_syncer_server /server
+ADD output/lumina_server /server
 
 WORKDIR /
 CMD ["bash", "-c", "/server"]

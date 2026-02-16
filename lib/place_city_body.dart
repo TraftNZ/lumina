@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:photo_manager/photo_manager.dart' hide LatLng;
-import 'package:img_syncer/places_service.dart';
+import 'package:lumina/places_service.dart';
 
 class PlaceCityBody extends StatefulWidget {
   final CityGroup group;

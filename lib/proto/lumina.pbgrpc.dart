@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from proto/img_syncer.proto.
+// Generated from proto/lumina.proto.
 
 // @dart = 3.3
 
@@ -16,12 +16,12 @@ import 'dart:core' as $core;
 import 'package:grpc/service_api.dart' as $grpc;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'img_syncer.pb.dart' as $0;
+import 'lumina.pb.dart' as $0;
 
-export 'img_syncer.pb.dart';
+export 'lumina.pb.dart';
 
-@$pb.GrpcServiceName('img_syncer.ImgSyncer')
-class ImgSyncerClient extends $grpc.Client {
+@$pb.GrpcServiceName('lumina.Lumina')
+class LuminaClient extends $grpc.Client {
   /// The hostname for this service.
   static const $core.String defaultHost = '';
 
@@ -30,7 +30,7 @@ class ImgSyncerClient extends $grpc.Client {
     '',
   ];
 
-  ImgSyncerClient(super.channel, {super.options, super.interceptors});
+  LuminaClient(super.channel, {super.options, super.interceptors});
 
   $grpc.ResponseFuture<$0.ListByDateResponse> listByDate(
     $0.ListByDateRequest request, {
@@ -235,146 +235,146 @@ class ImgSyncerClient extends $grpc.Client {
 
   static final _$listByDate =
       $grpc.ClientMethod<$0.ListByDateRequest, $0.ListByDateResponse>(
-          '/img_syncer.ImgSyncer/ListByDate',
+          '/lumina.Lumina/ListByDate',
           ($0.ListByDateRequest value) => value.writeToBuffer(),
           $0.ListByDateResponse.fromBuffer);
   static final _$delete =
       $grpc.ClientMethod<$0.DeleteRequest, $0.DeleteResponse>(
-          '/img_syncer.ImgSyncer/Delete',
+          '/lumina.Lumina/Delete',
           ($0.DeleteRequest value) => value.writeToBuffer(),
           $0.DeleteResponse.fromBuffer);
   static final _$filterNotUploaded = $grpc.ClientMethod<
           $0.FilterNotUploadedRequest, $0.FilterNotUploadedResponse>(
-      '/img_syncer.ImgSyncer/FilterNotUploaded',
+      '/lumina.Lumina/FilterNotUploaded',
       ($0.FilterNotUploadedRequest value) => value.writeToBuffer(),
       $0.FilterNotUploadedResponse.fromBuffer);
   static final _$setDriveSMB =
       $grpc.ClientMethod<$0.SetDriveSMBRequest, $0.SetDriveSMBResponse>(
-          '/img_syncer.ImgSyncer/SetDriveSMB',
+          '/lumina.Lumina/SetDriveSMB',
           ($0.SetDriveSMBRequest value) => value.writeToBuffer(),
           $0.SetDriveSMBResponse.fromBuffer);
   static final _$listDriveSMBShares = $grpc.ClientMethod<
           $0.ListDriveSMBSharesRequest, $0.ListDriveSMBSharesResponse>(
-      '/img_syncer.ImgSyncer/ListDriveSMBShares',
+      '/lumina.Lumina/ListDriveSMBShares',
       ($0.ListDriveSMBSharesRequest value) => value.writeToBuffer(),
       $0.ListDriveSMBSharesResponse.fromBuffer);
   static final _$listDriveSMBDir =
       $grpc.ClientMethod<$0.ListDriveSMBDirRequest, $0.ListDriveSMBDirResponse>(
-          '/img_syncer.ImgSyncer/ListDriveSMBDir',
+          '/lumina.Lumina/ListDriveSMBDir',
           ($0.ListDriveSMBDirRequest value) => value.writeToBuffer(),
           $0.ListDriveSMBDirResponse.fromBuffer);
   static final _$setDriveSMBShare = $grpc.ClientMethod<
           $0.SetDriveSMBShareRequest, $0.SetDriveSMBShareResponse>(
-      '/img_syncer.ImgSyncer/SetDriveSMBShare',
+      '/lumina.Lumina/SetDriveSMBShare',
       ($0.SetDriveSMBShareRequest value) => value.writeToBuffer(),
       $0.SetDriveSMBShareResponse.fromBuffer);
   static final _$setDriveWebdav =
       $grpc.ClientMethod<$0.SetDriveWebdavRequest, $0.SetDriveWebdavResponse>(
-          '/img_syncer.ImgSyncer/SetDriveWebdav',
+          '/lumina.Lumina/SetDriveWebdav',
           ($0.SetDriveWebdavRequest value) => value.writeToBuffer(),
           $0.SetDriveWebdavResponse.fromBuffer);
   static final _$listDriveWebdavDir = $grpc.ClientMethod<
           $0.ListDriveWebdavDirRequest, $0.ListDriveWebdavDirResponse>(
-      '/img_syncer.ImgSyncer/ListDriveWebdavDir',
+      '/lumina.Lumina/ListDriveWebdavDir',
       ($0.ListDriveWebdavDirRequest value) => value.writeToBuffer(),
       $0.ListDriveWebdavDirResponse.fromBuffer);
   static final _$setDriveNFS =
       $grpc.ClientMethod<$0.SetDriveNFSRequest, $0.SetDriveNFSResponse>(
-          '/img_syncer.ImgSyncer/SetDriveNFS',
+          '/lumina.Lumina/SetDriveNFS',
           ($0.SetDriveNFSRequest value) => value.writeToBuffer(),
           $0.SetDriveNFSResponse.fromBuffer);
   static final _$listDriveNFSDir =
       $grpc.ClientMethod<$0.ListDriveNFSDirRequest, $0.ListDriveNFSDirResponse>(
-          '/img_syncer.ImgSyncer/ListDriveNFSDir',
+          '/lumina.Lumina/ListDriveNFSDir',
           ($0.ListDriveNFSDirRequest value) => value.writeToBuffer(),
           $0.ListDriveNFSDirResponse.fromBuffer);
   static final _$setDriveS3 =
       $grpc.ClientMethod<$0.SetDriveS3Request, $0.SetDriveS3Response>(
-          '/img_syncer.ImgSyncer/SetDriveS3',
+          '/lumina.Lumina/SetDriveS3',
           ($0.SetDriveS3Request value) => value.writeToBuffer(),
           $0.SetDriveS3Response.fromBuffer);
   static final _$listDriveS3Buckets = $grpc.ClientMethod<
           $0.ListDriveS3BucketsRequest, $0.ListDriveS3BucketsResponse>(
-      '/img_syncer.ImgSyncer/ListDriveS3Buckets',
+      '/lumina.Lumina/ListDriveS3Buckets',
       ($0.ListDriveS3BucketsRequest value) => value.writeToBuffer(),
       $0.ListDriveS3BucketsResponse.fromBuffer);
   static final _$moveToTrash =
       $grpc.ClientMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
-          '/img_syncer.ImgSyncer/MoveToTrash',
+          '/lumina.Lumina/MoveToTrash',
           ($0.MoveToTrashRequest value) => value.writeToBuffer(),
           $0.MoveToTrashResponse.fromBuffer);
   static final _$listTrash =
       $grpc.ClientMethod<$0.ListTrashRequest, $0.ListTrashResponse>(
-          '/img_syncer.ImgSyncer/ListTrash',
+          '/lumina.Lumina/ListTrash',
           ($0.ListTrashRequest value) => value.writeToBuffer(),
           $0.ListTrashResponse.fromBuffer);
   static final _$restoreFromTrash = $grpc.ClientMethod<
           $0.RestoreFromTrashRequest, $0.RestoreFromTrashResponse>(
-      '/img_syncer.ImgSyncer/RestoreFromTrash',
+      '/lumina.Lumina/RestoreFromTrash',
       ($0.RestoreFromTrashRequest value) => value.writeToBuffer(),
       $0.RestoreFromTrashResponse.fromBuffer);
   static final _$emptyTrash =
       $grpc.ClientMethod<$0.EmptyTrashRequest, $0.EmptyTrashResponse>(
-          '/img_syncer.ImgSyncer/EmptyTrash',
+          '/lumina.Lumina/EmptyTrash',
           ($0.EmptyTrashRequest value) => value.writeToBuffer(),
           $0.EmptyTrashResponse.fromBuffer);
   static final _$moveToLocked =
       $grpc.ClientMethod<$0.MoveToLockedRequest, $0.MoveToLockedResponse>(
-          '/img_syncer.ImgSyncer/MoveToLocked',
+          '/lumina.Lumina/MoveToLocked',
           ($0.MoveToLockedRequest value) => value.writeToBuffer(),
           $0.MoveToLockedResponse.fromBuffer);
   static final _$listLocked =
       $grpc.ClientMethod<$0.ListLockedRequest, $0.ListLockedResponse>(
-          '/img_syncer.ImgSyncer/ListLocked',
+          '/lumina.Lumina/ListLocked',
           ($0.ListLockedRequest value) => value.writeToBuffer(),
           $0.ListLockedResponse.fromBuffer);
   static final _$restoreFromLocked = $grpc.ClientMethod<
           $0.RestoreFromLockedRequest, $0.RestoreFromLockedResponse>(
-      '/img_syncer.ImgSyncer/RestoreFromLocked',
+      '/lumina.Lumina/RestoreFromLocked',
       ($0.RestoreFromLockedRequest value) => value.writeToBuffer(),
       $0.RestoreFromLockedResponse.fromBuffer);
   static final _$rebuildIndex =
       $grpc.ClientMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
-          '/img_syncer.ImgSyncer/RebuildIndex',
+          '/lumina.Lumina/RebuildIndex',
           ($0.RebuildIndexRequest value) => value.writeToBuffer(),
           $0.RebuildIndexResponse.fromBuffer);
   static final _$getIndexStats =
       $grpc.ClientMethod<$0.GetIndexStatsRequest, $0.GetIndexStatsResponse>(
-          '/img_syncer.ImgSyncer/GetIndexStats',
+          '/lumina.Lumina/GetIndexStats',
           ($0.GetIndexStatsRequest value) => value.writeToBuffer(),
           $0.GetIndexStatsResponse.fromBuffer);
   static final _$clearThumbnailCache = $grpc.ClientMethod<
           $0.ClearThumbnailCacheRequest, $0.ClearThumbnailCacheResponse>(
-      '/img_syncer.ImgSyncer/ClearThumbnailCache',
+      '/lumina.Lumina/ClearThumbnailCache',
       ($0.ClearThumbnailCacheRequest value) => value.writeToBuffer(),
       $0.ClearThumbnailCacheResponse.fromBuffer);
   static final _$updatePhotoLabels = $grpc.ClientMethod<
           $0.UpdatePhotoLabelsRequest, $0.UpdatePhotoLabelsResponse>(
-      '/img_syncer.ImgSyncer/UpdatePhotoLabels',
+      '/lumina.Lumina/UpdatePhotoLabels',
       ($0.UpdatePhotoLabelsRequest value) => value.writeToBuffer(),
       $0.UpdatePhotoLabelsResponse.fromBuffer);
   static final _$searchPhotos =
       $grpc.ClientMethod<$0.SearchPhotosRequest, $0.SearchPhotosResponse>(
-          '/img_syncer.ImgSyncer/SearchPhotos',
+          '/lumina.Lumina/SearchPhotos',
           ($0.SearchPhotosRequest value) => value.writeToBuffer(),
           $0.SearchPhotosResponse.fromBuffer);
   static final _$getUnlabeledPhotos = $grpc.ClientMethod<
           $0.GetUnlabeledPhotosRequest, $0.GetUnlabeledPhotosResponse>(
-      '/img_syncer.ImgSyncer/GetUnlabeledPhotos',
+      '/lumina.Lumina/GetUnlabeledPhotos',
       ($0.GetUnlabeledPhotosRequest value) => value.writeToBuffer(),
       $0.GetUnlabeledPhotosResponse.fromBuffer);
   static final _$getLabelSummary =
       $grpc.ClientMethod<$0.GetLabelSummaryRequest, $0.GetLabelSummaryResponse>(
-          '/img_syncer.ImgSyncer/GetLabelSummary',
+          '/lumina.Lumina/GetLabelSummary',
           ($0.GetLabelSummaryRequest value) => value.writeToBuffer(),
           $0.GetLabelSummaryResponse.fromBuffer);
 }
 
-@$pb.GrpcServiceName('img_syncer.ImgSyncer')
-abstract class ImgSyncerServiceBase extends $grpc.Service {
-  $core.String get $name => 'img_syncer.ImgSyncer';
+@$pb.GrpcServiceName('lumina.Lumina')
+abstract class LuminaServiceBase extends $grpc.Service {
+  $core.String get $name => 'lumina.Lumina';
 
-  ImgSyncerServiceBase() {
+  LuminaServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.ListByDateRequest, $0.ListByDateResponse>(
         'ListByDate',
         listByDate_Pre,

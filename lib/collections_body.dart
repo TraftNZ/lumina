@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/trash_body.dart';
-import 'package:img_syncer/locked_folder_body.dart';
-import 'package:img_syncer/album_detail_body.dart';
-import 'package:img_syncer/places_body.dart';
-import 'package:img_syncer/year_detail_body.dart';
-import 'package:img_syncer/smart_album_body.dart';
-import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
-import 'package:img_syncer/storage/storage.dart';
-import 'package:img_syncer/state_model.dart';
-import 'package:img_syncer/search_body.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/trash_body.dart';
+import 'package:lumina/locked_folder_body.dart';
+import 'package:lumina/album_detail_body.dart';
+import 'package:lumina/places_body.dart';
+import 'package:lumina/year_detail_body.dart';
+import 'package:lumina/smart_album_body.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:lumina/state_model.dart';
+import 'package:lumina/search_body.dart';
 
 class _YearData {
   final int year;

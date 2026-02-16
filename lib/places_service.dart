@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 
 class CityGroup {
   final String cityName;

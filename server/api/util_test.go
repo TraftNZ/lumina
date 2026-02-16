@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	pb "github.com/fregie/img_syncer/proto"
+	pb "github.com/traftai/lumina/proto"
 	"github.com/hirochachacha/go-smb2"
 )
 
@@ -118,7 +118,7 @@ func initSmbDir() error {
 	return nil
 }
 
-func waitfile(srv pb.ImgSyncerClient, path string, timeout time.Duration) error {
+func waitfile(srv pb.LuminaClient, path string, timeout time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	if path[0] != '/' {
 		path = "/" + path

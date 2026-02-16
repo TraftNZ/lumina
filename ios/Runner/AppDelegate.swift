@@ -9,7 +9,7 @@ import RUN
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     		    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-    let batteryChannel = FlutterMethodChannel(name: "com.example.img_syncer/RunGrpcServer",binaryMessenger: controller.binaryMessenger)
+    let batteryChannel = FlutterMethodChannel(name: "com.traftai.lumina/RunGrpcServer",binaryMessenger: controller.binaryMessenger)
     batteryChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         var error: NSError? = nil

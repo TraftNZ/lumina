@@ -6,8 +6,8 @@ import (
 	"net"
 	"strings"
 
-	pb "github.com/fregie/img_syncer/proto"
-	"github.com/fregie/img_syncer/server/drive/smb"
+	pb "github.com/traftai/lumina/proto"
+	"github.com/traftai/lumina/server/drive/smb"
 )
 
 func (a *api) SetDriveSMB(ctx context.Context, req *pb.SetDriveSMBRequest) (rsp *pb.SetDriveSMBResponse, err error) {

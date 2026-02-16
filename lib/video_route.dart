@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:img_syncer/asset.dart';
+import 'package:lumina/asset.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 
 class VideoRoute extends StatefulWidget {
   const VideoRoute({

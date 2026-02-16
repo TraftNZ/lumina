@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from proto/img_syncer.proto.
+// Generated from proto/lumina.proto.
 
 // @dart = 3.3
 

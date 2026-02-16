@@ -1,4 +1,4 @@
-module github.com/fregie/img_syncer
+module github.com/traftai/lumina
 
 go 1.26
 

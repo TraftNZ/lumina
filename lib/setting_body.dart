@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:img_syncer/choose_album_route.dart';
-import 'package:img_syncer/setting_storage_route.dart';
-import 'package:img_syncer/background_sync_route.dart';
-import 'package:img_syncer/theme.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
-import 'package:img_syncer/storage/storage.dart';
+import 'package:lumina/choose_album_route.dart';
+import 'package:lumina/setting_storage_route.dart';
+import 'package:lumina/background_sync_route.dart';
+import 'package:lumina/theme.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/storage/storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingBody extends StatefulWidget {

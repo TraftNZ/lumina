@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 import 'package:provider/provider.dart';
-import 'package:img_syncer/state_model.dart';
+import 'package:lumina/state_model.dart';
 import 'gallery_body.dart';
 import 'collections_body.dart';
 import 'search_body.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:img_syncer/logger.dart';
+import 'package:lumina/logger.dart';
 import 'package:flutter/services.dart';
-import 'package:img_syncer/l10n/app_localizations.dart';
-import 'package:img_syncer/theme.dart';
+import 'package:lumina/l10n/app_localizations.dart';
+import 'package:lumina/theme.dart';
 
 const seedThemeColor = Color(0xFF5B9BD5);
 

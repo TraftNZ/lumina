@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/fregie/img_syncer/proto"
-	s3drive "github.com/fregie/img_syncer/server/drive/s3"
+	pb "github.com/traftai/lumina/proto"
+	s3drive "github.com/traftai/lumina/server/drive/s3"
 )
 
 func (a *api) SetDriveS3(ctx context.Context, req *pb.SetDriveS3Request) (rsp *pb.SetDriveS3Response, e error) {

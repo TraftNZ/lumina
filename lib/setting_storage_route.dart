@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:img_syncer/storageform/smbform.dart';
-import 'package:img_syncer/storageform/webdavform.dart';
-import 'package:img_syncer/storageform/nfsform.dart';
-import 'package:img_syncer/storageform/s3form.dart';
+import 'package:lumina/storageform/smbform.dart';
+import 'package:lumina/storageform/webdavform.dart';
+import 'package:lumina/storageform/nfsform.dart';
+import 'package:lumina/storageform/s3form.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:img_syncer/state_model.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/theme.dart';
+import 'package:lumina/state_model.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/theme.dart';
 
 class SettingStorageRoute extends StatefulWidget {
   const SettingStorageRoute({Key? key}) : super(key: key);

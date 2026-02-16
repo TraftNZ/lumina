@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:img_syncer/sync_timer.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/theme.dart';
+import 'package:lumina/sync_timer.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/theme.dart';
 
 class BackgroundSyncSettingRoute extends StatefulWidget {
   const BackgroundSyncSettingRoute({Key? key}) : super(key: key);

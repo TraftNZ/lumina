@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 import 'package:intl/intl.dart';
 
 class MonthDetailBody extends StatefulWidget {

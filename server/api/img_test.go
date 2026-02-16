@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/fregie/img_syncer/proto"
-	"github.com/fregie/img_syncer/test/static"
+	pb "github.com/traftai/lumina/proto"
+	"github.com/traftai/lumina/test/static"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )
 
 type ImageTestSuite struct {
 	suite.Suite
-	srv pb.ImgSyncerClient
+	srv pb.LuminaClient
 }
 
 func TestImageTestSuite(t *testing.T) {
@@ -31,7 +31,7 @@ func (s *ImageTestSuite) SetupTest() {
 	s.Nilf(err, "failed to init smb dir: %s", err)
 	grpcConn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
 	s.Nil(err)
-	s.srv = pb.NewImgSyncerClient(grpcConn)
+	s.srv = pb.NewLuminaClient(grpcConn)
 	s.setupSmbDrive()
 }
 

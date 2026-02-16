@@ -9,9 +9,9 @@ import (
 	_ "net/http/pprof"
 
 	version "github.com/fregie/PrintVersion"
-	pb "github.com/fregie/img_syncer/proto"
-	"github.com/fregie/img_syncer/server/api"
-	"github.com/fregie/img_syncer/server/imgmanager"
+	pb "github.com/traftai/lumina/proto"
+	"github.com/traftai/lumina/server/api"
+	"github.com/traftai/lumina/server/imgmanager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -50,7 +50,7 @@ func main() {
 	go http.ListenAndServe(*httpAddr, apiServer.HttpHandler())
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterImgSyncerServer(grpcServer, apiServer)
+	pb.RegisterLuminaServer(grpcServer, apiServer)
 	reflection.Register(grpcServer)
 	Info.Printf("Listening grpc on %s", lis.Addr().String())
 	Error.Fatal(grpcServer.Serve(lis))

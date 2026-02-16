@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/fregie/img_syncer/server/api"
-	"github.com/fregie/img_syncer/server/imgmanager"
-	"github.com/fregie/img_syncer/server/localstore"
+	"github.com/traftai/lumina/server/api"
+	"github.com/traftai/lumina/server/imgmanager"
+	"github.com/traftai/lumina/server/localstore"
 	_ "golang.org/x/mobile/bind"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/fregie/img_syncer/proto"
+	pb "github.com/traftai/lumina/proto"
 )
 
 var (
@@ -71,7 +71,7 @@ func RunGrpcServer(dataDir, cacheDir string) (string, error) {
 	api := api.NewApi(imgManager)
 	api.SetHttpPort(httpPort)
 	grpcServer := grpc.NewServer()
-	pb.RegisterImgSyncerServer(grpcServer, api)
+	pb.RegisterLuminaServer(grpcServer, api)
 	reflection.Register(grpcServer)
 
 	Info.Printf("Listening grpc on %s", grpcLis.Addr().String())

@@ -1,12 +1,12 @@
 BUILD_VERSION   := $(shell git describe --tags 2>/dev/null || echo "dev")
 GIT_COMMIT_SHA1 := $(shell git rev-parse HEAD)
 BUILD_TIME      := $(shell date "+%F %T")
-BUILD_NAME      := img_syncer_server
+BUILD_NAME      := lumina_server
 VERSION_PACKAGE_NAME := github.com/fregie/PrintVersion
 GOPATH          := $(shell go env GOPATH)
 export PATH     := $(GOPATH)/bin:$(HOME)/.pub-cache/bin:$(PATH)
 
-DESCRIBE := img_syncer grpc server
+DESCRIBE := lumina grpc server
 
 .DEFAULT_GOAL := server-aar
 

@@ -3,15 +3,15 @@ import 'package:date_format/date_format.dart';
 import 'package:grpc/grpc.dart';
 import 'package:flutter/material.dart';
 import 'event_bus.dart';
-import 'package:img_syncer/asset.dart';
+import 'package:lumina/asset.dart';
 import 'dart:async';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/storage/storage.dart';
+import 'package:lumina/storage/storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
-import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/global.dart';
 
 SettingModel settingModel = SettingModel();
 AssetModel assetModel = AssetModel();
@@ -405,7 +405,7 @@ Future<void> scanFile(String filePath) async {
         'mimeType': mimeType,
       };
 
-      await const MethodChannel('com.example.img_syncer/RunGrpcServer')
+      await const MethodChannel('com.traftai.lumina/RunGrpcServer')
           .invokeMethod('scanFile', params);
     } on PlatformException catch (e) {
       print('Failed to scan file $filePath: ${e.message}');

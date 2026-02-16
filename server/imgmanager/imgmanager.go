@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/Workiva/go-datastructures/queue"
-	"github.com/fregie/img_syncer/server/localstore"
+	"github.com/traftai/lumina/server/localstore"
 	"github.com/nfnt/resize"
 )
 

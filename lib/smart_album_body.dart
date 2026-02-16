@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:img_syncer/proto/img_syncer.pbgrpc.dart';
-import 'package:img_syncer/storage/storage.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/asset.dart';
-import 'package:img_syncer/state_model.dart';
-import 'package:img_syncer/search_body.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/asset.dart';
+import 'package:lumina/state_model.dart';
+import 'package:lumina/search_body.dart';
 
 class SmartAlbumBody extends StatefulWidget {
   final String query;

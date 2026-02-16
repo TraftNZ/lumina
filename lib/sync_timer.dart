@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:img_syncer/state_model.dart';
+import 'package:lumina/state_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:img_syncer/storage/storage.dart';
-import 'package:img_syncer/event_bus.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:lumina/event_bus.dart';
 import 'package:path/path.dart';
-import 'package:img_syncer/global.dart';
+import 'package:lumina/global.dart';
 
 Timer? autoSyncTimer;
 

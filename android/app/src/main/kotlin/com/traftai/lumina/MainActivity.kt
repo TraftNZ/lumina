@@ -1,4 +1,4 @@
-package com.example.img_syncer
+package com.traftai.lumina
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -17,7 +17,7 @@ import java.io.File
 
 
 class MainActivity : FlutterFragmentActivity() {
-  private val CHANNEL = "com.example.img_syncer/RunGrpcServer"
+  private val CHANNEL = "com.traftai.lumina/RunGrpcServer"
 
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)

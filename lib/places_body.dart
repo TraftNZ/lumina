@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/places_service.dart';
-import 'package:img_syncer/place_city_body.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/places_service.dart';
+import 'package:lumina/place_city_body.dart';
 
 class PlacesBody extends StatefulWidget {
   const PlacesBody({Key? key}) : super(key: key);

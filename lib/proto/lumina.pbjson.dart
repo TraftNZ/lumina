@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from proto/img_syncer.proto.
+// Generated from proto/lumina.proto.
 
 // @dart = 3.3
 
@@ -96,7 +96,7 @@ const FilterNotUploadedRequest$json = {
       '3': 1,
       '4': 3,
       '5': 11,
-      '6': '.img_syncer.FilterNotUploadedRequestInfo',
+      '6': '.lumina.FilterNotUploadedRequestInfo',
       '10': 'photos'
     },
     {'1': 'isFinished', '3': 2, '4': 1, '5': 8, '10': 'isFinished'},
@@ -105,9 +105,9 @@ const FilterNotUploadedRequest$json = {
 
 /// Descriptor for `FilterNotUploadedRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List filterNotUploadedRequestDescriptor = $convert.base64Decode(
-    'ChhGaWx0ZXJOb3RVcGxvYWRlZFJlcXVlc3QSQAoGcGhvdG9zGAEgAygLMiguaW1nX3N5bmNlci'
-    '5GaWx0ZXJOb3RVcGxvYWRlZFJlcXVlc3RJbmZvUgZwaG90b3MSHgoKaXNGaW5pc2hlZBgCIAEo'
-    'CFIKaXNGaW5pc2hlZA==');
+    'ChhGaWx0ZXJOb3RVcGxvYWRlZFJlcXVlc3QSPAoGcGhvdG9zGAEgAygLMiQubHVtaW5hLkZpbH'
+    'Rlck5vdFVwbG9hZGVkUmVxdWVzdEluZm9SBnBob3RvcxIeCgppc0ZpbmlzaGVkGAIgASgIUgpp'
+    'c0ZpbmlzaGVk');
 
 @$core.Deprecated('Use filterNotUploadedResponseDescriptor instead')
 const FilterNotUploadedResponse$json = {
@@ -488,7 +488,7 @@ const ListTrashResponse$json = {
       '3': 3,
       '4': 3,
       '5': 11,
-      '6': '.img_syncer.TrashItem',
+      '6': '.lumina.TrashItem',
       '10': 'items'
     },
   ],
@@ -497,8 +497,8 @@ const ListTrashResponse$json = {
 /// Descriptor for `ListTrashResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List listTrashResponseDescriptor = $convert.base64Decode(
     'ChFMaXN0VHJhc2hSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB21lc3NhZ2'
-    'UYAiABKAlSB21lc3NhZ2USKwoFaXRlbXMYAyADKAsyFS5pbWdfc3luY2VyLlRyYXNoSXRlbVIF'
-    'aXRlbXM=');
+    'UYAiABKAlSB21lc3NhZ2USJwoFaXRlbXMYAyADKAsyES5sdW1pbmEuVHJhc2hJdGVtUgVpdGVt'
+    'cw==');
 
 @$core.Deprecated('Use restoreFromTrashRequestDescriptor instead')
 const RestoreFromTrashRequest$json = {
@@ -633,7 +633,7 @@ const ListLockedResponse$json = {
       '3': 3,
       '4': 3,
       '5': 11,
-      '6': '.img_syncer.TrashItem',
+      '6': '.lumina.TrashItem',
       '10': 'items'
     },
   ],
@@ -642,8 +642,8 @@ const ListLockedResponse$json = {
 /// Descriptor for `ListLockedResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List listLockedResponseDescriptor = $convert.base64Decode(
     'ChJMaXN0TG9ja2VkUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCgdtZXNzYW'
-    'dlGAIgASgJUgdtZXNzYWdlEisKBWl0ZW1zGAMgAygLMhUuaW1nX3N5bmNlci5UcmFzaEl0ZW1S'
-    'BWl0ZW1z');
+    'dlGAIgASgJUgdtZXNzYWdlEicKBWl0ZW1zGAMgAygLMhEubHVtaW5hLlRyYXNoSXRlbVIFaXRl'
+    'bXM=');
 
 @$core.Deprecated('Use rebuildIndexRequestDescriptor instead')
 const RebuildIndexRequest$json = {
@@ -854,7 +854,7 @@ const GetLabelSummaryResponse$json = {
       '3': 2,
       '4': 3,
       '5': 11,
-      '6': '.img_syncer.LabelSummaryItem',
+      '6': '.lumina.LabelSummaryItem',
       '10': 'labels'
     },
     {'1': 'faceCount', '3': 3, '4': 1, '5': 5, '10': 'faceCount'},
@@ -864,7 +864,7 @@ const GetLabelSummaryResponse$json = {
 
 /// Descriptor for `GetLabelSummaryResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getLabelSummaryResponseDescriptor = $convert.base64Decode(
-    'ChdHZXRMYWJlbFN1bW1hcnlSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEjQKBm'
-    'xhYmVscxgCIAMoCzIcLmltZ19zeW5jZXIuTGFiZWxTdW1tYXJ5SXRlbVIGbGFiZWxzEhwKCWZh'
-    'Y2VDb3VudBgDIAEoBVIJZmFjZUNvdW50EiYKDmZhY2VTYW1wbGVQYXRoGAQgASgJUg5mYWNlU2'
-    'FtcGxlUGF0aA==');
+    'ChdHZXRMYWJlbFN1bW1hcnlSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEjAKBm'
+    'xhYmVscxgCIAMoCzIYLmx1bWluYS5MYWJlbFN1bW1hcnlJdGVtUgZsYWJlbHMSHAoJZmFjZUNv'
+    'dW50GAMgASgFUglmYWNlQ291bnQSJgoOZmFjZVNhbXBsZVBhdGgYBCABKAlSDmZhY2VTYW1wbG'
+    'VQYXRo');

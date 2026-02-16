@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from proto/img_syncer.proto.
+// Generated from proto/lumina.proto.
 
 // @dart = 3.3
 
@@ -41,7 +41,7 @@ class ListByDateRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListByDateRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'date')
     ..aI(2, _omitFieldNames ? '' : 'offset')
@@ -119,7 +119,7 @@ class ListByDateResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListByDateResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -187,7 +187,7 @@ class DeleteRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'DeleteRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..pPS(1, _omitFieldNames ? '' : 'paths')
     ..hasRequiredFields = false;
@@ -237,7 +237,7 @@ class DeleteResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'DeleteResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -305,7 +305,7 @@ class FilterNotUploadedRequestInfo extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'FilterNotUploadedRequestInfo',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'name')
     ..aOS(2, _omitFieldNames ? '' : 'date')
@@ -384,7 +384,7 @@ class FilterNotUploadedRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'FilterNotUploadedRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..pPM<FilterNotUploadedRequestInfo>(1, _omitFieldNames ? '' : 'photos',
         subBuilder: FilterNotUploadedRequestInfo.create)
@@ -450,7 +450,7 @@ class FilterNotUploadedResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'FilterNotUploadedResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -537,7 +537,7 @@ class SetDriveSMBRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveSMBRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'addr')
     ..aOS(2, _omitFieldNames ? '' : 'username')
@@ -633,7 +633,7 @@ class SetDriveSMBResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveSMBResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -691,7 +691,7 @@ class ListDriveSMBSharesRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveSMBSharesRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -740,7 +740,7 @@ class ListDriveSMBSharesResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveSMBSharesResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -812,7 +812,7 @@ class ListDriveSMBDirRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveSMBDirRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'share')
     ..aOS(2, _omitFieldNames ? '' : 'dir')
@@ -881,7 +881,7 @@ class ListDriveSMBDirResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveSMBDirResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -952,7 +952,7 @@ class SetDriveSMBShareRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveSMBShareRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'share')
     ..aOS(2, _omitFieldNames ? '' : 'root')
@@ -1019,7 +1019,7 @@ class SetDriveSMBShareResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveSMBShareResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1090,7 +1090,7 @@ class SetDriveWebdavRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveWebdavRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'addr')
     ..aOS(2, _omitFieldNames ? '' : 'username')
@@ -1177,7 +1177,7 @@ class SetDriveWebdavResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveWebdavResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1242,7 +1242,7 @@ class ListDriveWebdavDirRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveWebdavDirRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'dir')
     ..hasRequiredFields = false;
@@ -1301,7 +1301,7 @@ class ListDriveWebdavDirResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveWebdavDirResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1373,7 +1373,7 @@ class SetDriveNFSRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveNFSRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'addr')
     ..aOS(2, _omitFieldNames ? '' : 'root')
@@ -1439,7 +1439,7 @@ class SetDriveNFSResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveNFSResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1503,7 +1503,7 @@ class ListDriveNFSDirRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveNFSDirRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'dir')
     ..hasRequiredFields = false;
@@ -1562,7 +1562,7 @@ class ListDriveNFSDirResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveNFSDirResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1641,7 +1641,7 @@ class SetDriveS3Request extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveS3Request',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'endpoint')
     ..aOS(2, _omitFieldNames ? '' : 'region')
@@ -1748,7 +1748,7 @@ class SetDriveS3Response extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SetDriveS3Response',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1806,7 +1806,7 @@ class ListDriveS3BucketsRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveS3BucketsRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -1855,7 +1855,7 @@ class ListDriveS3BucketsResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListDriveS3BucketsResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -1925,7 +1925,7 @@ class MoveToTrashRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MoveToTrashRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..pPS(1, _omitFieldNames ? '' : 'paths')
     ..hasRequiredFields = false;
@@ -1975,7 +1975,7 @@ class MoveToTrashResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MoveToTrashResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2045,7 +2045,7 @@ class TrashItem extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'TrashItem',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'originalPath', protoName: 'originalPath')
     ..aOS(2, _omitFieldNames ? '' : 'trashPath', protoName: 'trashPath')
@@ -2130,7 +2130,7 @@ class ListTrashRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListTrashRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aI(1, _omitFieldNames ? '' : 'offset')
     ..aI(2, _omitFieldNames ? '' : 'maxReturn', protoName: 'maxReturn')
@@ -2198,7 +2198,7 @@ class ListTrashResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListTrashResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2267,7 +2267,7 @@ class RestoreFromTrashRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RestoreFromTrashRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..pPS(1, _omitFieldNames ? '' : 'trashPaths', protoName: 'trashPaths')
     ..hasRequiredFields = false;
@@ -2318,7 +2318,7 @@ class RestoreFromTrashResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RestoreFromTrashResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2377,7 +2377,7 @@ class EmptyTrashRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'EmptyTrashRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -2423,7 +2423,7 @@ class EmptyTrashResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'EmptyTrashResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2487,7 +2487,7 @@ class MoveToLockedRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MoveToLockedRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..pPS(1, _omitFieldNames ? '' : 'paths')
     ..hasRequiredFields = false;
@@ -2537,7 +2537,7 @@ class MoveToLockedResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MoveToLockedResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2601,7 +2601,7 @@ class RestoreFromLockedRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RestoreFromLockedRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..pPS(1, _omitFieldNames ? '' : 'lockedPaths', protoName: 'lockedPaths')
     ..hasRequiredFields = false;
@@ -2652,7 +2652,7 @@ class RestoreFromLockedResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RestoreFromLockedResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2719,7 +2719,7 @@ class ListLockedRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListLockedRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aI(1, _omitFieldNames ? '' : 'offset')
     ..aI(2, _omitFieldNames ? '' : 'maxReturn', protoName: 'maxReturn')
@@ -2787,7 +2787,7 @@ class ListLockedResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListLockedResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2850,7 +2850,7 @@ class RebuildIndexRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RebuildIndexRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -2900,7 +2900,7 @@ class RebuildIndexResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'RebuildIndexResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -2978,7 +2978,7 @@ class GetIndexStatsRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetIndexStatsRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -3031,7 +3031,7 @@ class GetIndexStatsResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetIndexStatsResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -3122,7 +3122,7 @@ class ClearThumbnailCacheRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ClearThumbnailCacheRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -3172,7 +3172,7 @@ class ClearThumbnailCacheResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ClearThumbnailCacheResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -3255,7 +3255,7 @@ class UpdatePhotoLabelsRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'UpdatePhotoLabelsRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'path')
     ..pPS(2, _omitFieldNames ? '' : 'labels')
@@ -3330,7 +3330,7 @@ class UpdatePhotoLabelsResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'UpdatePhotoLabelsResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -3395,7 +3395,7 @@ class SearchPhotosRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SearchPhotosRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'query')
     ..hasRequiredFields = false;
@@ -3453,7 +3453,7 @@ class SearchPhotosResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SearchPhotosResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -3521,7 +3521,7 @@ class GetUnlabeledPhotosRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetUnlabeledPhotosRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aI(1, _omitFieldNames ? '' : 'limit')
     ..hasRequiredFields = false;
@@ -3580,7 +3580,7 @@ class GetUnlabeledPhotosResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetUnlabeledPhotosResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'message')
@@ -3644,7 +3644,7 @@ class GetLabelSummaryRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetLabelSummaryRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -3693,7 +3693,7 @@ class LabelSummaryItem extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'LabelSummaryItem',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'label')
     ..aI(2, _omitFieldNames ? '' : 'count')
@@ -3773,7 +3773,7 @@ class GetLabelSummaryResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetLabelSummaryResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'img_syncer'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..pPM<LabelSummaryItem>(2, _omitFieldNames ? '' : 'labels',

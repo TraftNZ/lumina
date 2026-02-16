@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/fregie/img_syncer/proto"
-	"github.com/fregie/img_syncer/server/drive/nfs"
+	pb "github.com/traftai/lumina/proto"
+	"github.com/traftai/lumina/server/drive/nfs"
 )
 
 func (a *api) SetDriveNFS(ctx context.Context, req *pb.SetDriveNFSRequest) (rsp *pb.SetDriveNFSResponse, e error) {

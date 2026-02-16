@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/fregie/img_syncer/proto"
-	"github.com/fregie/img_syncer/server/drive/webdav"
+	pb "github.com/traftai/lumina/proto"
+	"github.com/traftai/lumina/server/drive/webdav"
 )
 
 func (a *api) SetDriveWebdav(ctx context.Context, req *pb.SetDriveWebdavRequest) (rsp *pb.SetDriveWebdavResponse, e error) {

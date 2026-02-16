@@ -1,9 +1,9 @@
 syntax = "proto3";
-package img_syncer;
+package lumina;
 
-option go_package = "github.com/fregie/img_syncer/proto";
+option go_package = "github.com/traftai/lumina/proto";
 
-service ImgSyncer {
+service Lumina {
   rpc ListByDate (ListByDateRequest) returns (ListByDateResponse) {}
   rpc Delete (DeleteRequest) returns (DeleteResponse) {}
   rpc FilterNotUploaded (stream FilterNotUploadedRequest) returns (stream FilterNotUploadedResponse) {}

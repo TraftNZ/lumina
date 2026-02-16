@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:img_syncer/event_bus.dart';
-import 'package:img_syncer/global.dart';
-import 'package:img_syncer/proto/img_syncer.pb.dart';
-import 'package:img_syncer/storage/storage.dart';
+import 'package:lumina/event_bus.dart';
+import 'package:lumina/global.dart';
+import 'package:lumina/proto/lumina.pb.dart';
+import 'package:lumina/storage/storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

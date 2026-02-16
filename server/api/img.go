@@ -7,15 +7,15 @@ import (
 	"path/filepath"
 	"time"
 
-	pb "github.com/fregie/img_syncer/proto"
-	"github.com/fregie/img_syncer/server/imgmanager"
+	pb "github.com/traftai/lumina/proto"
+	"github.com/traftai/lumina/server/imgmanager"
 )
 
 type api struct {
 	im       *imgmanager.ImgManager
 	httpPort int
 
-	pb.UnimplementedImgSyncerServer
+	pb.UnimplementedLuminaServer
 }
 
 func NewApi(im *imgmanager.ImgManager) *api {
@@ -67,7 +67,7 @@ func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.Delete
 	return
 }
 
-func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) error {
+func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error {
 	store := a.im.Store()
 	if store == nil || store.IsEmpty() {
 		return a.filterNotUploadedLegacy(stream)
@@ -123,7 +123,7 @@ func (a *api) FilterNotUploaded(stream pb.ImgSyncer_FilterNotUploadedServer) err
 	return nil
 }
 
-func (a *api) filterNotUploadedLegacy(stream pb.ImgSyncer_FilterNotUploadedServer) error {
+func (a *api) filterNotUploadedLegacy(stream pb.Lumina_FilterNotUploadedServer) error {
 	all := make(map[string]bool)
 	a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
 		name := filepath.Base(path)
@@ -256,7 +256,7 @@ func (a *api) RestoreFromLocked(ctx context.Context, req *pb.RestoreFromLockedRe
 	return
 }
 
-func (a *api) RebuildIndex(req *pb.RebuildIndexRequest, stream pb.ImgSyncer_RebuildIndexServer) error {
+func (a *api) RebuildIndex(req *pb.RebuildIndexRequest, stream pb.Lumina_RebuildIndexServer) error {
 	err := a.im.RebuildIndex(func(found int) {
 		stream.Send(&pb.RebuildIndexResponse{
 			Success:    true,
