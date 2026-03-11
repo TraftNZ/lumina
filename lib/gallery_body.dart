@@ -177,7 +177,7 @@ class GalleryBodyState extends State<GalleryBody>
   void _runAutoSync(List<Asset> toSync) async {
     stateModel.startSync(toSync.length);
     for (final asset in toSync) {
-      if (stateModel.syncCancelled) break;
+      if (!mounted || stateModel.syncCancelled) break;
       if (!asset.hasLocal || asset.hasRemote) {
         stateModel.advanceSync(asset.name());
         continue;
@@ -192,6 +192,8 @@ class GalleryBodyState extends State<GalleryBody>
         stateModel.advanceSync(asset.name());
         continue;
       }
+      // Yield to UI event loop between uploads
+      await Future.delayed(Duration.zero);
     }
     stateModel.finishSync();
     eventBus.fire(RemoteRefreshEvent());
@@ -330,19 +332,23 @@ class GalleryBodyState extends State<GalleryBody>
         assets.add(all[key]);
       }
     });
+    clearSelection();
+    int uploaded = 0;
     for (var asset in assets) {
+      if (!mounted) break;
       final entity = asset.local!;
       try {
         await storage.uploadAssetEntity(entity);
+        uploaded++;
       } catch (e) {
         SnackBarManager.showSnackBar("${l10n.uploadFailed}: $e");
       }
+      // Yield to UI event loop between uploads
+      await Future.delayed(Duration.zero);
     }
     SnackBarManager.showSnackBar(
-        "${l10n.successfullyUpload} ${assets.length} ${l10n.photos}");
+        "${l10n.successfullyUpload} $uploaded ${l10n.photos}");
     eventBus.fire(RemoteRefreshEvent());
-
-    clearSelection();
   }
 
   Widget _buildSelectionBar() {

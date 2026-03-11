@@ -185,7 +185,7 @@ class SyncBodyState extends State<SyncBody> {
       ids[id] = true;
     }
     for (var asset in all) {
-      if (_needStopSync) {
+      if (_needStopSync || !mounted) {
         break;
       }
       final id = asset.local!.id;
@@ -199,7 +199,10 @@ class SyncBodyState extends State<SyncBody> {
         SnackBarManager.showSnackBar("${l10n.uploadFailed}: $e");
         continue;
       }
+      // Yield to UI event loop between uploads
+      await Future.delayed(Duration.zero);
     }
+    if (!mounted) return;
     setState(() {
       syncing = false;
     });

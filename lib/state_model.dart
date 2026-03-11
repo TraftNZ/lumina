@@ -274,12 +274,50 @@ class AssetModel extends ChangeNotifier {
     if (remoteGetting != null) {
       await remoteGetting!.future;
     }
+    // Keep old data visible while fetching new data in background
     remoteHasMore = true;
-    remoteAssets = [];
-    _unifiedDirty = true;
     remoteGetting = null;
-    stateModel.setNotSyncedPhotos([]);
-    await getRemotePhotos();
+    await _fetchRemotePhotos();
+  }
+
+  Future<void> _fetchRemotePhotos() async {
+    if (!isServerReady) return;
+    await checkServer();
+    if (remoteGetting != null) {
+      await remoteGetting!.future;
+      return;
+    }
+    remoteGetting = Completer<bool>();
+    try {
+      final List<Asset> newRemoteAssets = [];
+      int offset = 0;
+      bool hasMore = true;
+      while (hasMore) {
+        final List<RemoteImage> images =
+            await storage.listImages("9999:12:31", offset, pageSize);
+        if (images.length < pageSize) {
+          hasMore = false;
+        }
+        for (var image in images) {
+          try {
+            newRemoteAssets.add(Asset(remote: image));
+          } catch (e) {
+            print(e);
+          }
+        }
+        offset += images.length;
+      }
+      // Swap in new data at once — no flicker
+      remoteAssets = newRemoteAssets;
+      remoteHasMore = false;
+      _unifiedDirty = true;
+      stateModel.setNotSyncedPhotos([]);
+      notifyListeners();
+    } catch (e) {
+      remoteLastError = e.toString();
+    }
+    remoteGetting?.complete(true);
+    remoteGetting = null;
   }
 
   Future<void> getLocalPhotos() async {

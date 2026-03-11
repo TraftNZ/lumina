@@ -474,7 +474,11 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
                         case LoadState.completed:
                           return null;
                         case LoadState.failed:
-                          return null;
+                          // Show thumbnail as fallback when full image fails
+                          return ExtendedImage(
+                            image: all[index].thumbnailProvider(),
+                            fit: BoxFit.contain,
+                          );
                         default:
                           return null;
                       }

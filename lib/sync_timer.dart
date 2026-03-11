@@ -51,6 +51,8 @@ Future<void> reloadAutoSyncTimer() async {
         print(e);
         continue;
       }
+      // Yield to UI event loop between uploads to keep interface fluid
+      await Future.delayed(Duration.zero);
     }
     eventBus.fire(RemoteRefreshEvent());
   });

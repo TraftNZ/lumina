@@ -110,6 +110,9 @@ class MLIndexer extends ChangeNotifier {
           } catch (e) {
             logger.w("MLIndexer: Failed to process $path: $e");
           }
+
+          // Yield to UI event loop between photos to keep interface fluid
+          await Future.delayed(const Duration(milliseconds: 50));
         }
       } catch (e) {
         logger.e("MLIndexer: Batch error: $e");
@@ -142,10 +145,15 @@ class MLIndexer extends ChangeNotifier {
       await tempFile.writeAsBytes(imageData);
       inputImage = InputImage.fromFilePath(tempFile.path);
 
-      // Run ML inference
-      final labels = await _labeler.processImage(inputImage);
-      final faces = await _faceDetector.processImage(inputImage);
-      final text = await _textRecognizer.processImage(inputImage);
+      // Run ML inference in parallel for better performance
+      final results = await Future.wait([
+        _labeler.processImage(inputImage),
+        _faceDetector.processImage(inputImage),
+        _textRecognizer.processImage(inputImage),
+      ]);
+      final labels = results[0] as List<ImageLabel>;
+      final faces = results[1] as List<Face>;
+      final text = results[2] as RecognizedText;
 
       // Extract data
       final labelList = labels.map((l) => l.label).toList();

@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:lumina/util.dart';
+import 'package:lumina/thumbnail_cache.dart';
 
 RemoteStorage storage = RemoteStorage("127.0.0.1", 10000);
 
@@ -210,7 +211,15 @@ class RemoteImage {
     if (thumbnailData != null) {
       return thumbnailData!;
     }
-    int maxRetries = 3;
+
+    // Check disk cache first
+    final cached = await ThumbnailCache.instance.get(path);
+    if (cached != null && cached.isNotEmpty) {
+      thumbnailData = cached;
+      return thumbnailData!;
+    }
+
+    const maxRetries = 3;
     int retryCount = 0;
     bool succeeded = false;
     while (retryCount < maxRetries && !succeeded) {
@@ -222,9 +231,16 @@ class RemoteImage {
         }
         thumbnailData = currentData.takeBytes();
         succeeded = true;
+
+        // Save to disk cache
+        ThumbnailCache.instance.put(path, thumbnailData!);
       } catch (e) {
-        print("get $path thumbnail failed: $e");
+        print("get $path thumbnail failed (attempt ${retryCount + 1}): $e");
         retryCount++;
+        if (retryCount < maxRetries) {
+          // Exponential backoff: 1s, 3s
+          await Future.delayed(Duration(seconds: retryCount * 2 - 1));
+        }
       }
     }
     if (!succeeded) {

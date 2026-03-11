@@ -130,13 +130,13 @@ flutter_icons:
   adaptive_icon_monochrome: "assets/icon/lumina_icon.png"
 
 flutter_native_splash:
-  image: "assets/icon/lumina_icon.png"
+  image: "assets/icon/lumina_splash_clean.png"
   color: "#ffffff"
-  color_dark: "#1a1a1a"
+  color_dark: "#000000"
   android_screen_orientation: portrait
   android_12:
-    image: "assets/icon/lumina_splash.png"
+    image: "assets/icon/lumina_splash_android12.png"
     color: "#ffffff"
-    color_dark: "#1a1a1a"
+    color_dark: "#000000"
     icon_background_color: "#ffffff"
-    icon_background_color_dark: "#1a1a1a"
+    icon_background_color_dark: "#000000"

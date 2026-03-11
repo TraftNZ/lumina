@@ -241,6 +241,11 @@ class Asset extends ImageProvider<Asset> {
     if (data == null || data.isEmpty || !await isValidImage(data)) {
       final brokenData = await rootBundle.load("assets/images/gray.jpg");
       _thumbnailDataCompleter!.complete(brokenData.buffer.asUint8List());
+      // Reset so next call retries the download instead of returning fallback forever
+      _thumbnailDataCompleter = null;
+      if (hasRemote) {
+        remote!.thumbnailData = null;
+      }
       return brokenData.buffer.asUint8List();
     } else {
       _thumbnailDataCompleter!.complete(data);
