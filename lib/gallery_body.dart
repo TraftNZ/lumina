@@ -109,17 +109,15 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
-  bool _isRefreshing = false;
-  Future<void> refresh() async {
+  void refresh() {
     if (stateModel.isDownloading() || stateModel.isUploading()) {
       return;
     }
-    if (_isRefreshing) {
+    if (assetModel.isRefreshing) {
       return;
     }
-    _isRefreshing = true;
-    await assetModel.refreshAll();
-    _isRefreshing = false;
+    // Fire-and-forget: refresh in background, no blocking spinner
+    assetModel.refreshAll();
   }
 
   void getPhotos() {
@@ -597,37 +595,51 @@ class GalleryBodyState extends State<GalleryBody>
               children: [
                 Image.asset('assets/icon/lumina_icon_transparent.png', width: 36, height: 36),
                 const Spacer(),
-                if (model.isSyncing)
-                  GestureDetector(
-                    onTap: _toggleSyncPanel,
-                    child: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 36,
-                            height: 36,
-                            child: CircularProgressIndicator(
-                              value: model.syncTotal > 0
-                                  ? model.syncDone / model.syncTotal
-                                  : null,
-                              strokeWidth: 3,
-                              color: colorScheme.primary,
-                            ),
+                Consumer<AssetModel>(
+                  builder: (context, assetModel, child) {
+                    if (model.isSyncing) {
+                      return GestureDetector(
+                        onTap: _toggleSyncPanel,
+                        child: SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: CircularProgressIndicator(
+                                  value: model.syncTotal > 0
+                                      ? model.syncDone / model.syncTotal
+                                      : null,
+                                  strokeWidth: 3,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              Icon(Icons.cloud_sync, size: 18, color: colorScheme.primary),
+                            ],
                           ),
-                          Icon(Icons.cloud_sync, size: 18, color: colorScheme.primary),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                  Icon(
-                    Icons.cloud_done,
-                    size: 20,
-                    color: colorScheme.primary,
-                  ),
+                        ),
+                      );
+                    }
+                    if (assetModel.isRefreshing) {
+                      return SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.primary,
+                        ),
+                      );
+                    }
+                    return Icon(
+                      Icons.cloud_done,
+                      size: 20,
+                      color: colorScheme.primary,
+                    );
+                  },
+                ),
                 PopupMenuButton<String>(
                   icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
                   onSelected: (value) {
@@ -1094,7 +1106,9 @@ class GalleryBodyState extends State<GalleryBody>
       children: [
         RefreshIndicator(
           key: _refreshIndicatorKey,
-          onRefresh: refresh,
+          onRefresh: () async {
+            refresh(); // Fire-and-forget, returns immediately
+          },
           child: CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),

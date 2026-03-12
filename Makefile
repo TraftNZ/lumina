@@ -46,6 +46,12 @@ apk:
 ipa:
 	flutter build ipa --no-tree-shake-icons --obfuscate --split-debug-info=./debug-info
 
+testflight:
+	./deploy-testflight.sh
+
+testflight-quick:
+	./deploy-testflight.sh --skip-server
+
 .PHONY: test
 test:
 	docker-compose -f test/docker-compose.yml up -d --build

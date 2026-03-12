@@ -187,6 +187,8 @@ class AssetModel extends ChangeNotifier {
   Completer<bool>? remoteGetting;
 
   String? remoteLastError;
+  bool _isRefreshing = false;
+  bool get isRefreshing => _isRefreshing;
 
   bool get hasMore => localHasMore || remoteHasMore;
 
@@ -256,7 +258,14 @@ class AssetModel extends ChangeNotifier {
   }
 
   Future<void> refreshAll() async {
-    await Future.wait([refreshLocal(), refreshRemote()]);
+    _isRefreshing = true;
+    notifyListeners();
+    try {
+      await Future.wait([refreshLocal(), refreshRemote()]);
+    } finally {
+      _isRefreshing = false;
+      notifyListeners();
+    }
   }
 
   Future<void> refreshLocal() async {
