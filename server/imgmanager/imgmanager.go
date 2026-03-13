@@ -595,6 +595,26 @@ func (im *ImgManager) SyncFromRemoteIndex() error {
 	return nil
 }
 
+// ListByDateFromIndex serves a ListByDate query from the local index.
+// Returns (paths, true) if the index was available and used, or (nil, false)
+// if the caller should fall back to RangeByDate.
+func (im *ImgManager) ListByDateFromIndex(date time.Time, offset, limit int) ([]string, bool) {
+	if im.store == nil || im.store.IsEmpty() {
+		return nil, false
+	}
+	// Ensure index is fresh
+	changed, _ := im.CheckMarkerChanged()
+	if changed {
+		if err := im.SyncFromRemoteIndex(); err != nil {
+			if err := im.RebuildIndex(nil); err != nil {
+				return nil, false
+			}
+		}
+	}
+	paths := im.store.ListPhotos(date, offset, limit)
+	return paths, true
+}
+
 func (im *ImgManager) RebuildIndex(progressCb func(found int)) error {
 	if im.store == nil {
 		return fmt.Errorf("local store not available")

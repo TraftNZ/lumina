@@ -42,6 +42,13 @@ func (a *api) ListByDate(ctx context.Context, req *pb.ListByDateRequest) (rsp *p
 			return
 		}
 	}
+	// Try fast path: serve from local index
+	if paths, ok := a.im.ListByDateFromIndex(start, int(req.Offset), int(req.MaxReturn)); ok {
+		rsp.Paths = paths
+		return
+	}
+
+	// Fallback: walk remote storage directories
 	rsp.Paths = make([]string, 0, req.MaxReturn)
 	offset := req.Offset
 	needReturn := req.MaxReturn

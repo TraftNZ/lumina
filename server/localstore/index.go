@@ -2,6 +2,7 @@ package localstore
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 )
@@ -77,6 +78,47 @@ func (s *LocalStore) BatchExistsByFilename(filenames []string) map[string]bool {
 		}
 	}
 	return result
+}
+
+// ListPhotos returns photo paths sorted by date descending (newest first),
+// filtered to paths with date <= beforeDate, with offset/limit pagination.
+func (s *LocalStore) ListPhotos(beforeDate time.Time, offset, limit int) []string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if !s.initialized {
+		return nil
+	}
+
+	// Format the cutoff as YYYY/MM/DD for prefix comparison
+	cutoff := beforeDate.Format("2006/01/02")
+
+	paths := make([]string, 0, len(s.data.Photos))
+	for p := range s.data.Photos {
+		// Path format is YYYY/MM/DD/filename — extract date prefix
+		// Only include paths whose date prefix <= cutoff
+		if len(p) >= 10 {
+			datePrefix := p[:10]
+			if datePrefix <= cutoff {
+				paths = append(paths, p)
+			}
+		}
+	}
+
+	// Sort descending by path (YYYY/MM/DD/name lexicographic = chronological)
+	sort.Sort(sort.Reverse(sort.StringSlice(paths)))
+
+	// Apply offset
+	if offset >= len(paths) {
+		return nil
+	}
+	paths = paths[offset:]
+
+	// Apply limit
+	if limit > 0 && len(paths) > limit {
+		paths = paths[:limit]
+	}
+
+	return paths
 }
 
 func (s *LocalStore) IsEmpty() bool {
