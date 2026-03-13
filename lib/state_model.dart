@@ -272,11 +272,17 @@ class AssetModel extends ChangeNotifier {
     if (localGetting != null) {
       await localGetting!.future;
     }
+    final reuseMap = <String, Asset>{};
+    for (final a in localAssets) {
+      if (a.hasLocal) {
+        reuseMap[a.local!.id] = a;
+      }
+    }
     localHasMore = true;
     localAssets = [];
     _unifiedDirty = true;
     stateModel.setNotSyncedPhotos([]);
-    await getLocalPhotos();
+    await getLocalPhotos(reuseMap: reuseMap);
   }
 
   Future<void> refreshRemote() async {
@@ -298,6 +304,12 @@ class AssetModel extends ChangeNotifier {
     }
     remoteGetting = Completer<bool>();
     try {
+      final reuseMap = <String, Asset>{};
+      for (final a in remoteAssets) {
+        if (a.hasRemote) {
+          reuseMap[a.remote!.path] = a;
+        }
+      }
       final List<Asset> newRemoteAssets = [];
       int offset = 0;
       bool hasMore = true;
@@ -309,7 +321,13 @@ class AssetModel extends ChangeNotifier {
         }
         for (var image in images) {
           try {
-            newRemoteAssets.add(Asset(remote: image));
+            final existing = reuseMap[image.path];
+            if (existing != null) {
+              existing.remote = image;
+              newRemoteAssets.add(existing);
+            } else {
+              newRemoteAssets.add(Asset(remote: image));
+            }
           } catch (e) {
             print(e);
           }
@@ -329,7 +347,7 @@ class AssetModel extends ChangeNotifier {
     remoteGetting = null;
   }
 
-  Future<void> getLocalPhotos() async {
+  Future<void> getLocalPhotos({Map<String, Asset>? reuseMap}) async {
     if (localGetting != null) {
       await localGetting?.future;
       return;
@@ -372,12 +390,24 @@ class AssetModel extends ChangeNotifier {
       localHasMore = false;
     }
     for (var i = 0; i < entities.length; i++) {
-      final asset = Asset(local: entities[i]);
-      await asset.getLocalFile();
+      final existing = reuseMap?[entities[i].id];
+      final Asset asset;
+      if (existing != null) {
+        existing.local = entities[i];
+        asset = existing;
+      } else {
+        asset = Asset(local: entities[i]);
+      }
       localAssets.add(asset);
-      if (i % 100 == 0) {
+      // Notify immediately for the first batch so the grid appears fast,
+      // then batch every 100 assets to avoid excessive rebuilds.
+      if (i == 0 && offset == 0) {
+        _unifiedDirty = true;
+        notifyListeners();
+      } else if (i % 100 == 0) {
         notifyListeners();
       }
+      await asset.getLocalFile();
     }
     _unifiedDirty = true;
     notifyListeners();

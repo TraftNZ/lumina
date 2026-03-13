@@ -22,6 +22,8 @@ class Asset extends ImageProvider<Asset> {
   Uint8List? _thumbnailData;
   Completer<Uint8List>? _dataAsyncCompleter;
   Uint8List? _data;
+  MemoryImage? _cachedThumbnailProvider;
+  Uint8List? _cachedThumbnailDataRef;
 
   String? make;
   String? model;
@@ -214,12 +216,18 @@ class Asset extends ImageProvider<Asset> {
   ImageProvider thumbnailProvider() {
     try {
       if (_thumbnailData != null && _thumbnailData!.isNotEmpty) {
-        return MemoryImage(_thumbnailData!);
+        if (_cachedThumbnailProvider != null &&
+            identical(_thumbnailData, _cachedThumbnailDataRef)) {
+          return _cachedThumbnailProvider!;
+        }
+        _cachedThumbnailDataRef = _thumbnailData;
+        _cachedThumbnailProvider = MemoryImage(_thumbnailData!);
+        return _cachedThumbnailProvider!;
       }
     } catch (e) {
       print(e);
     }
-    return Image.asset("assets/images/gray.jpg").image;
+    return const AssetImage("assets/images/gray.jpg");
   }
 
   Future<Uint8List> thumbnailDataAsync() async {

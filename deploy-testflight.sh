@@ -63,7 +63,11 @@ step "Incrementing build number"
 PUBSPEC="$PROJECT_DIR/pubspec.yaml"
 CURRENT_VERSION=$(grep '^version:' "$PUBSPEC" | sed 's/version: //')
 BUILD_NAME=$(echo "$CURRENT_VERSION" | cut -d'+' -f1)
-BUILD_NUMBER=$(echo "$CURRENT_VERSION" | cut -d'+' -f2)
+if [[ "$CURRENT_VERSION" == *"+"* ]]; then
+  BUILD_NUMBER=$(echo "$CURRENT_VERSION" | cut -d'+' -f2)
+else
+  BUILD_NUMBER=0
+fi
 NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
 NEW_VERSION="${BUILD_NAME}+${NEW_BUILD_NUMBER}"
 

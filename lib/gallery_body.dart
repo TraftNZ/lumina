@@ -42,6 +42,8 @@ class GalleryBodyState extends State<GalleryBody>
   bool _showToTopBtn = false;
   bool _syncPanelExpanded = false;
   bool _isDeleting = false;
+  Timer? _thumbnailDebounce;
+  bool _thumbnailDirty = false;
   @override
   bool get wantKeepAlive => true;
   final ScrollController _scrollController = ScrollController();
@@ -96,6 +98,7 @@ class GalleryBodyState extends State<GalleryBody>
   void dispose() {
     assetModel.removeListener(_scheduleAutoSync);
     _autoSyncTimer?.cancel();
+    _thumbnailDebounce?.cancel();
     _scrollController.dispose();
     _scrollSubject.close();
     super.dispose();
@@ -784,7 +787,17 @@ class GalleryBodyState extends State<GalleryBody>
           currentScrollOffset < scrollOffset + (3 * totalHeight)) {
         needLoadThumbnail = true;
         if (!all[i].loadThumbnailFinished()) {
-          all[i].thumbnailDataAsync().then((value) => setState(() {}));
+          all[i].thumbnailDataAsync().then((value) {
+            _thumbnailDirty = true;
+            _thumbnailDebounce ??=
+                Timer(const Duration(milliseconds: 100), () {
+              _thumbnailDebounce = null;
+              if (_thumbnailDirty && mounted) {
+                _thumbnailDirty = false;
+                setState(() {});
+              }
+            });
+          });
         }
       }
       var child = GestureDetector(
