@@ -93,6 +93,7 @@ flutter pub get
 ok "Dependencies resolved"
 
 step "Building Xcode archive"
+rm -rf "$IPA_DIR"
 flutter build ipa \
   --release \
   --no-tree-shake-icons \
@@ -100,8 +101,7 @@ flutter build ipa \
   --split-debug-info=./debug-info \
   --build-name="$BUILD_NAME" \
   --build-number="$NEW_BUILD_NUMBER" \
-  --export-options-plist="$EXPORT_OPTIONS" \
-  || true  # Archive succeeds even if IPA export fails
+  --export-options-plist="$EXPORT_OPTIONS"
 
 [ -d "$ARCHIVE_PATH" ] || fail "Archive not found at $ARCHIVE_PATH"
 ok "Archive built: $ARCHIVE_PATH"
