@@ -15,8 +15,6 @@ func (a *api) SetDriveWebdav(ctx context.Context, req *pb.SetDriveWebdavRequest)
 		return
 	}
 	d := webdav.NewWebdavDrive(req.Addr, req.Username, req.Password)
-	configHash := fmt.Sprintf("webdav://%s@%s/%s", req.Username, req.Addr, req.Root)
-	a.im.SwitchDrive(d, configHash)
 	if req.Root != "" {
 		err := d.SetRootPath(req.Root)
 		if err != nil {
@@ -24,6 +22,8 @@ func (a *api) SetDriveWebdav(ctx context.Context, req *pb.SetDriveWebdavRequest)
 			return
 		}
 	}
+	configHash := fmt.Sprintf("webdav://%s@%s/%s", req.Username, req.Addr, req.Root)
+	a.im.SwitchDrive(d, configHash)
 	return
 }
 

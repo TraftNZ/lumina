@@ -122,23 +122,42 @@ class RemoteStorage {
       throw Exception("upload thumbnail failed: ${thumbRsp.statusCode}");
     }
 
-    var req = http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
-    req.headers['Image-Date'] = dateStr;
-    req.contentLength = await file.length();
-    file.openRead().listen((chunk) {
-      uploaded += chunk.length;
-      stateModel.updateUploadProgress(asset.id, uploaded, totalLen);
-      req.sink.add(chunk);
-    }, onDone: () {
-      req.sink.close();
-    });
-    final response = await req.send();
-    if (response.statusCode != 200) {
-      stateModel.finishUpload(asset.id, false);
-      final body = await response.stream.bytesToString();
-      throw Exception("upload failed: [${response.statusCode}] $body");
+    const maxUploadRetries = 3;
+    for (int attempt = 0; attempt < maxUploadRetries; attempt++) {
+      try {
+        final retryFile = await asset.originFile;
+        if (retryFile == null) {
+          throw Exception("asset file is null on retry");
+        }
+        uploaded = thumbLen;
+        var req =
+            http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
+        req.headers['Image-Date'] = dateStr;
+        req.contentLength = await retryFile.length();
+        retryFile.openRead().listen((chunk) {
+          uploaded += chunk.length;
+          stateModel.updateUploadProgress(asset.id, uploaded, totalLen);
+          req.sink.add(chunk);
+        }, onDone: () {
+          req.sink.close();
+        });
+        final response = await req.send();
+        if (response.statusCode != 200) {
+          final body = await response.stream.bytesToString();
+          throw Exception("upload failed: [${response.statusCode}] $body");
+        }
+        stateModel.finishUpload(asset.id, true);
+        return;
+      } catch (e) {
+        if (attempt < maxUploadRetries - 1) {
+          final backoff = Duration(seconds: (attempt + 1) * 2);
+          await Future.delayed(backoff);
+          continue;
+        }
+        stateModel.finishUpload(asset.id, false);
+        rethrow;
+      }
     }
-    stateModel.finishUpload(asset.id, true);
   }
 
   // @protected
