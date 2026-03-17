@@ -97,6 +97,12 @@ func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
 		if err := im.store.SwitchDrive(configHash); err != nil {
 			im.logger.Printf("Failed to switch drive store: %v", err)
 		}
+		// Always sync index from remote — remote is the source of truth
+		if err := im.SyncFromRemoteIndex(); err != nil {
+			im.logger.Printf("SwitchDrive: sync from remote index failed: %v", err)
+		} else {
+			im.logger.Printf("SwitchDrive: synced %d photos from remote index", im.store.PhotoCount())
+		}
 	}
 }
 
@@ -626,17 +632,18 @@ func (im *ImgManager) SyncFromRemoteIndex() error {
 // Returns (paths, true) if the index was available and used, or (nil, false)
 // if the caller should fall back to RangeByDate.
 func (im *ImgManager) ListByDateFromIndex(date time.Time, offset, limit int) ([]string, bool) {
-	if im.store == nil || im.store.IsEmpty() {
+	if im.store == nil {
 		return nil, false
 	}
-	// Ensure index is fresh
+	// Always check if remote has newer data
 	changed, _ := im.CheckMarkerChanged()
-	if changed {
+	if changed || im.store.IsEmpty() {
 		if err := im.SyncFromRemoteIndex(); err != nil {
-			if err := im.RebuildIndex(nil); err != nil {
-				return nil, false
-			}
+			im.logger.Printf("SyncFromRemoteIndex failed: %v", err)
 		}
+	}
+	if im.store.IsEmpty() {
+		return nil, false
 	}
 	paths := im.store.ListPhotos(date, offset, limit)
 	return paths, true

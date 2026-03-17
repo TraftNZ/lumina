@@ -76,18 +76,19 @@ func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.Delete
 
 func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error {
 	store := a.im.Store()
-	if store == nil || store.IsEmpty() {
+	if store == nil {
 		return a.filterNotUploadedLegacy(stream)
 	}
 
-	// Check if remote has changed since last rebuild
-	changed, _ := a.im.CheckMarkerChanged()
-	if changed {
-		// Download remote index (2 GETs) instead of walking all directories
+	// Sync from remote if store is empty or marker has changed
+	needsSync := store.IsEmpty()
+	if !needsSync {
+		changed, _ := a.im.CheckMarkerChanged()
+		needsSync = changed
+	}
+	if needsSync {
 		if err := a.im.SyncFromRemoteIndex(); err != nil {
-			// Index file missing or corrupt — fall back to full rebuild
-			if err := a.im.RebuildIndex(nil); err != nil {
-				// Rebuild also failed — fall back to legacy walk
+			if store.IsEmpty() {
 				return a.filterNotUploadedLegacy(stream)
 			}
 		}

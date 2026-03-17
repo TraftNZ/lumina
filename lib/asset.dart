@@ -55,10 +55,12 @@ class Asset extends ImageProvider<Asset> {
 
   bool get isCloudOnly => hasRemote && !hasLocal;
 
-  static final _timestampPrefixRe = RegExp(r'^\d{14}_');
+  static final _timestampPrefixRe = RegExp(r'^\d{14}_([a-f0-9]{16}_)?');
 
   /// Returns the original filename, stripping the server-added timestamp prefix
-  /// from remote filenames (e.g., `20260213090431_IMG.jpg` → `IMG.jpg`).
+  /// (and optional content-hash segment) from remote filenames.
+  /// e.g. `20260213090431_IMG.jpg` → `IMG.jpg`
+  /// e.g. `20260213090431_abcdef0123456789_IMG.jpg` → `IMG.jpg`
   String? get originalName {
     if (hasLocal) return name();
     if (hasRemote) {
