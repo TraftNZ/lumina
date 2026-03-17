@@ -286,11 +286,13 @@ class FilterNotUploadedRequestInfo extends $pb.GeneratedMessage {
     $core.String? name,
     $core.String? date,
     $core.String? id,
+    $core.String? contentHash,
   }) {
     final result = create();
     if (name != null) result.name = name;
     if (date != null) result.date = date;
     if (id != null) result.id = id;
+    if (contentHash != null) result.contentHash = contentHash;
     return result;
   }
 
@@ -310,6 +312,7 @@ class FilterNotUploadedRequestInfo extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'name')
     ..aOS(2, _omitFieldNames ? '' : 'date')
     ..aOS(3, _omitFieldNames ? '' : 'id')
+    ..aOS(4, _omitFieldNames ? '' : 'contentHash')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -360,6 +363,15 @@ class FilterNotUploadedRequestInfo extends $pb.GeneratedMessage {
   $core.bool hasId() => $_has(2);
   @$pb.TagNumber(3)
   void clearId() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get contentHash => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set contentHash($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasContentHash() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearContentHash() => $_clearField(4);
 }
 
 class FilterNotUploadedRequest extends $pb.GeneratedMessage {

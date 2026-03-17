@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const defaultMaxCache = 500 * 1024 * 1024 // 500MB
@@ -38,6 +40,7 @@ type indexData struct {
 	Thumbs         map[string]thumbEntry // key: path
 	LastFullIndex  int64
 	LastSeenMarker string // remote .sync_marker value at last rebuild
+	ClientID       string // unique identifier for this device
 }
 
 type LocalStore struct {
@@ -100,8 +103,13 @@ func (s *LocalStore) SwitchDrive(configHash string) error {
 		}
 		f.Close()
 	}
+	// Generate a stable client ID for this device+drive combination
+	if s.data.ClientID == "" {
+		s.data.ClientID = uuid.New().String()
+		s.saveLocked()
+	}
 	s.initialized = true
-	s.logger.Printf("Switched to drive store: %s (%d photos indexed)", s.dataFile, len(s.data.Photos))
+	s.logger.Printf("Switched to drive store: %s (%d photos indexed, clientID=%s)", s.dataFile, len(s.data.Photos), s.data.ClientID)
 	return nil
 }
 
@@ -139,6 +147,12 @@ func (s *LocalStore) Close() error {
 		s.saveLocked()
 	}
 	return nil
+}
+
+func (s *LocalStore) GetClientID() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.data.ClientID
 }
 
 func (s *LocalStore) ThumbDir() string {

@@ -101,23 +101,43 @@ func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error 
 			}
 			return err
 		}
-		filenames := make([]string, 0, len(r.Photos))
-		infoMap := make(map[string]string) // encodedName -> assetId
+		// Collect all candidate filenames per asset for batch lookup
+		type candidate struct {
+			assetID   string
+			filenames []string
+		}
+		candidates := make([]candidate, 0, len(r.Photos))
+		allFilenames := make([]string, 0, len(r.Photos)*3)
 		for _, info := range r.Photos {
 			t, err := time.Parse("2006:01:02 15:04:05", info.Date)
 			if err != nil {
 				continue
 			}
-			encoded := encodeName(t, info.Name)
-			filenames = append(filenames, encoded)
-			infoMap[encoded] = info.Id
+			var names []string
+			if info.ContentHash != "" {
+				names = append(names, encodeName(t, info.Name, info.ContentHash))
+			}
+			// Also check legacy formats for backwards compat
+			names = append(names, encodeName(t, info.Name, ""))
+			names = append(names, legacyEncodeName(t, info.Name))
+			// Also check raw filename (for manually uploaded files)
+			names = append(names, info.Name)
+			allFilenames = append(allFilenames, names...)
+			candidates = append(candidates, candidate{assetID: info.Id, filenames: names})
 		}
-		exists := store.BatchExistsByFilename(filenames)
+		exists := store.BatchExistsByFilename(allFilenames)
 		rsp := &pb.FilterNotUploadedResponse{Success: true, IsFinished: r.IsFinished}
 		rsp.NotUploaedIDs = make([]string, 0)
-		for _, name := range filenames {
-			if !exists[name] {
-				rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, infoMap[name])
+		for _, c := range candidates {
+			found := false
+			for _, name := range c.filenames {
+				if exists[name] {
+					found = true
+					break
+				}
+			}
+			if !found {
+				rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, c.assetID)
 			}
 		}
 		if err := stream.Send(rsp); err != nil {
@@ -152,7 +172,21 @@ func (a *api) filterNotUploadedLegacy(stream pb.Lumina_FilterNotUploadedServer) 
 			if err != nil {
 				continue
 			}
-			if !all[encodeName(t, info.Name)] {
+			// Check new format (with hash), new format (without hash), legacy 12-hour, and raw filename
+			found := false
+			if info.ContentHash != "" {
+				found = all[encodeName(t, info.Name, info.ContentHash)]
+			}
+			if !found {
+				found = all[encodeName(t, info.Name, "")]
+			}
+			if !found {
+				found = all[legacyEncodeName(t, info.Name)]
+			}
+			if !found {
+				found = all[info.Name]
+			}
+			if !found {
 				rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, info.Id)
 			}
 		}

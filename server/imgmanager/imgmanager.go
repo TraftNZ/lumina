@@ -30,8 +30,9 @@ const (
 	defaultTrashDir           = ".trash"
 	defaultLockedDir           = ".locked"
 	trashAutoDeleteDays       = 30
-	syncMarkerFile            = ".sync_marker"
-	syncIndexFile             = ".sync_index"
+	syncMarkerFile  = ".sync_marker"
+	syncIndexPrefix = ".sync_index."
+	syncIndexLegacy = ".sync_index"
 )
 
 type TrashItem struct {
@@ -491,37 +492,30 @@ func (im *ImgManager) DebouncedWriteSyncState() {
 	if im.syncDebounce != nil {
 		im.syncDebounce.Stop()
 	}
-	im.syncDebounce = time.AfterFunc(2*time.Second, func() {
+	im.syncDebounce = time.AfterFunc(500*time.Millisecond, func() {
 		im.WriteSyncState()
 	})
 }
 
-// WriteSyncState uploads both the index and marker to remote storage.
-// Called async after mutations so other devices can download the index
-// instead of walking all directories.
-// It merges with the existing remote index first so concurrent uploads
-// from different devices don't overwrite each other's entries.
+// WriteSyncState uploads this client's index and the marker to remote storage.
+// Each client writes its own index file (.sync_index.<clientID>) so concurrent
+// uploads from different devices never overwrite each other.
 func (im *ImgManager) WriteSyncState() {
 	if im.store == nil {
 		return
 	}
-	// Download existing remote index and merge into local before exporting,
-	// so we don't lose entries added by other devices
-	rc, _, err := im.dri.Download(syncIndexFile)
-	if err == nil {
-		data, readErr := io.ReadAll(rc)
-		rc.Close()
-		if readErr == nil {
-			im.store.MergeIndex(data)
-		}
+	clientID := im.store.GetClientID()
+	if clientID == "" {
+		im.logger.Printf("WriteSyncState: no client ID, skipping")
+		return
 	}
-	// Upload merged index, then marker
 	indexData, err := im.store.ExportIndex()
 	if err != nil {
 		im.logger.Printf("Failed to export index: %v", err)
 		return
 	}
-	err = im.dri.Upload(syncIndexFile,
+	indexFile := syncIndexPrefix + clientID
+	err = im.dri.Upload(indexFile,
 		io.NopCloser(bytes.NewReader(indexData)),
 		int64(len(indexData)), time.Time{})
 	if err != nil {
@@ -540,6 +534,41 @@ func (im *ImgManager) WriteSyncState() {
 		return
 	}
 	im.store.SetLastSeenMarker(marker)
+}
+
+// ReadAllRemoteIndexFiles reads all per-client index files (and the legacy
+// single index file if present) from remote storage.
+func (im *ImgManager) ReadAllRemoteIndexFiles() ([][]byte, error) {
+	var blobs [][]byte
+	// List root directory for index files
+	err := im.dri.Range(".", func(info fs.FileInfo) bool {
+		name := info.Name()
+		if info.IsDir() {
+			return true
+		}
+		isPerClient := strings.HasPrefix(name, syncIndexPrefix)
+		isLegacy := name == syncIndexLegacy
+		if !isPerClient && !isLegacy {
+			return true
+		}
+		rc, _, err := im.dri.Download(name)
+		if err != nil {
+			im.logger.Printf("Failed to download index file %s: %v", name, err)
+			return true
+		}
+		data, err := io.ReadAll(rc)
+		rc.Close()
+		if err != nil {
+			im.logger.Printf("Failed to read index file %s: %v", name, err)
+			return true
+		}
+		blobs = append(blobs, data)
+		return true
+	})
+	if err != nil {
+		return nil, fmt.Errorf("list root for index files: %w", err)
+	}
+	return blobs, nil
 }
 
 func (im *ImgManager) ReadSyncMarker() (string, error) {
@@ -570,23 +599,21 @@ func (im *ImgManager) CheckMarkerChanged() (bool, error) {
 	return remote != local, nil
 }
 
-// SyncFromRemoteIndex downloads the remote index file and imports it.
-// Cost: 2 GETs (marker + index) instead of walking all directories.
+// SyncFromRemoteIndex downloads all per-client remote index files, merges
+// them into the local store. Cost: 1 Range + N GETs instead of walking all directories.
 func (im *ImgManager) SyncFromRemoteIndex() error {
 	if im.store == nil {
 		return fmt.Errorf("local store not available")
 	}
-	rc, _, err := im.dri.Download(syncIndexFile)
+	blobs, err := im.ReadAllRemoteIndexFiles()
 	if err != nil {
-		return fmt.Errorf("download sync index: %w", err)
+		return fmt.Errorf("read remote index files: %w", err)
 	}
-	defer rc.Close()
-	data, err := io.ReadAll(rc)
-	if err != nil {
-		return fmt.Errorf("read sync index: %w", err)
+	if len(blobs) == 0 {
+		return fmt.Errorf("no remote index files found")
 	}
-	if err := im.store.ImportIndex(data); err != nil {
-		return fmt.Errorf("import index: %w", err)
+	for _, data := range blobs {
+		im.store.MergeIndex(data)
 	}
 	// Snapshot the current marker so we don't re-download next time
 	if marker, err := im.ReadSyncMarker(); err == nil {

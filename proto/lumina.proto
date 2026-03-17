@@ -70,6 +70,7 @@ message FilterNotUploadedRequestInfo {
   string name = 1;
   string date = 2;
   string id = 3;
+  string content_hash = 4;
 }
 
 message FilterNotUploadedRequest {

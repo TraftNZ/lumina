@@ -2,6 +2,8 @@ package api
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log"
@@ -53,17 +55,33 @@ func (a *api) httpUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	date := r.Header.Get("Image-Date")
-	length := r.ContentLength
-	var err error
 	dateTime, err := time.Parse("2006:01:02 15:04:05", date)
 	if err != nil {
 		dateTime = time.Now()
 	}
 	name := strings.TrimPrefix(path, "/")
+	// Use client-provided hash or compute from body
+	contentHash := r.Header.Get("Content-Hash")
+	var body io.Reader = r.Body
+	length := r.ContentLength
+	if contentHash == "" {
+		// Must buffer to compute hash
+		data, readErr := io.ReadAll(r.Body)
+		if readErr != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(readErr.Error()))
+			return
+		}
+		h := sha256.Sum256(data)
+		contentHash = hex.EncodeToString(h[:])
+		body = bytes.NewReader(data)
+		length = int64(len(data))
+	}
+	encoded := encodeName(dateTime, name, contentHash)
 	if isVideo(path) {
-		err = a.im.UploadVideo(r.Body, nil, length, 0, encodeName(dateTime, name), dateTime)
+		err = a.im.UploadVideo(body, nil, length, 0, encoded, dateTime)
 	} else {
-		err = a.im.UploadImg(r.Body, nil, length, 0, encodeName(dateTime, name), dateTime)
+		err = a.im.UploadImg(body, nil, length, 0, encoded, dateTime)
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -86,7 +104,6 @@ func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
 	}
 	name := strings.TrimPrefix(path, "/thumbnail/")
 	date := r.Header.Get("Image-Date")
-	length := r.ContentLength
 	dateTime, err := time.Parse("2006:01:02 15:04:05", date)
 	if err != nil {
 		dateTime = time.Now()
@@ -98,8 +115,9 @@ func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	_ = length
-	encodedName := encodeName(dateTime, name)
+	// Use Content-Hash from original photo (passed by client)
+	contentHash := r.Header.Get("Content-Hash")
+	encodedName := encodeName(dateTime, name, contentHash)
 	err = a.im.UploadImg(nil, bytes.NewReader(thumbData), 0, int64(len(thumbData)), encodedName, dateTime)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -263,19 +281,44 @@ func (a *api) httpDownloadLockedThumbnail(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func encodeName(time time.Time, name string) string {
-	return fmt.Sprintf("%s_%s", time.Format("20060102030405"), name)
+// encodeName builds a filename with 24-hour timestamp + content hash prefix + original name.
+// Format: YYYYMMDDHHmmss_<hash16>_<name>
+func encodeName(t time.Time, name string, contentHash string) string {
+	if contentHash != "" && len(contentHash) >= 16 {
+		return fmt.Sprintf("%s_%s_%s", t.Format("20060102150405"), contentHash[:16], name)
+	}
+	// Fallback when no hash available: use 24-hour format without hash segment
+	return fmt.Sprintf("%s_%s", t.Format("20060102150405"), name)
+}
+
+// legacyEncodeName preserves the old format (12-hour clock, no hash) for backwards compat lookups.
+func legacyEncodeName(t time.Time, name string) string {
+	return fmt.Sprintf("%s_%s", t.Format("20060102030405"), name)
 }
 
 func decodeName(encoded string) (time.Time, string, error) {
+	parts := strings.SplitN(encoded, "_", 3)
+	if len(parts) == 3 && len(parts[0]) == 14 && len(parts[1]) == 16 {
+		// New format: timestamp_hash16_name
+		t, err := time.Parse("20060102150405", parts[0])
+		if err != nil {
+			return time.Time{}, "", err
+		}
+		return t, parts[2], nil
+	}
+	// Legacy format: timestamp_name (12-hour or 24-hour)
 	if len(encoded) < 15 {
 		return time.Time{}, "", fmt.Errorf("invalid encoded name")
 	}
 	timeStr := encoded[:14]
 	name := encoded[15:]
-	t, err := time.Parse("20060102030405", timeStr)
+	t, err := time.Parse("20060102150405", timeStr)
 	if err != nil {
-		return time.Time{}, "", err
+		// Try legacy 12-hour format
+		t, err = time.Parse("20060102030405", timeStr)
+		if err != nil {
+			return time.Time{}, "", err
+		}
 	}
 	return t, name, nil
 }

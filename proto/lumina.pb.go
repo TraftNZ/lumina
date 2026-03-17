@@ -242,6 +242,7 @@ type FilterNotUploadedRequestInfo struct {
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	Id            string                 `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	ContentHash   string                 `protobuf:"bytes,4,opt,name=content_hash,json=contentHash,proto3" json:"content_hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -293,6 +294,13 @@ func (x *FilterNotUploadedRequestInfo) GetDate() string {
 func (x *FilterNotUploadedRequestInfo) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *FilterNotUploadedRequestInfo) GetContentHash() string {
+	if x != nil {
+		return x.ContentHash
 	}
 	return ""
 }
@@ -3106,11 +3114,12 @@ const file_proto_lumina_proto_rawDesc = "" +
 	"\x05paths\x18\x01 \x03(\tR\x05paths\"D\n" +
 	"\x0eDeleteResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"V\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"y\n" +
 	"\x1cFilterNotUploadedRequestInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04date\x18\x02 \x01(\tR\x04date\x12\x0e\n" +
-	"\x02id\x18\x03 \x01(\tR\x02id\"x\n" +
+	"\x02id\x18\x03 \x01(\tR\x02id\x12!\n" +
+	"\fcontent_hash\x18\x04 \x01(\tR\vcontentHash\"x\n" +
 	"\x18FilterNotUploadedRequest\x12<\n" +
 	"\x06photos\x18\x01 \x03(\v2$.lumina.FilterNotUploadedRequestInfoR\x06photos\x12\x1e\n" +
 	"\n" +

@@ -7,6 +7,7 @@ import 'package:lumina/asset.dart';
 import 'dart:async';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/storage/storage.dart';
+import 'package:lumina/storage/hash_cache.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
@@ -587,9 +588,17 @@ Future<FilterNotUploadedRequestInfo> _createFilterNotUploadedRequestInfo(
   final dateStr =
       formatDate(date, [yyyy, ':', mm, ':', dd, ' ', HH, ':', nn, ':', ss]);
   var name = await asset.titleAsync;
+  // Compute content hash (with cache) for dedup
+  String contentHash = '';
+  try {
+    contentHash = await HashCache.instance.getHash(asset);
+  } catch (_) {
+    // If hashing fails, proceed without hash — server will fall back to name match
+  }
   return FilterNotUploadedRequestInfo(
     id: asset.id,
     name: name,
     date: dateStr,
+    contentHash: contentHash,
   );
 }

@@ -78,6 +78,7 @@ const FilterNotUploadedRequestInfo$json = {
     {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
     {'1': 'date', '3': 2, '4': 1, '5': 9, '10': 'date'},
     {'1': 'id', '3': 3, '4': 1, '5': 9, '10': 'id'},
+    {'1': 'content_hash', '3': 4, '4': 1, '5': 9, '10': 'contentHash'},
   ],
 };
 
@@ -85,7 +86,8 @@ const FilterNotUploadedRequestInfo$json = {
 final $typed_data.Uint8List filterNotUploadedRequestInfoDescriptor =
     $convert.base64Decode(
         'ChxGaWx0ZXJOb3RVcGxvYWRlZFJlcXVlc3RJbmZvEhIKBG5hbWUYASABKAlSBG5hbWUSEgoEZG'
-        'F0ZRgCIAEoCVIEZGF0ZRIOCgJpZBgDIAEoCVICaWQ=');
+        'F0ZRgCIAEoCVIEZGF0ZRIOCgJpZBgDIAEoCVICaWQSIQoMY29udGVudF9oYXNoGAQgASgJUgtj'
+        'b250ZW50SGFzaA==');
 
 @$core.Deprecated('Use filterNotUploadedRequestDescriptor instead')
 const FilterNotUploadedRequest$json = {

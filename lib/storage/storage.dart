@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 import 'package:grpc/grpc.dart';
 import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:date_format/date_format.dart';
 import 'package:lumina/state_model.dart';
+import 'package:lumina/storage/hash_cache.dart';
 import 'package:path/path.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -51,12 +53,15 @@ class RemoteStorage {
       minHeight: thumbnailSize,
       quality: 90,
     );
+    // Compute SHA-256 of file content for dedup
+    final fileBytes = await file.readAsBytes();
+    final contentHash = sha256.convert(fileBytes).toString();
     int uploaded = 0;
-    final imgLen = await file.length();
-    // final thumbLen = thumbnailData!.length;
+    final imgLen = fileBytes.length;
     final totalLen = imgLen;
     var req = http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
     req.headers['Image-Date'] = dateStr;
+    req.headers['Content-Hash'] = contentHash;
     req.contentLength = imgLen;
     file.openRead().listen((chunk) {
       uploaded += chunk.length;
@@ -73,6 +78,7 @@ class RemoteStorage {
       body: thumbnailData,
       headers: {
         'Image-Date': dateStr,
+        'Content-Hash': contentHash,
       },
     );
     if (thumbRsp.statusCode != 200) {
@@ -87,7 +93,6 @@ class RemoteStorage {
       throw Exception("asset file is null");
     }
     final name = await asset.titleAsync;
-    // print("upload $name");
     var date = asset.createDateTime;
     if (date.isBefore(DateTime(1990, 1, 1))) {
       date = asset.modifiedDateTime;
@@ -103,6 +108,8 @@ class RemoteStorage {
     if (thumbnailData == null) {
       throw Exception("asset thumbnail is null");
     }
+    // Compute SHA-256 of file content for dedup
+    final contentHash = await HashCache.instance.getHash(asset);
     int uploaded = 0;
     final imgLen = await file.length();
     final thumbLen = thumbnailData!.length;
@@ -114,6 +121,7 @@ class RemoteStorage {
       body: thumbnailData,
       headers: {
         'Image-Date': dateStr,
+        'Content-Hash': contentHash,
       },
     );
     stateModel.updateUploadProgress(asset.id, uploaded + thumbLen, totalLen);
@@ -133,6 +141,7 @@ class RemoteStorage {
         var req =
             http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
         req.headers['Image-Date'] = dateStr;
+        req.headers['Content-Hash'] = contentHash;
         req.contentLength = await retryFile.length();
         retryFile.openRead().listen((chunk) {
           uploaded += chunk.length;
