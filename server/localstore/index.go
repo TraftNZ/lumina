@@ -3,223 +3,19 @@ package localstore
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
-func (s *LocalStore) IndexPhoto(path string, filename string, size int64) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return fmt.Errorf("store not initialized")
-	}
-	_, err := s.db.Exec(
-		`INSERT OR REPLACE INTO photos(path,filename,size,indexed_at) VALUES(?,?,?,?)`,
-		path, filename, size, time.Now().Unix())
-	return err
-}
-
-func (s *LocalStore) RemovePhoto(path string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return fmt.Errorf("store not initialized")
-	}
-	_, err := s.db.Exec(`DELETE FROM photos WHERE path=?`, path)
-	return err
-}
-
-func (s *LocalStore) PhotoExistsByFilename(filename string) bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return false
-	}
-	var n int
-	err := s.db.QueryRow(`SELECT 1 FROM photos WHERE filename=? LIMIT 1`, filename).Scan(&n)
-	return err == nil
-}
-
-func (s *LocalStore) BatchExistsByFilename(filenames []string) map[string]bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	result := make(map[string]bool, len(filenames))
-	if !s.initialized {
-		return result
-	}
-	stmt, err := s.db.Prepare(`SELECT 1 FROM photos WHERE filename=? LIMIT 1`)
-	if err != nil {
-		return result
-	}
-	defer stmt.Close()
-	for _, f := range filenames {
-		var n int
-		if stmt.QueryRow(f).Scan(&n) == nil {
-			result[f] = true
-		}
-	}
-	return result
-}
-
-// ListPhotos returns photo paths sorted by date descending (newest first),
-// filtered to paths with date <= beforeDate, with offset/limit pagination.
-func (s *LocalStore) ListPhotos(beforeDate time.Time, offset, limit int) []string {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return nil
-	}
-	cutoff := beforeDate.Format("2006/01/02")
-	rows, err := s.db.Query(
-		`SELECT path FROM photos WHERE substr(path,1,10) <= ? ORDER BY path DESC LIMIT ? OFFSET ?`,
-		cutoff, limit, offset)
-	if err != nil {
-		return nil
-	}
-	defer rows.Close()
-	var paths []string
-	for rows.Next() {
-		var p string
-		if rows.Scan(&p) == nil {
-			paths = append(paths, p)
-		}
-	}
-	return paths
-}
-
-func (s *LocalStore) IsEmpty() bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return true
-	}
-	var n int
-	err := s.db.QueryRow(`SELECT 1 FROM photos LIMIT 1`).Scan(&n)
-	return err != nil
-}
-
-func (s *LocalStore) PhotoCount() int64 {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return 0
-	}
-	return s.photoCountLocked()
-}
-
-func (s *LocalStore) RebuildFromRemote(
-	walkFn func(cb func(path string, filename string, size int64) bool) error,
-	progressCb func(found int),
-) error {
-	s.mu.Lock()
-	if !s.initialized {
-		s.mu.Unlock()
-		return fmt.Errorf("store not initialized")
-	}
-
-	// Clear existing photos
-	if _, err := s.db.Exec(`DELETE FROM photos`); err != nil {
-		s.mu.Unlock()
-		return fmt.Errorf("clear photos: %w", err)
-	}
-	s.mu.Unlock()
-
-	now := time.Now().Unix()
-	count := 0
-	const batchSize = 1000
-
-	// Collect entries in batches
-	type entry struct {
-		path, filename string
-		size           int64
-	}
-	batch := make([]entry, 0, batchSize)
-
-	flushBatch := func() error {
-		if len(batch) == 0 {
-			return nil
-		}
-		s.mu.Lock()
-		defer s.mu.Unlock()
-		tx, err := s.db.Begin()
-		if err != nil {
-			return err
-		}
-		defer tx.Rollback()
-		stmt, err := tx.Prepare(`INSERT INTO photos(path,filename,size,indexed_at) VALUES(?,?,?,?)`)
-		if err != nil {
-			return err
-		}
-		defer stmt.Close()
-		for _, e := range batch {
-			if _, err := stmt.Exec(e.path, e.filename, e.size, now); err != nil {
-				return err
-			}
-		}
-		return tx.Commit()
-	}
-
-	err := walkFn(func(path string, filename string, size int64) bool {
-		batch = append(batch, entry{path, filename, size})
-		count++
-		if len(batch) >= batchSize {
-			if err := flushBatch(); err != nil {
-				return false
-			}
-			batch = batch[:0]
-			if progressCb != nil {
-				progressCb(count)
-			}
-		}
-		return true
-	})
-	if err != nil {
-		return err
-	}
-
-	// Flush remaining
-	if err := flushBatch(); err != nil {
-		return err
-	}
-
-	if progressCb != nil {
-		progressCb(count)
-	}
-
-	s.mu.Lock()
-	s.setMeta("last_full_index", fmt.Sprintf("%d", time.Now().Unix()))
-	s.mu.Unlock()
-
-	s.logger.Printf("RebuildFromRemote complete: %d photos indexed", count)
-	return nil
-}
-
-func (s *LocalStore) LastIndexTimestamp() int64 {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.initialized {
-		return 0
-	}
-	return s.getMetaInt64("last_full_index")
-}
-
-// UpdateLabels sets ML labels for a photo that's already indexed.
+// UpdateLabels upserts ML labels for a photo path.
 func (s *LocalStore) UpdateLabels(path string, labels []string, faceIDs []string, text string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !s.initialized {
 		return fmt.Errorf("store not initialized")
 	}
-	result, err := s.db.Exec(
-		`UPDATE photos SET labels=?, face_ids=?, text=? WHERE path=?`,
-		encodeStringSlice(labels), encodeStringSlice(faceIDs), text, path)
-	if err != nil {
-		return err
-	}
-	n, _ := result.RowsAffected()
-	if n == 0 {
-		return fmt.Errorf("photo not found: %s", path)
-	}
-	return nil
+	_, err := s.db.Exec(
+		`INSERT OR REPLACE INTO ml_results(path,labels,face_ids,text) VALUES(?,?,?,?)`,
+		path, encodeStringSlice(labels), encodeStringSlice(faceIDs), text)
+	return err
 }
 
 // LabelSummary holds the count and a sample path for a label.
@@ -236,7 +32,7 @@ type LabelSummaryResult struct {
 	FaceSample string
 }
 
-// GetLabelSummary scans all photos and returns per-label counts with a sample path, plus face stats.
+// GetLabelSummary scans all ML results and returns per-label counts with a sample path, plus face stats.
 func (s *LocalStore) GetLabelSummary() LabelSummaryResult {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -245,7 +41,7 @@ func (s *LocalStore) GetLabelSummary() LabelSummaryResult {
 		return result
 	}
 
-	rows, err := s.db.Query(`SELECT path, labels, face_ids FROM photos WHERE labels != '[]' OR face_ids != '[]'`)
+	rows, err := s.db.Query(`SELECT path, labels, face_ids FROM ml_results WHERE labels != '[]' OR face_ids != '[]'`)
 	if err != nil {
 		return result
 	}
@@ -290,8 +86,7 @@ func (s *LocalStore) GetLabelSummary() LabelSummaryResult {
 	return result
 }
 
-// SearchLabels returns paths whose labels or text contain any of the query terms (case-insensitive substring match).
-// Special query "_faces" returns all photos with detected faces.
+// SearchLabels returns paths whose labels or text contain any of the query terms.
 func (s *LocalStore) SearchLabels(query string) []string {
 	if query == "" {
 		return nil
@@ -303,7 +98,7 @@ func (s *LocalStore) SearchLabels(query string) []string {
 	}
 
 	if query == "_faces" {
-		rows, err := s.db.Query(`SELECT path FROM photos WHERE face_ids != '[]'`)
+		rows, err := s.db.Query(`SELECT path FROM ml_results WHERE face_ids != '[]'`)
 		if err != nil {
 			return nil
 		}
@@ -320,9 +115,11 @@ func (s *LocalStore) SearchLabels(query string) []string {
 
 	queryLower := strings.ToLower(query)
 	queryTerms := strings.Fields(queryLower)
+	if len(queryTerms) == 0 {
+		return nil
+	}
 
-	// Use SQL LIKE for initial filtering, then Go-side post-filter for exact match
-	rows, err := s.db.Query(`SELECT path, labels, text FROM photos WHERE labels LIKE '%' || ? || '%' OR text LIKE '%' || ? || '%'`,
+	rows, err := s.db.Query(`SELECT path, labels, text FROM ml_results WHERE labels LIKE '%' || ? || '%' OR text LIKE '%' || ? || '%'`,
 		queryTerms[0], queryTerms[0])
 	if err != nil {
 		return nil
@@ -372,21 +169,16 @@ func (s *LocalStore) SearchLabels(query string) []string {
 	return results
 }
 
-// GetUnlabeledPaths returns paths that have no ML labels yet and have cached thumbnails (for batch indexing).
-// Only photos with locally cached thumbnails are returned, since ML indexing needs the thumbnail
-// and downloading full images from remote storage on-the-fly is too expensive.
+// GetUnlabeledPaths returns paths from the provided set that lack ML results.
 func (s *LocalStore) GetUnlabeledPaths(limit int) []string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !s.initialized {
 		return nil
 	}
+	// Return paths that have ml_results but no labels yet
 	rows, err := s.db.Query(
-		`SELECT p.path FROM photos p
-		 WHERE p.labels='[]' AND p.text=''
-		 AND (EXISTS(SELECT 1 FROM thumbs t WHERE t.path = p.path)
-		   OR EXISTS(SELECT 1 FROM thumbs t WHERE t.path = '/' || p.path))
-		 LIMIT ?`, limit)
+		`SELECT path FROM ml_results WHERE labels='[]' AND text='' LIMIT ?`, limit)
 	if err != nil {
 		return nil
 	}

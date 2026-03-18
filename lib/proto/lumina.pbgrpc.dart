@@ -178,30 +178,6 @@ class LuminaClient extends $grpc.Client {
     return $createUnaryCall(_$restoreFromLocked, request, options: options);
   }
 
-  /// Index management
-  $grpc.ResponseStream<$0.RebuildIndexResponse> rebuildIndex(
-    $0.RebuildIndexRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createStreamingCall(
-        _$rebuildIndex, $async.Stream.fromIterable([request]),
-        options: options);
-  }
-
-  $grpc.ResponseFuture<$0.GetIndexStatsResponse> getIndexStats(
-    $0.GetIndexStatsRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getIndexStats, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$0.ClearThumbnailCacheResponse> clearThumbnailCache(
-    $0.ClearThumbnailCacheRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$clearThumbnailCache, request, options: options);
-  }
-
   /// ML Photo Search
   $grpc.ResponseFuture<$0.UpdatePhotoLabelsResponse> updatePhotoLabels(
     $0.UpdatePhotoLabelsRequest request, {
@@ -333,21 +309,6 @@ class LuminaClient extends $grpc.Client {
       '/lumina.Lumina/RestoreFromLocked',
       ($0.RestoreFromLockedRequest value) => value.writeToBuffer(),
       $0.RestoreFromLockedResponse.fromBuffer);
-  static final _$rebuildIndex =
-      $grpc.ClientMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
-          '/lumina.Lumina/RebuildIndex',
-          ($0.RebuildIndexRequest value) => value.writeToBuffer(),
-          $0.RebuildIndexResponse.fromBuffer);
-  static final _$getIndexStats =
-      $grpc.ClientMethod<$0.GetIndexStatsRequest, $0.GetIndexStatsResponse>(
-          '/lumina.Lumina/GetIndexStats',
-          ($0.GetIndexStatsRequest value) => value.writeToBuffer(),
-          $0.GetIndexStatsResponse.fromBuffer);
-  static final _$clearThumbnailCache = $grpc.ClientMethod<
-          $0.ClearThumbnailCacheRequest, $0.ClearThumbnailCacheResponse>(
-      '/lumina.Lumina/ClearThumbnailCache',
-      ($0.ClearThumbnailCacheRequest value) => value.writeToBuffer(),
-      $0.ClearThumbnailCacheResponse.fromBuffer);
   static final _$updatePhotoLabels = $grpc.ClientMethod<
           $0.UpdatePhotoLabelsRequest, $0.UpdatePhotoLabelsResponse>(
       '/lumina.Lumina/UpdatePhotoLabels',
@@ -543,33 +504,6 @@ abstract class LuminaServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.RestoreFromLockedRequest.fromBuffer(value),
         ($0.RestoreFromLockedResponse value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$0.RebuildIndexRequest, $0.RebuildIndexResponse>(
-            'RebuildIndex',
-            rebuildIndex_Pre,
-            false,
-            true,
-            ($core.List<$core.int> value) =>
-                $0.RebuildIndexRequest.fromBuffer(value),
-            ($0.RebuildIndexResponse value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$0.GetIndexStatsRequest, $0.GetIndexStatsResponse>(
-            'GetIndexStats',
-            getIndexStats_Pre,
-            false,
-            false,
-            ($core.List<$core.int> value) =>
-                $0.GetIndexStatsRequest.fromBuffer(value),
-            ($0.GetIndexStatsResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.ClearThumbnailCacheRequest,
-            $0.ClearThumbnailCacheResponse>(
-        'ClearThumbnailCache',
-        clearThumbnailCache_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $0.ClearThumbnailCacheRequest.fromBuffer(value),
-        ($0.ClearThumbnailCacheResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.UpdatePhotoLabelsRequest,
             $0.UpdatePhotoLabelsResponse>(
         'UpdatePhotoLabels',
@@ -773,33 +707,6 @@ abstract class LuminaServiceBase extends $grpc.Service {
 
   $async.Future<$0.RestoreFromLockedResponse> restoreFromLocked(
       $grpc.ServiceCall call, $0.RestoreFromLockedRequest request);
-
-  $async.Stream<$0.RebuildIndexResponse> rebuildIndex_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$0.RebuildIndexRequest> $request) async* {
-    yield* rebuildIndex($call, await $request);
-  }
-
-  $async.Stream<$0.RebuildIndexResponse> rebuildIndex(
-      $grpc.ServiceCall call, $0.RebuildIndexRequest request);
-
-  $async.Future<$0.GetIndexStatsResponse> getIndexStats_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$0.GetIndexStatsRequest> $request) async {
-    return getIndexStats($call, await $request);
-  }
-
-  $async.Future<$0.GetIndexStatsResponse> getIndexStats(
-      $grpc.ServiceCall call, $0.GetIndexStatsRequest request);
-
-  $async.Future<$0.ClearThumbnailCacheResponse> clearThumbnailCache_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$0.ClearThumbnailCacheRequest> $request) async {
-    return clearThumbnailCache($call, await $request);
-  }
-
-  $async.Future<$0.ClearThumbnailCacheResponse> clearThumbnailCache(
-      $grpc.ServiceCall call, $0.ClearThumbnailCacheRequest request);
 
   $async.Future<$0.UpdatePhotoLabelsResponse> updatePhotoLabels_Pre(
       $grpc.ServiceCall $call,

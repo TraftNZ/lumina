@@ -20,7 +20,7 @@ func (a *api) SetDriveSMB(ctx context.Context, req *pb.SetDriveSMBRequest) (rsp 
 		req.Addr = req.Addr + ":445"
 	}
 	_, e := net.Dial("tcp", req.Addr)
-	if err != nil {
+	if e != nil {
 		rsp.Success, rsp.Message = false, fmt.Sprintf("connect to %s failed: %s", req.Addr, e.Error())
 		return
 	}

@@ -11,9 +11,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/global.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:lumina/util.dart';
-import 'package:lumina/thumbnail_cache.dart';
 
 RemoteStorage storage = RemoteStorage("127.0.0.1", 10000);
 
@@ -43,28 +41,13 @@ class RemoteStorage {
     final date = await file.lastModified();
     final dateStr =
         formatDate(date, [yyyy, ':', mm, ':', dd, ' ', HH, ':', nn, ':', ss]);
-    var thumbnailSize = 200;
-    if (isVideoByPath(file.path)) {
-      thumbnailSize = 800;
-    }
-    var thumbnailData = await FlutterImageCompress.compressWithFile(
-      file.path,
-      minWidth: thumbnailSize,
-      minHeight: thumbnailSize,
-      quality: 90,
-    );
-    // Compute SHA-256 of file content for dedup
     final fileBytes = await file.readAsBytes();
     final contentHash = sha256.convert(fileBytes).toString();
-    int uploaded = 0;
-    final imgLen = fileBytes.length;
-    final totalLen = imgLen;
     var req = http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
     req.headers['Image-Date'] = dateStr;
     req.headers['Content-Hash'] = contentHash;
-    req.contentLength = imgLen;
+    req.contentLength = fileBytes.length;
     file.openRead().listen((chunk) {
-      uploaded += chunk.length;
       req.sink.add(chunk);
     }, onDone: () {
       req.sink.close();
@@ -72,17 +55,6 @@ class RemoteStorage {
     final response = await req.send();
     if (response.statusCode != 200) {
       throw Exception("upload failed: ${response.statusCode}");
-    }
-    final thumbRsp = await http.post(
-      Uri.parse("$httpBaseUrl/thumbnail/$name"),
-      body: thumbnailData,
-      headers: {
-        'Image-Date': dateStr,
-        'Content-Hash': contentHash,
-      },
-    );
-    if (thumbRsp.statusCode != 200) {
-      throw Exception("upload thumbnail failed: ${thumbRsp.statusCode}");
     }
   }
 
@@ -99,36 +71,9 @@ class RemoteStorage {
     }
     final dateStr =
         formatDate(date, [yyyy, ':', mm, ':', dd, ' ', HH, ':', nn, ':', ss]);
-    var thumbnailSize = const ThumbnailSize.square(200);
-    if (asset.type == AssetType.video) {
-      thumbnailSize = const ThumbnailSize.square(800);
-    }
-    final thumbnailData =
-        await asset.thumbnailDataWithSize(thumbnailSize, quality: 90);
-    if (thumbnailData == null) {
-      throw Exception("asset thumbnail is null");
-    }
-    // Compute SHA-256 of file content for dedup
     final contentHash = await HashCache.instance.getHash(asset);
-    int uploaded = 0;
     final imgLen = await file.length();
-    final thumbLen = thumbnailData!.length;
-    final totalLen = imgLen + thumbLen;
-    stateModel.updateUploadProgress(asset.id, uploaded, totalLen);
-
-    final thumbRsp = await http.post(
-      Uri.parse("$httpBaseUrl/thumbnail/$name"),
-      body: thumbnailData,
-      headers: {
-        'Image-Date': dateStr,
-        'Content-Hash': contentHash,
-      },
-    );
-    stateModel.updateUploadProgress(asset.id, uploaded + thumbLen, totalLen);
-    if (thumbRsp.statusCode != 200) {
-      stateModel.finishUpload(asset.id, false);
-      throw Exception("upload thumbnail failed: ${thumbRsp.statusCode}");
-    }
+    stateModel.updateUploadProgress(asset.id, 0, imgLen);
 
     const maxUploadRetries = 3;
     for (int attempt = 0; attempt < maxUploadRetries; attempt++) {
@@ -137,7 +82,7 @@ class RemoteStorage {
         if (retryFile == null) {
           throw Exception("asset file is null on retry");
         }
-        uploaded = thumbLen;
+        int uploaded = 0;
         var req =
             http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
         req.headers['Image-Date'] = dateStr;
@@ -145,7 +90,7 @@ class RemoteStorage {
         req.contentLength = await retryFile.length();
         retryFile.openRead().listen((chunk) {
           uploaded += chunk.length;
-          stateModel.updateUploadProgress(asset.id, uploaded, totalLen);
+          stateModel.updateUploadProgress(asset.id, uploaded, imgLen);
           req.sink.add(chunk);
         }, onDone: () {
           req.sink.close();
@@ -168,18 +113,6 @@ class RemoteStorage {
       }
     }
   }
-
-  // @protected
-  // Stream<UploadRequest> uploadStream(Stream<List<int>> dataReader,
-  //     Stream<Uint8List> thumbnailReader, String name, date) async* {
-  //   yield UploadRequest(name: name, date: date);
-  //   await for (var data in dataReader) {
-  //     yield UploadRequest(data: data);
-  //   }
-  //   await for (var data in thumbnailReader) {
-  //     yield UploadRequest(thumbnailData: data);
-  //   }
-  // }
 
   Future<List<RemoteImage>> listImages(
       String date, int offset, maxReturn) async {
@@ -216,70 +149,26 @@ class RemoteImage {
     return isVideoByPath(path);
   }
 
-  Stream<Uint8List> thumbnailStream() async* {
-    var urlPath = path;
-    if (urlPath[0] == '/') {
-      urlPath = urlPath.substring(1);
-    }
-    final url = '$httpBaseUrl/thumbnail/$urlPath';
-    final client = http.Client();
-    final request = http.Request('GET', Uri.parse(url));
-    final response = await client.send(request);
-    if (response.statusCode != 200) {
-      final errMsg = await response.stream.bytesToString();
-      throw Exception(
-          "get [$urlPath] thumbnail failed: [${response.reasonPhrase}] $errMsg");
-    }
-    await for (var data in response.stream) {
-      yield data as Uint8List;
-    }
-  }
-
   Future<Uint8List> thumbnail() async {
     if (thumbnailData != null) {
       return thumbnailData!;
     }
-
-    // Check disk cache first
-    final cached = await ThumbnailCache.instance.get(path);
-    if (cached != null && cached.isNotEmpty) {
-      thumbnailData = cached;
-      return thumbnailData!;
+    var urlPath = path;
+    if (urlPath[0] == '/') {
+      urlPath = urlPath.substring(1);
     }
-
-    const maxRetries = 3;
-    int retryCount = 0;
-    bool succeeded = false;
-    while (retryCount < maxRetries && !succeeded) {
-      try {
-        var currentData = BytesBuilder();
-        var dataStream = thumbnailStream();
-        await for (var d in dataStream) {
-          currentData.add(d);
-        }
-        thumbnailData = currentData.takeBytes();
-        succeeded = true;
-
-        // Save to disk cache
-        ThumbnailCache.instance.put(path, thumbnailData!);
-      } catch (e) {
-        retryCount++;
-        // Don't retry on 400 Bad Request — it's a permanent error
-        // (e.g. unsupported format like .MP4 or .HEIC)
-        final errStr = e.toString();
-        if (errStr.contains('[Bad Request]')) {
-          break;
-        }
-        print("get $path thumbnail failed (attempt $retryCount): $e");
-        if (retryCount < maxRetries) {
-          await Future.delayed(Duration(seconds: retryCount * 2 - 1));
-        }
+    try {
+      final response =
+          await http.get(Uri.parse('$httpBaseUrl/thumbnail/$urlPath'));
+      if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+        thumbnailData = response.bodyBytes;
+        return thumbnailData!;
       }
+    } catch (e) {
+      print("get $path thumbnail failed: $e");
     }
-    if (!succeeded) {
-      final data = await rootBundle.load("assets/images/broken.png");
-      thumbnailData = data.buffer.asUint8List();
-    }
+    final data = await rootBundle.load("assets/images/broken.png");
+    thumbnailData = data.buffer.asUint8List();
     return thumbnailData!;
   }
 

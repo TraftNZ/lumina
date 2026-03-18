@@ -25,8 +25,8 @@ var (
 func RunGrpcServer(dataDir, cacheDir string) (string, error) {
 	opt := imgmanager.Option{}
 
-	if dataDir != "" && cacheDir != "" {
-		store, err := localstore.New(dataDir, cacheDir)
+	if dataDir != "" {
+		store, err := localstore.New(dataDir)
 		if err != nil {
 			Info.Printf("Failed to create local store (continuing without): %v", err)
 		} else {

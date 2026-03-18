@@ -7,8 +7,6 @@ import 'package:lumina/setting_storage_route.dart';
 import 'package:lumina/background_sync_route.dart';
 import 'package:lumina/theme.dart';
 import 'package:lumina/global.dart';
-import 'package:lumina/proto/lumina.pbgrpc.dart';
-import 'package:lumina/storage/storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingBody extends StatefulWidget {
@@ -20,15 +18,12 @@ class SettingBody extends StatefulWidget {
 
 class _SettingBodyState extends State<SettingBody> {
   bool _hasPinSet = false;
-  String _cacheSizeStr = '...';
-  bool _isRebuilding = false;
   String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
     _checkPin();
-    _loadCacheStats();
     _loadVersion();
   }
 
@@ -37,59 +32,6 @@ class _SettingBodyState extends State<SettingBody> {
     setState(() {
       _appVersion = info.version;
     });
-  }
-
-  Future<void> _loadCacheStats() async {
-    if (!isServerReady) return;
-    try {
-      final stats = await storage.cli.getIndexStats(GetIndexStatsRequest());
-      if (stats.success && mounted) {
-        setState(() {
-          _cacheSizeStr = _formatBytes(stats.cacheSizeBytes.toInt());
-        });
-      }
-    } catch (_) {}
-  }
-
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
-  }
-
-  Future<void> _clearCache() async {
-    try {
-      final rsp =
-          await storage.cli.clearThumbnailCache(ClearThumbnailCacheRequest());
-      if (rsp.success) {
-        SnackBarManager.showSnackBar(
-            l10n.cacheCleared(_formatBytes(rsp.freedBytes.toInt())));
-        _loadCacheStats();
-      }
-    } catch (e) {
-      SnackBarManager.showSnackBar(e.toString());
-    }
-  }
-
-  Future<void> _rebuildIndex() async {
-    if (_isRebuilding) return;
-    setState(() => _isRebuilding = true);
-    try {
-      final responses = storage.cli.rebuildIndex(RebuildIndexRequest());
-      int count = 0;
-      await for (final rsp in responses) {
-        count = rsp.totalFound;
-        if (rsp.isFinished) break;
-      }
-      SnackBarManager.showSnackBar(l10n.indexRebuilt(count));
-    } catch (e) {
-      SnackBarManager.showSnackBar(e.toString());
-    } finally {
-      if (mounted) setState(() => _isRebuilding = false);
-    }
   }
 
   Future<void> _checkPin() async {
@@ -296,48 +238,6 @@ class _SettingBodyState extends State<SettingBody> {
                         )
                       : const Icon(Icons.chevron_right),
                   onTap: _showSetPinDialog,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: AppSpacing.md, bottom: AppSpacing.xs),
-            child: Text(
-              l10n.cacheManagement,
-              style: textTheme.titleSmall?.copyWith(color: colorScheme.primary),
-            ),
-          ),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.photo_size_select_large_outlined,
-                      color: colorScheme.primary),
-                  title: Text(l10n.thumbnailCache),
-                  subtitle: Text(_cacheSizeStr),
-                  trailing: TextButton(
-                    onPressed: _clearCache,
-                    child: Text(l10n.clearCache),
-                  ),
-                ),
-                const Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: Icon(Icons.refresh_outlined,
-                      color: colorScheme.primary),
-                  title: Text(l10n.rebuildIndex),
-                  subtitle: _isRebuilding
-                      ? Text(l10n.rebuildingIndex)
-                      : null,
-                  trailing: _isRebuilding
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.chevron_right),
-                  onTap: _isRebuilding ? null : _rebuildIndex,
                 ),
               ],
             ),

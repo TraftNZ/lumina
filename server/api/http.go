@@ -26,21 +26,13 @@ func (a *api) HttpHandler() http.Handler {
 func (a *api) httpHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		if strings.HasPrefix(r.URL.Path, "/trash/thumbnail/") {
-			a.httpDownloadTrashThumbnail(w, r)
-		} else if strings.HasPrefix(r.URL.Path, "/locked/thumbnail/") {
-			a.httpDownloadLockedThumbnail(w, r)
-		} else if strings.HasPrefix(r.URL.Path, "/thumbnail/") {
+		if strings.HasPrefix(r.URL.Path, "/thumbnail/") {
 			a.httpDownloadThumbnail(w, r)
 		} else {
 			a.httpDownload(w, r)
 		}
 	case http.MethodPost:
-		if strings.HasPrefix(r.URL.Path, "/thumbnail/") {
-			a.httpUploadThumbnail(w, r)
-		} else {
-			a.httpUpload(w, r)
-		}
+		a.httpUpload(w, r)
 	}
 }
 
@@ -79,9 +71,9 @@ func (a *api) httpUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	encoded := encodeName(dateTime, name, contentHash)
 	if isVideo(path) {
-		err = a.im.UploadVideo(body, nil, length, 0, encoded, dateTime)
+		err = a.im.UploadVideo(body, length, encoded, dateTime)
 	} else {
-		err = a.im.UploadImg(body, nil, length, 0, encoded, dateTime)
+		err = a.im.UploadImg(body, length, encoded, dateTime)
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -89,45 +81,6 @@ func (a *api) httpUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	w.WriteHeader(http.StatusOK)
-}
-
-func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	if path == "" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	if r.ContentLength == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	name := strings.TrimPrefix(path, "/thumbnail/")
-	date := r.Header.Get("Image-Date")
-	dateTime, err := time.Parse("2006:01:02 15:04:05", date)
-	if err != nil {
-		dateTime = time.Now()
-	}
-	thumbData, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	r.Body.Close()
-	// Use Content-Hash from original photo (passed by client)
-	contentHash := r.Header.Get("Content-Hash")
-	encodedName := encodeName(dateTime, name, contentHash)
-	err = a.im.UploadImg(nil, bytes.NewReader(thumbData), 0, int64(len(thumbData)), encodedName, dateTime)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	if store := a.im.Store(); store != nil {
-		thumbPath := filepath.Join(dateTime.Format("2006/01/02"), encodedName)
-		go store.PutThumb(thumbPath, thumbData)
-	}
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -217,68 +170,9 @@ func (a *api) httpDownloadThumbnail(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	contentType := mime.TypeByExtension(filepath.Ext(realPath))
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Type", "image/jpeg")
 	w.Write(data)
-}
-
-func (a *api) httpDownloadTrashThumbnail(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	if path == "" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	realPath := strings.TrimPrefix(path, "/trash/thumbnail/")
-	img, err := a.im.GetTrashThumbnail(realPath)
-	if err != nil {
-		// Fallback: try to get the full image from trash
-		img, err = a.im.GetImg(filepath.Join(".trash", realPath))
-		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(err.Error()))
-			return
-		}
-	}
-	contentType := mime.TypeByExtension(filepath.Ext(realPath))
-	defer img.Content.Close()
-	w.Header().Add("Content-Length", strconv.FormatInt(img.Size, 10))
-	w.Header().Add("Content-Type", contentType)
-	w.WriteHeader(http.StatusOK)
-	_, err = io.Copy(w, img.Content)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-}
-
-func (a *api) httpDownloadLockedThumbnail(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	if path == "" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	realPath := strings.TrimPrefix(path, "/locked/thumbnail/")
-	img, err := a.im.GetLockedThumbnail(realPath)
-	if err != nil {
-		// Fallback: try to get the full image from locked
-		img, err = a.im.GetImg(filepath.Join(".locked", realPath))
-		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(err.Error()))
-			return
-		}
-	}
-	contentType := mime.TypeByExtension(filepath.Ext(realPath))
-	defer img.Content.Close()
-	w.Header().Add("Content-Length", strconv.FormatInt(img.Size, 10))
-	w.Header().Add("Content-Type", contentType)
-	w.WriteHeader(http.StatusOK)
-	_, err = io.Copy(w, img.Content)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
 }
 
 // encodeName builds a filename with 24-hour timestamp + content hash prefix + original name.
@@ -296,29 +190,3 @@ func legacyEncodeName(t time.Time, name string) string {
 	return fmt.Sprintf("%s_%s", t.Format("20060102030405"), name)
 }
 
-func decodeName(encoded string) (time.Time, string, error) {
-	parts := strings.SplitN(encoded, "_", 3)
-	if len(parts) == 3 && len(parts[0]) == 14 && len(parts[1]) == 16 {
-		// New format: timestamp_hash16_name
-		t, err := time.Parse("20060102150405", parts[0])
-		if err != nil {
-			return time.Time{}, "", err
-		}
-		return t, parts[2], nil
-	}
-	// Legacy format: timestamp_name (12-hour or 24-hour)
-	if len(encoded) < 15 {
-		return time.Time{}, "", fmt.Errorf("invalid encoded name")
-	}
-	timeStr := encoded[:14]
-	name := encoded[15:]
-	t, err := time.Parse("20060102150405", timeStr)
-	if err != nil {
-		// Try legacy 12-hour format
-		t, err = time.Parse("20060102030405", timeStr)
-		if err != nil {
-			return time.Time{}, "", err
-		}
-	}
-	return t, name, nil
-}

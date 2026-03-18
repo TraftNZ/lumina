@@ -364,6 +364,8 @@ class GalleryBodyState extends State<GalleryBody>
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _selectionBarButton(
+                    Icons.close, l10n.cancel, clearSelection),
+                _selectionBarButton(
                     Icons.share_outlined, l10n.share, _shareAsset),
                 _selectionBarButton(Icons.delete_outline, l10n.delete,
                     () => _deleteSelected()),
@@ -1115,7 +1117,14 @@ class GalleryBodyState extends State<GalleryBody>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Stack(
+    return PopScope(
+      canPop: !stateModel.isSelectionMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && stateModel.isSelectionMode) {
+          clearSelection();
+        }
+      },
+      child: Stack(
       children: [
         RefreshIndicator(
           key: _refreshIndicatorKey,
@@ -1168,6 +1177,7 @@ class GalleryBodyState extends State<GalleryBody>
             ),
           ),
       ],
+    ),
     );
   }
 }

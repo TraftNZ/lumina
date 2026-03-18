@@ -57,7 +57,6 @@ class Global {
       isServerReady = true;
       await resolveLocalFolderAbsPath();
       await initDrive();
-      _rebuildIndexIfEmpty();
       initMLIndexer();
       reloadAutoSyncTimer();
     });
@@ -188,25 +187,6 @@ Future<void> initDrive() async {
           assetModel.remoteLastError = rsp.message;
         }
       }
-  }
-}
-
-Future<void> _rebuildIndexIfEmpty() async {
-  if (!settingModel.isRemoteStorageSetted) return;
-  try {
-    final stats = await storage.cli.getIndexStats(GetIndexStatsRequest());
-    if (stats.success && stats.totalPhotos == 0) {
-      final responses = storage.cli.rebuildIndex(RebuildIndexRequest());
-      await for (final rsp in responses) {
-        if (rsp.isFinished) {
-          break;
-        }
-      }
-    }
-    // Start ML indexing after index is ready
-    startMLIndexingIfNeeded();
-  } catch (e) {
-    logger.e("Auto-rebuild index failed: $e");
   }
 }
 

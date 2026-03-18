@@ -30,10 +30,6 @@ service Lumina {
   rpc MoveToLocked (MoveToLockedRequest) returns (MoveToLockedResponse) {}
   rpc ListLocked (ListLockedRequest) returns (ListLockedResponse) {}
   rpc RestoreFromLocked (RestoreFromLockedRequest) returns (RestoreFromLockedResponse) {}
-  // Index management
-  rpc RebuildIndex (RebuildIndexRequest) returns (stream RebuildIndexResponse) {}
-  rpc GetIndexStats (GetIndexStatsRequest) returns (GetIndexStatsResponse) {}
-  rpc ClearThumbnailCache (ClearThumbnailCacheRequest) returns (ClearThumbnailCacheResponse) {}
   // ML Photo Search
   rpc UpdatePhotoLabels (UpdatePhotoLabelsRequest) returns (UpdatePhotoLabelsResponse) {}
   rpc SearchPhotos (SearchPhotosRequest) returns (SearchPhotosResponse) {}
@@ -243,30 +239,6 @@ message ListLockedResponse {
   bool success = 1;
   string message = 2;
   repeated TrashItem items = 3;
-}
-
-message RebuildIndexRequest {}
-message RebuildIndexResponse {
-  bool success = 1;
-  string message = 2;
-  int32 totalFound = 3;
-  bool isFinished = 4;
-}
-
-message GetIndexStatsRequest {}
-message GetIndexStatsResponse {
-  bool success = 1;
-  string message = 2;
-  int64 totalPhotos = 3;
-  int64 cacheSizeBytes = 4;
-  int64 lastIndexTimestamp = 5;
-}
-
-message ClearThumbnailCacheRequest {}
-message ClearThumbnailCacheResponse {
-  bool success = 1;
-  string message = 2;
-  int64 freedBytes = 3;
 }
 
 message UpdatePhotoLabelsRequest {

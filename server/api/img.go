@@ -43,13 +43,6 @@ func (a *api) ListByDate(ctx context.Context, req *pb.ListByDateRequest) (rsp *p
 			return
 		}
 	}
-	// Try fast path: serve from local index
-	if paths, ok := a.im.ListByDateFromIndex(start, int(req.Offset), int(req.MaxReturn)); ok {
-		rsp.Paths = paths
-		return
-	}
-
-	// Fallback: walk remote storage directories
 	rsp.Paths = make([]string, 0, req.MaxReturn)
 	offset := req.Offset
 	needReturn := req.MaxReturn
@@ -76,83 +69,6 @@ func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.Delete
 }
 
 func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error {
-	store := a.im.Store()
-	if store == nil {
-		return a.filterNotUploadedLegacy(stream)
-	}
-
-	// Sync from remote if store is empty or marker has changed
-	needsSync := store.IsEmpty()
-	if !needsSync {
-		changed, _ := a.im.CheckMarkerChanged()
-		needsSync = changed
-	}
-	if needsSync {
-		if err := a.im.SyncFromRemoteIndex(); err != nil {
-			if store.IsEmpty() {
-				return a.filterNotUploadedLegacy(stream)
-			}
-		}
-	}
-
-	for {
-		r, err := stream.Recv()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-		// Collect all candidate filenames per asset for batch lookup
-		type candidate struct {
-			assetID   string
-			filenames []string
-		}
-		candidates := make([]candidate, 0, len(r.Photos))
-		allFilenames := make([]string, 0, len(r.Photos)*3)
-		for _, info := range r.Photos {
-			t, err := time.Parse("2006:01:02 15:04:05", info.Date)
-			if err != nil {
-				continue
-			}
-			var names []string
-			if info.ContentHash != "" {
-				names = append(names, encodeName(t, info.Name, info.ContentHash))
-			}
-			// Also check legacy formats for backwards compat
-			names = append(names, encodeName(t, info.Name, ""))
-			names = append(names, legacyEncodeName(t, info.Name))
-			// Also check raw filename (for manually uploaded files)
-			names = append(names, info.Name)
-			allFilenames = append(allFilenames, names...)
-			candidates = append(candidates, candidate{assetID: info.Id, filenames: names})
-		}
-		exists := store.BatchExistsByFilename(allFilenames)
-		rsp := &pb.FilterNotUploadedResponse{Success: true, IsFinished: r.IsFinished}
-		rsp.NotUploaedIDs = make([]string, 0)
-		for _, c := range candidates {
-			found := false
-			for _, name := range c.filenames {
-				if exists[name] {
-					found = true
-					break
-				}
-			}
-			if !found {
-				rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, c.assetID)
-			}
-		}
-		if err := stream.Send(rsp); err != nil {
-			return err
-		}
-		if rsp.IsFinished {
-			break
-		}
-	}
-	return nil
-}
-
-func (a *api) filterNotUploadedLegacy(stream pb.Lumina_FilterNotUploadedServer) error {
 	all := make(map[string]bool)
 	a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
 		name := filepath.Base(path)
@@ -174,7 +90,6 @@ func (a *api) filterNotUploadedLegacy(stream pb.Lumina_FilterNotUploadedServer) 
 			if err != nil {
 				continue
 			}
-			// Check new format (with hash), new format (without hash), legacy 12-hour, and raw filename
 			found := false
 			if info.ContentHash != "" {
 				found = all[encodeName(t, info.Name, info.ContentHash)]
@@ -299,60 +214,6 @@ func (a *api) RestoreFromLocked(ctx context.Context, req *pb.RestoreFromLockedRe
 	return
 }
 
-func (a *api) RebuildIndex(req *pb.RebuildIndexRequest, stream pb.Lumina_RebuildIndexServer) error {
-	err := a.im.RebuildIndex(func(found int) {
-		stream.Send(&pb.RebuildIndexResponse{
-			Success:    true,
-			TotalFound: int32(found),
-		})
-	})
-	if err != nil {
-		stream.Send(&pb.RebuildIndexResponse{
-			Success:    false,
-			Message:    err.Error(),
-			IsFinished: true,
-		})
-		return nil
-	}
-	store := a.im.Store()
-	var total int32
-	if store != nil {
-		total = int32(store.PhotoCount())
-	}
-	stream.Send(&pb.RebuildIndexResponse{
-		Success:    true,
-		TotalFound: total,
-		IsFinished: true,
-	})
-	return nil
-}
-
-func (a *api) GetIndexStats(ctx context.Context, req *pb.GetIndexStatsRequest) (rsp *pb.GetIndexStatsResponse, err error) {
-	rsp = &pb.GetIndexStatsResponse{Success: true}
-	store := a.im.Store()
-	if store == nil {
-		rsp.Success = false
-		rsp.Message = "local store not available"
-		return
-	}
-	rsp.TotalPhotos = store.PhotoCount()
-	rsp.CacheSizeBytes = store.CacheSizeBytes()
-	rsp.LastIndexTimestamp = store.LastIndexTimestamp()
-	return
-}
-
-func (a *api) ClearThumbnailCache(ctx context.Context, req *pb.ClearThumbnailCacheRequest) (rsp *pb.ClearThumbnailCacheResponse, err error) {
-	rsp = &pb.ClearThumbnailCacheResponse{Success: true}
-	store := a.im.Store()
-	if store == nil {
-		rsp.Success = false
-		rsp.Message = "local store not available"
-		return
-	}
-	rsp.FreedBytes = store.ClearAllThumbs()
-	return
-}
-
 func (a *api) UpdatePhotoLabels(ctx context.Context, req *pb.UpdatePhotoLabelsRequest) (rsp *pb.UpdatePhotoLabelsResponse, err error) {
 	rsp = &pb.UpdatePhotoLabelsResponse{Success: true}
 	store := a.im.Store()
@@ -366,8 +227,6 @@ func (a *api) UpdatePhotoLabels(ctx context.Context, req *pb.UpdatePhotoLabelsRe
 		rsp.Message = updateErr.Error()
 		return
 	}
-	// Trigger debounced sync state write to persist labels to remote
-	a.im.DebouncedWriteSyncState()
 	return
 }
 

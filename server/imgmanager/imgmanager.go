@@ -14,25 +14,18 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Workiva/go-datastructures/queue"
-	"github.com/traftai/lumina/server/localstore"
 	"github.com/nfnt/resize"
+	"github.com/traftai/lumina/server/localstore"
 )
 
 const (
-	defaultWorkerNum          = 2
-	defaultThumbnailMaxWidth  = 500
-	defaultThumbnailMaxHeight = 500
-	defaultThumbnailDir       = ".thumbnail"
-	defaultTrashDir           = ".trash"
-	defaultLockedDir           = ".locked"
-	trashAutoDeleteDays       = 30
-	syncMarkerFile  = ".sync_marker"
-	syncIndexPrefix = ".sync_index."
-	syncIndexLegacy = ".sync_index"
+	defaultWorkerNum    = 2
+	defaultTrashDir     = ".trash"
+	defaultLockedDir    = ".locked"
+	trashAutoDeleteDays = 30
 )
 
 type TrashItem struct {
@@ -43,32 +36,21 @@ type TrashItem struct {
 }
 
 type ImgManager struct {
-	dri            StorageDrive
-	actQueue       *queue.Queue
-	logger         *log.Logger
-	opt            Option
-	store          *localstore.LocalStore
-	syncDebounce   *time.Timer
-	syncDebounceMu sync.Mutex
+	dri      StorageDrive
+	actQueue *queue.Queue
+	logger   *log.Logger
+	opt      Option
+	store    *localstore.LocalStore
 }
 
 type Option struct {
-	WorkerNum          int
-	ThumbnailMaxWidth  int
-	ThumbnailMaxHeight int
-	ThumbbailQuality   int
-	LocalStore         *localstore.LocalStore
+	WorkerNum  int
+	LocalStore *localstore.LocalStore
 }
 
 func NewImgManager(opt Option) *ImgManager {
 	if opt.WorkerNum <= 0 {
 		opt.WorkerNum = defaultWorkerNum
-	}
-	if opt.ThumbnailMaxWidth <= 0 {
-		opt.ThumbnailMaxWidth = defaultThumbnailMaxWidth
-	}
-	if opt.ThumbnailMaxHeight <= 0 {
-		opt.ThumbnailMaxHeight = defaultThumbnailMaxHeight
 	}
 	im := &ImgManager{
 		actQueue: queue.New(10),
@@ -97,12 +79,6 @@ func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
 		if err := im.store.SwitchDrive(configHash); err != nil {
 			im.logger.Printf("Failed to switch drive store: %v", err)
 		}
-		// Always sync index from remote — remote is the source of truth
-		if err := im.SyncFromRemoteIndex(); err != nil {
-			im.logger.Printf("SwitchDrive: sync from remote index failed: %v", err)
-		} else {
-			im.logger.Printf("SwitchDrive: synced %d photos from remote index", im.store.PhotoCount())
-		}
 	}
 }
 
@@ -113,8 +89,7 @@ func (im *ImgManager) Drive() StorageDrive {
 type actType int
 
 const (
-	actGenerateThumbnail = iota
-	actUpload
+	actUpload = iota
 	actDelete
 )
 
@@ -144,11 +119,6 @@ func (im *ImgManager) runWorker() {
 			if err != nil {
 				im.logger.Println("Error uploading image:", err)
 			}
-		case actGenerateThumbnail:
-			err := im.GenerateThumbnail(act.path, act.content)
-			if err != nil {
-				im.logger.Println("Error generating thumbnail:", err)
-			}
 		case actDelete:
 			err := im.dri.Delete(act.path)
 			if err != nil {
@@ -156,35 +126,6 @@ func (im *ImgManager) runWorker() {
 			}
 		}
 	}
-}
-
-func (im *ImgManager) GenerateThumbnail(path string, content []byte) error {
-	var err error
-	var imghdl image.Image
-	switch strings.ToLower(filepath.Ext(path)) {
-	case JpegSuffix:
-		imghdl, err = jpeg.Decode(bytes.NewReader(content))
-	case PngSuffix:
-		imghdl, err = png.Decode(bytes.NewReader(content))
-	default:
-		return fmt.Errorf("unsupported image format: %s", filepath.Ext(path))
-	}
-	if err != nil {
-		return err
-	}
-	newImghdl := resize.Thumbnail(uint(im.opt.ThumbnailMaxWidth), uint(im.opt.ThumbnailMaxHeight), imghdl, resize.Bilinear)
-	buf := bytes.NewBuffer(make([]byte, 0))
-	err = jpeg.Encode(buf, newImghdl, &jpeg.Options{Quality: 75})
-	if err != nil {
-		return err
-	}
-	thumbPath := filepath.Join(defaultThumbnailDir, path)
-	err = im.dri.Upload(thumbPath, io.NopCloser(buf), int64(buf.Len()), time.Time{})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (im *ImgManager) UploadImgAsync(path string, content []byte, lastModified time.Time) {
@@ -196,84 +137,33 @@ func (im *ImgManager) UploadImgAsync(path string, content []byte, lastModified t
 	})
 }
 
-func (im *ImgManager) GenerateThumbnailAsync(path string, content []byte) {
-	im.actQueue.Put(action{
-		t:       actGenerateThumbnail,
-		path:    path,
-		content: content,
-	})
-}
-
-func (im *ImgManager) UploadVideo(content, thumbnailContent io.Reader, contentSize, thumbnailSize int64, name string, date time.Time) error {
+func (im *ImgManager) UploadVideo(content io.Reader, contentSize int64, name string, date time.Time) error {
+	if content == nil {
+		return fmt.Errorf("no video data")
+	}
 	path := filepath.Join(date.Format("2006/01/02"), name)
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	var err error
-	go func() {
-		defer wg.Done()
-		if content == nil {
-			return
-		}
-		e := im.dri.Upload(path, io.NopCloser(content), contentSize, date)
-		if e != nil {
-			im.logger.Println("Error uploading video:", e)
-			err = fmt.Errorf("error uploading video: %w", e)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		if thumbnailContent == nil {
-			return
-		}
-		e := im.dri.Upload(filepath.Join(defaultThumbnailDir, path),
-			io.NopCloser(thumbnailContent), thumbnailSize, date)
-		if e != nil {
-			im.logger.Println("Error uploading video:", err)
-			err = fmt.Errorf("error uploading video thumbnail: %w", e)
-		}
-	}()
-	wg.Wait()
-	if err == nil && im.store != nil {
-		im.store.IndexPhoto(path, filepath.Base(path), contentSize)
+	err := im.dri.Upload(path, io.NopCloser(content), contentSize, date)
+	if err != nil {
+		im.logger.Println("Error uploading video:", err)
+		return fmt.Errorf("error uploading video: %w", err)
 	}
-	if err == nil {
-		im.DebouncedWriteSyncState()
-	}
-	return err
+	return nil
 }
 
-func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize, thumbnailSize int64, name string, date time.Time) error {
-	errCh := make(chan error, 2)
-	var data []byte
-	var thumbData []byte
-	go func() {
-		var err error
-		if content != nil {
-			data, err = io.ReadAll(content)
-		}
-		errCh <- err
-	}()
-	go func() {
-		var err error
-		if thumbnailContent != nil {
-			thumbData, err = io.ReadAll(thumbnailContent)
-		}
-		errCh <- err
-	}()
-	for i := 0; i < 2; i++ {
-		err := <-errCh
-		if err != nil {
-			return err
-		}
-	}
-	if len(data) == 0 && len(thumbData) == 0 {
+func (im *ImgManager) UploadImg(content io.Reader, contentSize int64, name string, date time.Time) error {
+	if content == nil {
 		return fmt.Errorf("no image data")
 	}
-	if date.IsZero() && len(data) > 0 {
-		// try to get image time from metadata
-		meta, err := GetImageMetadata(data)
-		if err == nil {
-			im.logger.Printf("Image metadata: %+v", meta)
+	data, err := io.ReadAll(content)
+	if err != nil {
+		return err
+	}
+	if len(data) == 0 {
+		return fmt.Errorf("no image data")
+	}
+	if date.IsZero() {
+		meta, metaErr := GetImageMetadata(data)
+		if metaErr == nil {
 			var dateStr string
 			if meta.Datetime != "" {
 				dateStr = meta.Datetime
@@ -285,9 +175,8 @@ func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize
 				dateStr = meta.ModifyDate
 			}
 			if dateStr != "" {
-				date, err = time.Parse("2006:01:02 15:04:05", dateStr)
-				if err != nil {
-					im.logger.Println("Error parsing date:", err)
+				if parsed, parseErr := time.Parse("2006:01:02 15:04:05", dateStr); parseErr == nil {
+					date = parsed
 				}
 			}
 		}
@@ -295,32 +184,16 @@ func (im *ImgManager) UploadImg(content, thumbnailContent io.Reader, contentSize
 	if date.Before(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)) {
 		date = time.Now()
 	}
-	// try to get image time from given date
 	if date.IsZero() {
 		date = time.Now()
 	}
 	path := filepath.Join(date.Format("2006/01/02"), name)
-	var err error
-	if len(data) > 0 {
-		err = im.dri.Upload(path,
-			io.NopCloser(bytes.NewReader(data)), int64(len(data)), date)
-		if err != nil {
-			im.logger.Println("Error uploading image:", err)
-			return err
-		}
-		if im.store != nil {
-			im.store.IndexPhoto(path, filepath.Base(path), int64(len(data)))
-		}
+	err = im.dri.Upload(path,
+		io.NopCloser(bytes.NewReader(data)), int64(len(data)), date)
+	if err != nil {
+		im.logger.Println("Error uploading image:", err)
+		return err
 	}
-	if len(thumbData) > 0 {
-		err = im.dri.Upload(filepath.Join(defaultThumbnailDir, path),
-			io.NopCloser(bytes.NewReader(thumbData)), int64(len(thumbData)), date)
-		if err != nil {
-			im.logger.Println("Error uploading thumbnail:", err)
-			return err
-		}
-	}
-	im.DebouncedWriteSyncState()
 	return nil
 }
 
@@ -346,85 +219,50 @@ func (im *ImgManager) GetOffset(path string, offset int64) (*Image, error) {
 	return img, nil
 }
 
-func (im *ImgManager) GetThumbnail(path string) (*Image, error) {
-	img := &Image{}
-	var err error
-	thumbnailPath := filepath.Join(defaultThumbnailDir, path)
-	img.Content, img.Size, err = im.dri.Download(thumbnailPath)
-	if err != nil {
-		return img, fmt.Errorf("error downloading thumbnail: %w", err)
-	}
-	img.Path = thumbnailPath
-	return img, nil
-}
+const (
+	thumbnailMaxWidth  = 500
+	thumbnailMaxHeight = 500
+)
 
 func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
-	if im.store != nil {
-		if data, err := im.store.GetThumb(path); err == nil {
-			return data, nil
-		}
-	}
-	img, err := im.GetThumbnail(path)
-	if err == nil {
-		defer img.Content.Close()
-		data, err := io.ReadAll(img.Content)
-		if err != nil {
-			return nil, err
-		}
-		if im.store != nil {
-			go im.store.PutThumb(path, data)
-		}
-		return data, nil
-	}
-
-	// Only attempt on-demand generation for formats we can decode
 	ext := strings.ToLower(filepath.Ext(path))
-	if ext != JpegSuffix && ext != PngSuffix {
+	switch ext {
+	case JpegSuffix, ".jpeg", PngSuffix:
+	default:
 		return nil, fmt.Errorf("thumbnail not available for %s", filepath.Base(path))
 	}
-
-	// Generate thumbnail on-demand from the full-size image
-	fullImg, _, dlErr := im.dri.Download(path)
-	if dlErr != nil {
-		return nil, fmt.Errorf("error downloading original for thumbnail generation: %w", dlErr)
+	fullImg, _, err := im.dri.Download(path)
+	if err != nil {
+		return nil, fmt.Errorf("error downloading original: %w", err)
 	}
 	defer fullImg.Close()
 	fullData, err := io.ReadAll(fullImg)
 	if err != nil {
 		return nil, err
 	}
-	if err := im.GenerateThumbnail(path, fullData); err != nil {
-		return nil, fmt.Errorf("error generating thumbnail on demand: %w", err)
+	var imghdl image.Image
+	switch ext {
+	case JpegSuffix, ".jpeg":
+		imghdl, err = jpeg.Decode(bytes.NewReader(fullData))
+	case PngSuffix:
+		imghdl, err = png.Decode(bytes.NewReader(fullData))
 	}
-	img, err = im.GetThumbnail(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error decoding image: %w", err)
 	}
-	defer img.Content.Close()
-	data, err := io.ReadAll(img.Content)
-	if err != nil {
-		return nil, err
+	resized := resize.Thumbnail(thumbnailMaxWidth, thumbnailMaxHeight, imghdl, resize.Bilinear)
+	buf := &bytes.Buffer{}
+	if err := jpeg.Encode(buf, resized, &jpeg.Options{Quality: 75}); err != nil {
+		return nil, fmt.Errorf("error encoding thumbnail: %w", err)
 	}
-	if im.store != nil {
-		go im.store.PutThumb(path, data)
-	}
-	return data, nil
+	return buf.Bytes(), nil
 }
 
 func (im *ImgManager) DeleteSingleImg(path string) error {
 	if path == "" {
 		return nil
 	}
-	err := im.dri.Delete(path)
-	if err != nil {
-		return err
-	}
-	if im.store != nil {
-		im.store.RemovePhoto(path)
-		im.store.RemoveThumb(path)
-	}
-	im.DebouncedWriteSyncState()
-	return nil
+	return im.dri.Delete(path)
 }
 
 func (im *ImgManager) DeleteSingleImgAsync(path string) {
@@ -437,10 +275,6 @@ func (im *ImgManager) DeleteImg(paths []string) {
 	for _, path := range paths {
 		if path != "" {
 			im.DeleteSingleImgAsync(path)
-			if im.store != nil {
-				im.store.RemovePhoto(path)
-				im.store.RemoveThumb(path)
-			}
 		}
 	}
 }
@@ -503,14 +337,23 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 					continue
 				}
 				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
-				goOn := true
+				var files []fs.FileInfo
 				im.dri.Range(dirPath, func(info fs.FileInfo) bool {
-					if info.IsDir() {
-						return true
+					if !info.IsDir() {
+						files = append(files, info)
 					}
-					goOn = f(filepath.Join(dirPath, info.Name()), info.Size())
-					return goOn
+					return true
 				})
+				sort.Slice(files, func(i, j int) bool {
+					return files[i].Name() > files[j].Name()
+				})
+				goOn := true
+				for _, finfo := range files {
+					goOn = f(filepath.Join(dirPath, finfo.Name()), finfo.Size())
+					if !goOn {
+						break
+					}
+				}
 				if !goOn {
 					goto BREAK
 				}
@@ -518,183 +361,6 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 		}
 	}
 BREAK:
-	return nil
-}
-
-// DebouncedWriteSyncState schedules a WriteSyncState to run after a short
-// delay. If called multiple times in quick succession (e.g. during a batch
-// upload), only one WriteSyncState runs after the last call settles.
-func (im *ImgManager) DebouncedWriteSyncState() {
-	im.syncDebounceMu.Lock()
-	defer im.syncDebounceMu.Unlock()
-	if im.syncDebounce != nil {
-		im.syncDebounce.Stop()
-	}
-	im.syncDebounce = time.AfterFunc(500*time.Millisecond, func() {
-		im.WriteSyncState()
-	})
-}
-
-// WriteSyncState uploads this client's index and the marker to remote storage.
-// Each client writes its own index file (.sync_index.<clientID>) so concurrent
-// uploads from different devices never overwrite each other.
-func (im *ImgManager) WriteSyncState() {
-	if im.store == nil {
-		return
-	}
-	clientID := im.store.GetClientID()
-	if clientID == "" {
-		im.logger.Printf("WriteSyncState: no client ID, skipping")
-		return
-	}
-	indexData, err := im.store.ExportIndex()
-	if err != nil {
-		im.logger.Printf("Failed to export index: %v", err)
-		return
-	}
-	indexFile := syncIndexPrefix + clientID
-	err = im.dri.Upload(indexFile,
-		io.NopCloser(bytes.NewReader(indexData)),
-		int64(len(indexData)), time.Time{})
-	if err != nil {
-		im.logger.Printf("Failed to upload sync index: %v", err)
-		return
-	}
-	// Write marker after index — so if a reader sees a new marker,
-	// the index is guaranteed to be available
-	marker := fmt.Sprintf("%d", time.Now().UnixNano())
-	content := []byte(marker)
-	err = im.dri.Upload(syncMarkerFile,
-		io.NopCloser(bytes.NewReader(content)),
-		int64(len(content)), time.Time{})
-	if err != nil {
-		im.logger.Printf("Failed to write sync marker: %v", err)
-		return
-	}
-	im.store.SetLastSeenMarker(marker)
-}
-
-// ReadAllRemoteIndexFiles reads all per-client index files (and the legacy
-// single index file if present) from remote storage.
-func (im *ImgManager) ReadAllRemoteIndexFiles() ([][]byte, error) {
-	var blobs [][]byte
-	// List root directory for index files
-	err := im.dri.Range(".", func(info fs.FileInfo) bool {
-		name := info.Name()
-		if info.IsDir() {
-			return true
-		}
-		isPerClient := strings.HasPrefix(name, syncIndexPrefix)
-		isLegacy := name == syncIndexLegacy
-		if !isPerClient && !isLegacy {
-			return true
-		}
-		rc, _, err := im.dri.Download(name)
-		if err != nil {
-			im.logger.Printf("Failed to download index file %s: %v", name, err)
-			return true
-		}
-		data, err := io.ReadAll(rc)
-		rc.Close()
-		if err != nil {
-			im.logger.Printf("Failed to read index file %s: %v", name, err)
-			return true
-		}
-		blobs = append(blobs, data)
-		return true
-	})
-	if err != nil {
-		return nil, fmt.Errorf("list root for index files: %w", err)
-	}
-	return blobs, nil
-}
-
-func (im *ImgManager) ReadSyncMarker() (string, error) {
-	rc, _, err := im.dri.Download(syncMarkerFile)
-	if err != nil {
-		return "", err
-	}
-	defer rc.Close()
-	data, err := io.ReadAll(rc)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(data)), nil
-}
-
-func (im *ImgManager) CheckMarkerChanged() (bool, error) {
-	if im.store == nil {
-		return true, nil
-	}
-	remote, err := im.ReadSyncMarker()
-	if err != nil {
-		return true, nil
-	}
-	local := im.store.GetLastSeenMarker()
-	if local == "" {
-		return true, nil
-	}
-	return remote != local, nil
-}
-
-// SyncFromRemoteIndex downloads all per-client remote index files, merges
-// them into the local store. Cost: 1 Range + N GETs instead of walking all directories.
-func (im *ImgManager) SyncFromRemoteIndex() error {
-	if im.store == nil {
-		return fmt.Errorf("local store not available")
-	}
-	blobs, err := im.ReadAllRemoteIndexFiles()
-	if err != nil {
-		return fmt.Errorf("read remote index files: %w", err)
-	}
-	if len(blobs) == 0 {
-		return fmt.Errorf("no remote index files found")
-	}
-	for _, data := range blobs {
-		im.store.MergeIndex(data)
-	}
-	// Snapshot the current marker so we don't re-download next time
-	if marker, err := im.ReadSyncMarker(); err == nil {
-		im.store.SetLastSeenMarker(marker)
-	}
-	return nil
-}
-
-// ListByDateFromIndex serves a ListByDate query from the local index.
-// Returns (paths, true) if the index was available and used, or (nil, false)
-// if the caller should fall back to RangeByDate.
-func (im *ImgManager) ListByDateFromIndex(date time.Time, offset, limit int) ([]string, bool) {
-	if im.store == nil {
-		return nil, false
-	}
-	// Always check if remote has newer data
-	changed, _ := im.CheckMarkerChanged()
-	if changed || im.store.IsEmpty() {
-		if err := im.SyncFromRemoteIndex(); err != nil {
-			im.logger.Printf("SyncFromRemoteIndex failed: %v", err)
-		}
-	}
-	if im.store.IsEmpty() {
-		return nil, false
-	}
-	paths := im.store.ListPhotos(date, offset, limit)
-	return paths, true
-}
-
-func (im *ImgManager) RebuildIndex(progressCb func(found int)) error {
-	if im.store == nil {
-		return fmt.Errorf("local store not available")
-	}
-	err := im.store.RebuildFromRemote(func(cb func(path string, filename string, size int64) bool) error {
-		return im.RangeByDate(time.Now(), func(path string, size int64) bool {
-			return cb(path, filepath.Base(path), size)
-		})
-	}, progressCb)
-	if err != nil {
-		return err
-	}
-	// After full rebuild, upload index + marker so other devices can use it
-	im.WriteSyncState()
 	return nil
 }
 
@@ -712,44 +378,15 @@ func (im *ImgManager) MoveToTrash(path string) error {
 	if err := im.dri.Rename(path, trashPath); err != nil {
 		return fmt.Errorf("move to trash error: %w", err)
 	}
-	// Also move thumbnail (ignore error if not present)
-	thumbPath := filepath.Join(defaultThumbnailDir, path)
-	trashThumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
-	_ = im.dri.Rename(thumbPath, trashThumbPath)
-
-	if im.store != nil {
-		im.store.RemovePhoto(path)
-		im.store.RemoveThumb(path)
-	}
-	im.DebouncedWriteSyncState()
 	return nil
 }
 
 func (im *ImgManager) RestoreFromTrash(trashPath string) error {
-	// trashPath is relative to .trash/, e.g. "2024/01/15/photo.jpg"
 	originalPath := trashPath
 	fullTrashPath := filepath.Join(defaultTrashDir, trashPath)
 	if err := im.dri.Rename(fullTrashPath, originalPath); err != nil {
 		return fmt.Errorf("restore from trash error: %w", err)
 	}
-	// Also restore thumbnail (ignore error)
-	trashThumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, trashPath)
-	thumbPath := filepath.Join(defaultThumbnailDir, trashPath)
-	_ = im.dri.Rename(trashThumbPath, thumbPath)
-
-	if im.store != nil {
-		// Try to get file size from the restored file
-		var size int64
-		im.dri.Range(filepath.Dir(originalPath), func(info fs.FileInfo) bool {
-			if info.Name() == filepath.Base(originalPath) {
-				size = info.Size()
-				return false
-			}
-			return true
-		})
-		im.store.IndexPhoto(originalPath, filepath.Base(originalPath), size)
-	}
-	im.DebouncedWriteSyncState()
 	return nil
 }
 
@@ -792,9 +429,6 @@ func (im *ImgManager) EmptyTrash() error {
 			im.logger.Printf("Error deleting trash item %s: %v", fullPath, err)
 			lastErr = err
 		}
-		// Also delete thumbnail
-		thumbPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
-		_ = im.dri.Delete(thumbPath)
 		return true
 	})
 	return lastErr
@@ -815,7 +449,7 @@ func (im *ImgManager) rangeTrashByDate(date time.Time, f func(path string, size 
 		if !yinfo.IsDir() {
 			continue
 		}
-		if yinfo.Name() == defaultThumbnailDir {
+		if strings.HasPrefix(yinfo.Name(), ".") {
 			continue
 		}
 		yNum, err := strconv.Atoi(yinfo.Name())
@@ -874,17 +508,6 @@ func (im *ImgManager) rangeTrashByDate(date time.Time, f func(path string, size 
 	}
 }
 
-func (im *ImgManager) GetTrashThumbnail(path string) (*Image, error) {
-	img := &Image{}
-	var err error
-	thumbnailPath := filepath.Join(defaultTrashDir, defaultThumbnailDir, path)
-	img.Content, img.Size, err = im.dri.Download(thumbnailPath)
-	if err != nil {
-		return img, fmt.Errorf("error downloading trash thumbnail: %w", err)
-	}
-	img.Path = thumbnailPath
-	return img, nil
-}
 
 // Locked folder functions
 
@@ -893,43 +516,15 @@ func (im *ImgManager) MoveToLocked(path string) error {
 	if err := im.dri.Rename(path, lockedPath); err != nil {
 		return fmt.Errorf("move to locked error: %w", err)
 	}
-	// Also move thumbnail (ignore error if not present)
-	thumbPath := filepath.Join(defaultThumbnailDir, path)
-	lockedThumbPath := filepath.Join(defaultLockedDir, defaultThumbnailDir, path)
-	_ = im.dri.Rename(thumbPath, lockedThumbPath)
-
-	if im.store != nil {
-		im.store.RemovePhoto(path)
-		im.store.RemoveThumb(path)
-	}
-	im.DebouncedWriteSyncState()
 	return nil
 }
 
 func (im *ImgManager) RestoreFromLocked(lockedPath string) error {
-	// lockedPath is relative to .locked/, e.g. "2024/01/15/photo.jpg"
 	originalPath := lockedPath
 	fullLockedPath := filepath.Join(defaultLockedDir, lockedPath)
 	if err := im.dri.Rename(fullLockedPath, originalPath); err != nil {
 		return fmt.Errorf("restore from locked error: %w", err)
 	}
-	// Also restore thumbnail (ignore error)
-	lockedThumbPath := filepath.Join(defaultLockedDir, defaultThumbnailDir, lockedPath)
-	thumbPath := filepath.Join(defaultThumbnailDir, lockedPath)
-	_ = im.dri.Rename(lockedThumbPath, thumbPath)
-
-	if im.store != nil {
-		var size int64
-		im.dri.Range(filepath.Dir(originalPath), func(info fs.FileInfo) bool {
-			if info.Name() == filepath.Base(originalPath) {
-				size = info.Size()
-				return false
-			}
-			return true
-		})
-		im.store.IndexPhoto(originalPath, filepath.Base(originalPath), size)
-	}
-	im.DebouncedWriteSyncState()
 	return nil
 }
 
@@ -972,7 +567,7 @@ func (im *ImgManager) rangeLockedByDate(date time.Time, f func(path string, size
 		if !yinfo.IsDir() {
 			continue
 		}
-		if yinfo.Name() == defaultThumbnailDir {
+		if strings.HasPrefix(yinfo.Name(), ".") {
 			continue
 		}
 		yNum, err := strconv.Atoi(yinfo.Name())
@@ -1031,17 +626,6 @@ func (im *ImgManager) rangeLockedByDate(date time.Time, f func(path string, size
 	}
 }
 
-func (im *ImgManager) GetLockedThumbnail(path string) (*Image, error) {
-	img := &Image{}
-	var err error
-	thumbnailPath := filepath.Join(defaultLockedDir, defaultThumbnailDir, path)
-	img.Content, img.Size, err = im.dri.Download(thumbnailPath)
-	if err != nil {
-		return img, fmt.Errorf("error downloading locked thumbnail: %w", err)
-	}
-	img.Path = thumbnailPath
-	return img, nil
-}
 
 type asc []fs.FileInfo
 
