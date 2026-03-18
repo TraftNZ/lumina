@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:lumina/choose_album_route.dart';
 import 'package:lumina/setting_storage_route.dart';
 import 'package:lumina/background_sync_route.dart';
@@ -21,12 +22,21 @@ class _SettingBodyState extends State<SettingBody> {
   bool _hasPinSet = false;
   String _cacheSizeStr = '...';
   bool _isRebuilding = false;
+  String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
     _checkPin();
     _loadCacheStats();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _appVersion = info.version;
+    });
   }
 
   Future<void> _loadCacheStats() async {
@@ -348,7 +358,7 @@ class _SettingBodyState extends State<SettingBody> {
                   leading:
                       Icon(Icons.info_outline, color: colorScheme.primary),
                   title: const Text('Lumina'),
-                  subtitle: Text('${l10n.version} 1.0.0'),
+                  subtitle: Text('${l10n.version} $_appVersion'),
                 ),
               ],
             ),
