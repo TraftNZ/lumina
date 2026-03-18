@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 	"time"
 
 	pb "github.com/traftai/lumina/proto"
@@ -420,7 +421,7 @@ func (a *api) GetLabelSummary(ctx context.Context, req *pb.GetLabelSummaryReques
 }
 
 func isVideo(name string) bool {
-	ext := filepath.Ext(name)
+	ext := strings.ToLower(filepath.Ext(name))
 	switch ext {
 	case ".mp4", ".avi", ".rmvb", ".rm", ".flv", ".wmv", ".mkv", ".mov", ".mpg", ".mpeg", ".3gp", ".3g2", ".asf", ".asx", ".vob", ".m2ts", ".mts", ".ts":
 		return true

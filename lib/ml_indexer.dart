@@ -9,8 +9,8 @@ import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/storage/storage.dart';
 import 'package:lumina/global.dart';
 import 'package:lumina/logger.dart';
+import 'package:lumina/util.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class MLIndexer extends ChangeNotifier {
@@ -23,6 +23,13 @@ class MLIndexer extends ChangeNotifier {
   int _indexed = 0;
   int _total = 0;
   String? _currentPath;
+
+  /// Reusable temp file path to avoid create/delete per photo
+  String? _tempFilePath;
+
+  /// Throttle UI updates to avoid excessive rebuilds
+  DateTime _lastNotify = DateTime.fromMillisecondsSinceEpoch(0);
+  static const _notifyInterval = Duration(milliseconds: 500);
 
   bool get isRunning => _running;
   bool get isPaused => _paused;
@@ -42,28 +49,47 @@ class MLIndexer extends ChangeNotifier {
         ),
         _textRecognizer = TextRecognizer();
 
+  /// Throttled notify — only fires if >= 500ms since last notify.
+  /// Use [force] for state transitions (start/stop/pause) that must update immediately.
+  void _throttledNotify({bool force = false}) {
+    final now = DateTime.now();
+    if (force || now.difference(_lastNotify) >= _notifyInterval) {
+      _lastNotify = now;
+      notifyListeners();
+    }
+  }
+
   Future<void> startBatchIndexing() async {
     if (_running) return;
     _running = true;
     _indexed = 0;
-    notifyListeners();
+    _throttledNotify(force: true);
 
     try {
+      final tempDir = await getTemporaryDirectory();
+      _tempFilePath = '${tempDir.path}/ml_indexer_temp.jpg';
       await _runBatchLoop();
     } finally {
       _running = false;
-      notifyListeners();
+      _throttledNotify(force: true);
+      // Clean up temp file
+      if (_tempFilePath != null) {
+        try {
+          await File(_tempFilePath!).delete();
+        } catch (_) {}
+        _tempFilePath = null;
+      }
     }
   }
 
   Future<void> pause() async {
     _paused = true;
-    notifyListeners();
+    _throttledNotify(force: true);
   }
 
   Future<void> resume() async {
     _paused = false;
-    notifyListeners();
+    _throttledNotify(force: true);
     if (!_running) {
       await startBatchIndexing();
     }
@@ -72,11 +98,11 @@ class MLIndexer extends ChangeNotifier {
   Future<void> stop() async {
     _paused = false;
     _running = false;
-    notifyListeners();
+    _throttledNotify(force: true);
   }
 
   Future<void> _runBatchLoop() async {
-    const batchSize = 50;
+    const batchSize = 20;
 
     while (_running) {
       if (_paused) {
@@ -95,24 +121,25 @@ class MLIndexer extends ChangeNotifier {
         }
 
         _total = _indexed + response.paths.length;
-        notifyListeners();
+        _throttledNotify(force: true);
 
         for (final path in response.paths) {
           if (!_running || _paused) break;
 
           _currentPath = path;
-          notifyListeners();
+          _throttledNotify();
 
           try {
             await _processPhoto(path);
             _indexed++;
-            notifyListeners();
+            _throttledNotify();
           } catch (e) {
             logger.w("MLIndexer: Failed to process $path: $e");
           }
 
-          // Yield to UI event loop between photos to keep interface fluid
-          await Future.delayed(const Duration(milliseconds: 50));
+          // Always yield to UI between photos with a real delay.
+          // This prevents a tight loop when many photos fail fast (no thumbnail/video).
+          await Future.delayed(const Duration(milliseconds: 200));
         }
       } catch (e) {
         logger.e("MLIndexer: Batch error: $e");
@@ -121,70 +148,62 @@ class MLIndexer extends ChangeNotifier {
     }
 
     _currentPath = null;
-    notifyListeners();
+    _throttledNotify(force: true);
   }
 
   Future<void> _processPhoto(String path) async {
-    File? tempFile;
-    InputImage inputImage;
-
-    try {
-      // Always use thumbnail for ML — fast and consistent across local/remote
-      final imageData = await _downloadThumbnail(path);
-      if (imageData == null) {
-        logger.w("MLIndexer: Could not get thumbnail for $path, marking as processed");
-        await storage.cli.updatePhotoLabels(
-          UpdatePhotoLabelsRequest(path: path, labels: ['_no_thumbnail']),
-        );
-        return;
-      }
-      // Save to temp file since InputImage.fromBytes doesn't support JPEG
-      final tempDir = await getTemporaryDirectory();
-      final filename = p.basename(path);
-      tempFile = File('${tempDir.path}/ml_$filename');
-      await tempFile.writeAsBytes(imageData);
-      inputImage = InputImage.fromFilePath(tempFile.path);
-
-      // Run ML inference in parallel for better performance
-      final results = await Future.wait([
-        _labeler.processImage(inputImage),
-        _faceDetector.processImage(inputImage),
-        _textRecognizer.processImage(inputImage),
-      ]);
-      final labels = results[0] as List<ImageLabel>;
-      final faces = results[1] as List<Face>;
-      final text = results[2] as RecognizedText;
-
-      // Extract data
-      final labelList = labels.map((l) => l.label).toList();
-      final faceIDs = faces.map((f) => f.trackingId?.toString() ?? '').where((id) => id.isNotEmpty).toList();
-      final textContent = text.text;
-
-      // Ensure at least one label so photo isn't returned as "unlabeled" again
-      if (labelList.isEmpty) {
-        labelList.add('_processed');
-      }
-
-      // Send results to server
-      final response = await storage.cli.updatePhotoLabels(
-        UpdatePhotoLabelsRequest(
-          path: path,
-          labels: labelList,
-          faceIDs: faceIDs,
-          text: textContent,
-        ),
+    // Skip videos — ML Kit image models don't apply
+    if (isVideoByPath(path)) {
+      await storage.cli.updatePhotoLabels(
+        UpdatePhotoLabelsRequest(path: path, labels: ['_video']),
       );
+      return;
+    }
 
-      if (!response.success) {
-        throw Exception("Failed to update labels: ${response.message}");
-      }
-    } finally {
-      // Clean up temp file
-      if (tempFile != null) {
-        try {
-          await tempFile.delete();
-        } catch (_) {}
-      }
+    // Always use thumbnail for ML — fast and consistent across local/remote
+    final imageData = await _downloadThumbnail(path);
+    if (imageData == null) {
+      logger.w("MLIndexer: Could not get thumbnail for $path, marking as processed");
+      await storage.cli.updatePhotoLabels(
+        UpdatePhotoLabelsRequest(path: path, labels: ['_no_thumbnail']),
+      );
+      return;
+    }
+
+    // Reuse a single temp file
+    final tempFile = File(_tempFilePath!);
+    await tempFile.writeAsBytes(imageData);
+    final inputImage = InputImage.fromFilePath(tempFile.path);
+
+    // Run ML models sequentially to avoid saturating the main thread.
+    // Each model does heavy native work via platform channels;
+    // running them one at a time keeps UI responsive between calls.
+    final labels = await _labeler.processImage(inputImage);
+    final faces = await _faceDetector.processImage(inputImage);
+    final text = await _textRecognizer.processImage(inputImage);
+
+    // Extract data
+    final labelList = labels.map((l) => l.label).toList();
+    final faceIDs = faces.map((f) => f.trackingId?.toString() ?? '').where((id) => id.isNotEmpty).toList();
+    final textContent = text.text;
+
+    // Ensure at least one label so photo isn't returned as "unlabeled" again
+    if (labelList.isEmpty) {
+      labelList.add('_processed');
+    }
+
+    // Send results to server
+    final response = await storage.cli.updatePhotoLabels(
+      UpdatePhotoLabelsRequest(
+        path: path,
+        labels: labelList,
+        faceIDs: faceIDs,
+        text: textContent,
+      ),
+    );
+
+    if (!response.success) {
+      throw Exception("Failed to update labels: ${response.message}");
     }
   }
 
@@ -193,7 +212,9 @@ class MLIndexer extends ChangeNotifier {
     if (urlPath.startsWith('/')) {
       urlPath = urlPath.substring(1);
     }
-    final url = '$httpBaseUrl/thumbnail/$urlPath';
+    // Encode each path segment individually to handle spaces and special chars
+    final encodedPath = urlPath.split('/').map(Uri.encodeComponent).join('/');
+    final url = '$httpBaseUrl/thumbnail/$encodedPath';
 
     try {
       final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30));
@@ -227,7 +248,6 @@ Future<void> startMLIndexingIfNeeded() async {
   }
 
   if (!mlIndexer!.isRunning) {
-    // Start indexing in the background
     mlIndexer!.startBatchIndexing().catchError((e) {
       logger.e("MLIndexer error: $e");
     });

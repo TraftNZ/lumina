@@ -9,15 +9,19 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.0
 	github.com/dsoprea/go-exif/v3 v3.0.1
 	github.com/fregie/PrintVersion v0.1.0
+	github.com/google/uuid v1.6.0
 	github.com/hirochachacha/go-smb2 v1.1.0
+	github.com/jdeng/goheif v0.0.0-20260309214039-46ce8d592019
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/stretchr/testify v1.10.0
 	github.com/studio-b12/gowebdav v0.12.0
 	github.com/vmware/go-nfs-client v0.0.0-20190605212624-d43b92724c1b
+	golang.org/x/image v0.37.0
 	golang.org/x/mobile v0.0.0-20260211191516-dcd2a3258864
 	golang.org/x/net v0.50.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
+	modernc.org/sqlite v1.47.0
 )
 
 require (
@@ -37,7 +41,6 @@ require (
 	github.com/geoffgarside/ber v1.2.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/golang/geo v0.0.0-20260129164528-943061e2742c // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -45,9 +48,9 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/mod v0.33.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -55,7 +58,6 @@ require (
 	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.47.0 // indirect
 )
 
 replace github.com/vmware/go-nfs-client => github.com/fregie/go-nfs-client v1.0.0

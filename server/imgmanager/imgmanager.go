@@ -365,6 +365,38 @@ func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
 		}
 	}
 	img, err := im.GetThumbnail(path)
+	if err == nil {
+		defer img.Content.Close()
+		data, err := io.ReadAll(img.Content)
+		if err != nil {
+			return nil, err
+		}
+		if im.store != nil {
+			go im.store.PutThumb(path, data)
+		}
+		return data, nil
+	}
+
+	// Only attempt on-demand generation for formats we can decode
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext != JpegSuffix && ext != PngSuffix {
+		return nil, fmt.Errorf("thumbnail not available for %s", filepath.Base(path))
+	}
+
+	// Generate thumbnail on-demand from the full-size image
+	fullImg, _, dlErr := im.dri.Download(path)
+	if dlErr != nil {
+		return nil, fmt.Errorf("error downloading original for thumbnail generation: %w", dlErr)
+	}
+	defer fullImg.Close()
+	fullData, err := io.ReadAll(fullImg)
+	if err != nil {
+		return nil, err
+	}
+	if err := im.GenerateThumbnail(path, fullData); err != nil {
+		return nil, fmt.Errorf("error generating thumbnail on demand: %w", err)
+	}
+	img, err = im.GetThumbnail(path)
 	if err != nil {
 		return nil, err
 	}

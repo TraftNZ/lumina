@@ -263,10 +263,15 @@ class RemoteImage {
         // Save to disk cache
         ThumbnailCache.instance.put(path, thumbnailData!);
       } catch (e) {
-        print("get $path thumbnail failed (attempt ${retryCount + 1}): $e");
         retryCount++;
+        // Don't retry on 400 Bad Request — it's a permanent error
+        // (e.g. unsupported format like .MP4 or .HEIC)
+        final errStr = e.toString();
+        if (errStr.contains('[Bad Request]')) {
+          break;
+        }
+        print("get $path thumbnail failed (attempt $retryCount): $e");
         if (retryCount < maxRetries) {
-          // Exponential backoff: 1s, 3s
           await Future.delayed(Duration(seconds: retryCount * 2 - 1));
         }
       }

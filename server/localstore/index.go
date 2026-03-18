@@ -372,14 +372,21 @@ func (s *LocalStore) SearchLabels(query string) []string {
 	return results
 }
 
-// GetUnlabeledPaths returns paths that have no ML labels yet (for batch indexing).
+// GetUnlabeledPaths returns paths that have no ML labels yet and have cached thumbnails (for batch indexing).
+// Only photos with locally cached thumbnails are returned, since ML indexing needs the thumbnail
+// and downloading full images from remote storage on-the-fly is too expensive.
 func (s *LocalStore) GetUnlabeledPaths(limit int) []string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !s.initialized {
 		return nil
 	}
-	rows, err := s.db.Query(`SELECT path FROM photos WHERE labels='[]' AND text='' LIMIT ?`, limit)
+	rows, err := s.db.Query(
+		`SELECT p.path FROM photos p
+		 WHERE p.labels='[]' AND p.text=''
+		 AND (EXISTS(SELECT 1 FROM thumbs t WHERE t.path = p.path)
+		   OR EXISTS(SELECT 1 FROM thumbs t WHERE t.path = '/' || p.path))
+		 LIMIT ?`, limit)
 	if err != nil {
 		return nil
 	}
