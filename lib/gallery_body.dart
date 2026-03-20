@@ -128,9 +128,11 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void toggleSelection(int index) async {
-    final hasVibrator = await Vibration.hasVibrator();
-    if (hasVibrator!) {
-      Vibration.vibrate(duration: 10);
+    if (Platform.isAndroid || Platform.isIOS) {
+      final hasVibrator = await Vibration.hasVibrator();
+      if (hasVibrator!) {
+        Vibration.vibrate(duration: 10);
+      }
     }
     if (_selectedIndices[index] == null) {
       _selectedIndices[index] = true;
@@ -175,7 +177,12 @@ class GalleryBodyState extends State<GalleryBody>
     });
   }
 
+  bool _autoSyncing = false;
+
   void _runAutoSync(List<Asset> toSync) async {
+    if (_autoSyncing) return;
+    _autoSyncing = true;
+    _autoSyncTimer?.cancel();
     stateModel.startSync(toSync.length);
     for (final asset in toSync) {
       if (!mounted || stateModel.syncCancelled) break;
@@ -196,6 +203,7 @@ class GalleryBodyState extends State<GalleryBody>
       // Yield to UI event loop between uploads
       await Future.delayed(Duration.zero);
     }
+    _autoSyncing = false;
     stateModel.finishSync();
     eventBus.fire(RemoteRefreshEvent());
   }
@@ -463,6 +471,7 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   Future<bool> _tryBiometricAuth() async {
+    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return false;
     final localAuth = LocalAuthentication();
     try {
       final canCheck = await localAuth.canCheckBiometrics;
@@ -602,6 +611,29 @@ class GalleryBodyState extends State<GalleryBody>
                 const Spacer(),
                 Consumer<AssetModel>(
                   builder: (context, assetModel, child) {
+                    if (model.indexSyncing) {
+                      return GestureDetector(
+                        onTap: _toggleSyncPanel,
+                        child: SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              Icon(Icons.cloud_sync, size: 18, color: colorScheme.primary),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
                     if (model.isSyncing) {
                       return GestureDetector(
                         onTap: _toggleSyncPanel,
@@ -638,10 +670,13 @@ class GalleryBodyState extends State<GalleryBody>
                         ),
                       );
                     }
-                    return Icon(
-                      Icons.cloud_done,
-                      size: 20,
-                      color: colorScheme.primary,
+                    return GestureDetector(
+                      onTap: refresh,
+                      child: Icon(
+                        Icons.cloud_done,
+                        size: 20,
+                        color: colorScheme.primary,
+                      ),
                     );
                   },
                 ),
@@ -688,50 +723,78 @@ class GalleryBodyState extends State<GalleryBody>
               : 0.0;
           return AnimatedSize(
             duration: const Duration(milliseconds: 200),
-            child: _syncPanelExpanded && model.isSyncing
+            child: _syncPanelExpanded && (model.isSyncing || model.indexSyncing)
                 ? Container(
                     margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          l10n.backingUpPhotos(remaining),
-                          style: textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 12),
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: CircularProgressIndicator(
-                                    value: progress,
-                                    strokeWidth: 3,
-                                    color: colorScheme.primary,
+                        if (model.indexSyncing) ...[
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 40,
+                                    height: 40,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      color: colorScheme.primary,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                Text(
-                                  l10n.nRemaining(remaining),
-                                  style: textTheme.bodyMedium,
-                                ),
-                              ],
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Text(
+                                      model.indexSyncMessage ?? '',
+                                      style: textTheme.bodyMedium,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              stateModel.cancelSync();
-                            },
-                            child: Text(l10n.stop),
+                        ],
+                        if (model.isSyncing) ...[
+                          Text(
+                            l10n.backingUpPhotos(remaining),
+                            style: textTheme.bodyLarge,
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 40,
+                                    height: 40,
+                                    child: CircularProgressIndicator(
+                                      value: progress,
+                                      strokeWidth: 3,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    l10n.nRemaining(remaining),
+                                    style: textTheme.bodyMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                stateModel.cancelSync();
+                              },
+                              child: Text(l10n.stop),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   )
@@ -743,6 +806,7 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   Widget contentBuilder(BuildContext context, AssetModel model, Widget? child) {
+    columCount = responsiveColumns(context, base: 3);
     final all = model.getUnifiedAssets();
     var children = <Widget>[];
     final totalwidth = MediaQuery.of(context).size.width - (columCount - 1) * 2;
@@ -841,13 +905,22 @@ class GalleryBodyState extends State<GalleryBody>
                     width: imgWidth,
                     height: imgHeight,
                     child: Hero(
-                      tag:
-                          "asset_${all[i].dedupKey ?? all[i].path()}",
+                      tag: "asset_grid_$i",
                       child:
                           needLoadThumbnail && all[i].loadThumbnailFinished()
                               ? Image(
                                   image: all[i].thumbnailProvider(),
-                                  fit: BoxFit.cover)
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        color: colorScheme.surfaceContainerHighest,
+                                        child: Icon(
+                                          all[i].isVideo() ? Icons.videocam : Icons.broken_image,
+                                          color: colorScheme.onSurfaceVariant,
+                                          size: 32,
+                                        ),
+                                      ),
+                                )
                               : Container(
                                   color: colorScheme.surfaceContainerHighest),
                       flightShuttleBuilder: (BuildContext flightContext,
@@ -1023,8 +1096,8 @@ class GalleryBodyState extends State<GalleryBody>
     return SliverPadding(
       padding: const EdgeInsets.all(4),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: responsiveColumns(context, base: 2),
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
           childAspectRatio: 1,
@@ -1078,8 +1151,8 @@ class GalleryBodyState extends State<GalleryBody>
     return SliverPadding(
       padding: const EdgeInsets.all(4),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: responsiveColumns(context, base: 2),
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
           childAspectRatio: 1,

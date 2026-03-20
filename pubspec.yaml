@@ -41,6 +41,7 @@ dependencies:
   date_format: ^2.0.9
   image_picker: ^1.2.1
   provider: ^6.1.5
+  ffi: ^2.1.0
   path: ^1.8.2
   shared_preferences: ^2.5.4
   crypto: ^3.0.6

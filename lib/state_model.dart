@@ -15,13 +15,24 @@ SettingModel settingModel = SettingModel();
 AssetModel assetModel = AssetModel();
 StateModel stateModel = StateModel();
 
-enum Drive { smb, webDav, nfs, s3 }
+IOSink? _debugSink;
+void _debugLog(String msg) {
+  try {
+    _debugSink ??= File('/Users/pzhu/Library/Containers/B0A88356-59CC-40D9-B21C-24CF195D3681/Data/Documents/lumina_debug.log').openWrite(mode: FileMode.append);
+    final ts = DateTime.now().toIso8601String();
+    _debugSink!.writeln('[$ts] $msg');
+    _debugSink!.flush();
+  } catch (_) {}
+}
+
+enum Drive { smb, webDav, nfs, s3, cloudreve }
 
 Map<Drive, String> driveName = {
   Drive.smb: 'SMB',
   Drive.webDav: 'WebDAV',
   Drive.nfs: 'NFS',
   Drive.s3: 'S3',
+  Drive.cloudreve: 'Cloudreve',
 };
 
 class SettingModel extends ChangeNotifier {
@@ -122,6 +133,8 @@ class StateModel extends ChangeNotifier {
   }
 
   void setNotSyncedPhotos(List<String> ids) {
+    _debugLog('setNotSyncedPhotos: ${ids.length} ids (was ${notSyncedIDs.length})');
+    _debugLog('stack: ${StackTrace.current.toString().split('\n').take(5).join(' <- ')}');
     notSyncedIDs = ids;
     notifyListeners();
   }
@@ -163,6 +176,23 @@ class StateModel extends ChangeNotifier {
 
   void cancelSync() {
     syncCancelled = true;
+    notifyListeners();
+  }
+
+  bool indexSyncing = false;
+  String? indexSyncMessage;
+  int? indexSyncResult;
+
+  void startIndexSync(String message) {
+    indexSyncing = true;
+    indexSyncMessage = message;
+    indexSyncResult = null;
+    notifyListeners();
+  }
+
+  void finishIndexSync(int totalFiles) {
+    indexSyncing = false;
+    indexSyncResult = totalFiles;
     notifyListeners();
   }
 }
@@ -284,6 +314,7 @@ class AssetModel extends ChangeNotifier {
   }
 
   Future<void> refreshRemote() async {
+    _debugLog('refreshRemote called from: ${StackTrace.current.toString().split('\n').take(6).join(' <- ')}');
     if (remoteGetting != null) {
       await remoteGetting!.future;
     }
@@ -295,13 +326,53 @@ class AssetModel extends ChangeNotifier {
 
   Future<void> _fetchRemotePhotos() async {
     if (!isServerReady) return;
+    if (!settingModel.isRemoteStorageSetted) return;
     await checkServer();
     if (remoteGetting != null) {
       await remoteGetting!.future;
       return;
     }
     remoteGetting = Completer<bool>();
+    final reuseMap = <String, Asset>{};
+    for (final a in remoteAssets) {
+      if (a.hasRemote) {
+        reuseMap[a.remote!.path] = a;
+      }
+    }
     try {
+      // Show cached data immediately (from local DB)
+      final cachedImages = await storage.listImages("");
+      if (cachedImages.isNotEmpty) {
+        final List<Asset> cachedAssets = [];
+        for (var image in cachedImages) {
+          final existing = reuseMap[image.path];
+          if (existing != null) {
+            existing.remote = image;
+            cachedAssets.add(existing);
+          } else {
+            cachedAssets.add(Asset(remote: image));
+          }
+        }
+        remoteAssets = cachedAssets;
+        _unifiedDirty = true;
+        notifyListeners();
+      }
+
+      // Sync index in background (slow for Cloudreve) — don't block UI
+      _syncIndexInBackground();
+    } catch (e) {
+      remoteLastError = e.toString();
+    }
+    remoteHasMore = false;
+    _unifiedDirty = true;
+    notifyListeners();
+    remoteGetting?.complete(true);
+    remoteGetting = null;
+  }
+
+  void _syncIndexInBackground() {
+    storage.syncIndex().then((_) async {
+      final images = await storage.listImages("");
       final reuseMap = <String, Asset>{};
       for (final a in remoteAssets) {
         if (a.hasRemote) {
@@ -309,43 +380,28 @@ class AssetModel extends ChangeNotifier {
         }
       }
       final List<Asset> newRemoteAssets = [];
-      int offset = 0;
-      bool hasMore = true;
-      while (hasMore) {
-        final List<RemoteImage> images =
-            await storage.listImages("9999:12:31", offset, pageSize);
-        if (images.length < pageSize) {
-          hasMore = false;
+      for (var image in images) {
+        final existing = reuseMap[image.path];
+        if (existing != null) {
+          existing.remote = image;
+          newRemoteAssets.add(existing);
+        } else {
+          newRemoteAssets.add(Asset(remote: image));
         }
-        for (var image in images) {
-          try {
-            final existing = reuseMap[image.path];
-            if (existing != null) {
-              existing.remote = image;
-              newRemoteAssets.add(existing);
-            } else {
-              newRemoteAssets.add(Asset(remote: image));
-            }
-          } catch (e) {
-            print(e);
-          }
-        }
-        offset += images.length;
       }
-      // Swap in new data at once — no flicker
       remoteAssets = newRemoteAssets;
-      remoteHasMore = false;
       _unifiedDirty = true;
-      stateModel.setNotSyncedPhotos([]);
       notifyListeners();
-    } catch (e) {
-      remoteLastError = e.toString();
-    }
-    remoteGetting?.complete(true);
-    remoteGetting = null;
+    }).catchError((e) {
+      print("[AssetModel] Background sync error: $e");
+    });
   }
 
   Future<void> getLocalPhotos({Map<String, Asset>? reuseMap}) async {
+    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) {
+      localHasMore = false;
+      return;
+    }
     if (localGetting != null) {
       await localGetting?.future;
       return;
@@ -409,7 +465,9 @@ class AssetModel extends ChangeNotifier {
     }
     _unifiedDirty = true;
     notifyListeners();
-    if (stateModel.notSyncedIDs.isEmpty) {
+    // Only trigger unsync check on initial load (offset == 0), not pagination,
+    // and only if we haven't already fetched the list.
+    if (offset == 0 && stateModel.notSyncedIDs.isEmpty && !stateModel.refreshingUnsynchronized) {
       refreshUnsynchronizedPhotos();
     }
 
@@ -419,40 +477,16 @@ class AssetModel extends ChangeNotifier {
 
   Future<void> getRemotePhotos() async {
     if (!isServerReady) return;
-    await checkServer();
     if (remoteGetting != null) {
       await remoteGetting!.future;
       return;
     }
-    remoteGetting = Completer<bool>();
-    final offset = remoteAssets.length;
-    try {
-      final List<RemoteImage> images =
-          await storage.listImages("9999:12:31", offset, pageSize);
-      if (images.length < pageSize) {
-        remoteHasMore = false;
-      }
-      for (var image in images) {
-        try {
-          final asset = Asset(remote: image);
-          remoteAssets.add(asset);
-          // asset.thumbnailDataAsync().then((value) => notifyListeners());
-        } catch (e) {
-          print(e);
-        }
-      }
-      _unifiedDirty = true;
-      notifyListeners();
-    } catch (e) {
-      remoteLastError = e.toString();
-    }
-
-    remoteGetting?.complete(true);
-    remoteGetting = null;
+    await _fetchRemotePhotos();
   }
 }
 
 Future<void> resolveLocalFolderAbsPath() async {
+  if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
   if (settingModel.localFolder.isEmpty) return;
   if (settingModel.localFolderAbsPath != null) return;
   final re = await requestPermission();
@@ -496,6 +530,8 @@ Future<void> scanFile(String filePath) async {
 }
 
 Future<void> refreshUnsynchronizedPhotos() async {
+  _debugLog('refreshUnsynchronizedPhotos called');
+  if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
   if (!isServerReady) return;
   await checkServer();
   if (!settingModel.isRemoteStorageSetted) {

@@ -239,10 +239,12 @@ class MLIndexer extends ChangeNotifier {
 MLIndexer? mlIndexer;
 
 void initMLIndexer() {
+  if (!(Platform.isAndroid || Platform.isIOS)) return;
   mlIndexer ??= MLIndexer();
 }
 
 Future<void> startMLIndexingIfNeeded() async {
+  if (!(Platform.isAndroid || Platform.isIOS)) return;
   if (mlIndexer == null) {
     initMLIndexer();
   }

@@ -14,6 +14,15 @@ import 'package:lumina/l10n/app_localizations.dart';
 import 'dart:async';
 import 'dart:io';
 
+/// Returns a responsive column count based on screen width.
+/// [base] is the column count for mobile (~400px wide).
+int responsiveColumns(BuildContext context, {int base = 3}) {
+  final width = MediaQuery.of(context).size.width;
+  if (width > 1200) return base * 3;
+  if (width > 800) return base * 2;
+  return base;
+}
+
 late String httpBaseUrl;
 late int grpcPort;
 late int httpPort;
@@ -36,7 +45,7 @@ class Global {
       final localFolder = prefs.getString("localFolder");
       if (localFolder != null && localFolder.isNotEmpty) {
         settingModel.setLocalFolder(localFolder);
-      } else {
+      } else if (Platform.isAndroid || Platform.isIOS) {
         final re = await requestPermission();
         if (!re) return;
         final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
@@ -59,8 +68,12 @@ class Global {
       final persistence = SyncStatePersistence(prefs);
       await persistence.setActivePorts(grpcPort, httpPort);
       await resolveLocalFolderAbsPath();
-      await initDrive();
-      initMLIndexer();
+      // Don't await initDrive — if Cloudreve server is unreachable, this can
+      // hang for 30s+. Let it run in background so the UI loads immediately.
+      initDrive().catchError((e) => print("initDrive error: $e"));
+      if (Platform.isAndroid || Platform.isIOS) {
+        initMLIndexer();
+      }
       reloadAutoSyncTimer();
     });
   }
@@ -192,6 +205,31 @@ Future<void> initDrive() async {
           assetModel.remoteLastError = rsp.message;
         }
       }
+      break;
+    case Drive.cloudreve:
+      final server = prefs.getString('cloudreve_server');
+      final email = prefs.getString('cloudreve_email');
+      final password = prefs.getString('cloudreve_password');
+      final root = prefs.getString('cloudreve_root_path');
+      if (server != null && email != null && password != null) {
+        final rsp =
+            await storage.cli.setDriveCloudreve(SetDriveCloudrveRequest(
+          server: server,
+          email: email,
+          password: password,
+          root: root ?? '',
+        ));
+        if (rsp.require2fa) {
+          settingModel.setRemoteStorageSetted(false);
+          assetModel.remoteLastError = "2FA required, please reconfigure storage";
+        } else if (rsp.success) {
+          logger.i("set drive cloudreve success");
+          settingModel.setRemoteStorageSetted(true);
+        } else {
+          settingModel.setRemoteStorageSetted(false);
+          assetModel.remoteLastError = rsp.message;
+        }
+      }
   }
 }
 
@@ -234,6 +272,7 @@ void initRequestPermission(BuildContext context) {
 }
 
 Future<bool> requestPermission() async {
+  if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return true;
   bool result = false;
   if (requesttingPermission != null) {
     result = await requesttingPermission!.future;

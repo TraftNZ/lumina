@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:lumina/global.dart';
 
 class AlbumDetailBody extends StatefulWidget {
   final AssetPathEntity album;
@@ -70,8 +71,8 @@ class _AlbumDetailBodyState extends State<AlbumDetailBody> {
       body: GridView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(2),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: responsiveColumns(context),
           mainAxisSpacing: 2,
           crossAxisSpacing: 2,
         ),

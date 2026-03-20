@@ -269,15 +269,17 @@ class _CollectionsBodyState extends State<CollectionsBody> {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 140,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _years.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: responsiveColumns(context, base: 3),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
                   final yearData = _years[index];
                   return _YearCard(
                     yearData: yearData,
@@ -291,6 +293,7 @@ class _CollectionsBodyState extends State<CollectionsBody> {
                     },
                   );
                 },
+                childCount: _years.length,
               ),
             ),
           ),
@@ -306,15 +309,17 @@ class _CollectionsBodyState extends State<CollectionsBody> {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 140,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _peoplePets.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: responsiveColumns(context, base: 3),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
                   final album = _peoplePets[index];
                   return _SmartAlbumCard(
                     album: album,
@@ -331,6 +336,7 @@ class _CollectionsBodyState extends State<CollectionsBody> {
                     },
                   );
                 },
+                childCount: _peoplePets.length,
               ),
             ),
           ),
@@ -346,15 +352,17 @@ class _CollectionsBodyState extends State<CollectionsBody> {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 140,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: responsiveColumns(context, base: 3),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
                   final album = _categories[index];
                   return _SmartAlbumCard(
                     album: album,
@@ -371,6 +379,7 @@ class _CollectionsBodyState extends State<CollectionsBody> {
                     },
                   );
                 },
+                childCount: _categories.length,
               ),
             ),
           ),
@@ -389,7 +398,7 @@ class _CollectionsBodyState extends State<CollectionsBody> {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid.count(
-              crossAxisCount: 2,
+              crossAxisCount: responsiveColumns(context, base: 2),
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               childAspectRatio: 0.85,
@@ -459,9 +468,7 @@ class _YearCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: 120,
-      child: Card(
+    return Card(
         clipBehavior: Clip.antiAliasWithSaveLayer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
@@ -510,7 +517,6 @@ class _YearCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }
@@ -666,65 +672,62 @@ class _SmartAlbumCardState extends State<_SmartAlbumCard> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: 120,
-      child: Card(
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: InkWell(
-          onTap: widget.onTap,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (_thumbData != null)
-                Image.memory(_thumbData!, fit: BoxFit.cover)
-              else
-                Container(
-                  color: colorScheme.surfaceContainerHighest,
-                  child: Icon(
-                    widget.album.icon ?? Icons.photo_library_outlined,
-                    size: 40,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
+    return Card(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: widget.onTap,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (_thumbData != null)
+              Image.memory(_thumbData!, fit: BoxFit.cover)
+            else
               Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.6),
-                    ],
-                  ),
+                color: colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  widget.album.icon ?? Icons.photo_library_outlined,
+                  size: 40,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      widget.album.label,
-                      style: textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '${widget.album.count} ${l10n.pics}',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.6),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    widget.album.label,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${widget.album.count} ${l10n.pics}',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

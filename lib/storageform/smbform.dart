@@ -375,15 +375,14 @@ class _SMBFormState extends State<SMBForm> {
           root: smbRootPathController!.text,
         ));
         if (rsp.success) {
-          ListByDateResponse rsp =
-              await storage.cli.listByDate(ListByDateRequest());
-          if (rsp.success) {
+          final listRsp = await storage.cli.listByDate(ListByDateRequest());
+          if (listRsp.success) {
             setState(() {
               testSuccess = true;
             });
           } else {
             setState(() {
-              errormsg = rsp.message;
+              errormsg = listRsp.message;
             });
           }
         } else {

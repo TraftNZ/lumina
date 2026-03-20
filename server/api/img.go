@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -26,40 +28,30 @@ func NewApi(im *imgmanager.ImgManager) *api {
 	return a
 }
 
-func (a *api) ListByDate(ctx context.Context, req *pb.ListByDateRequest) (rsp *pb.ListByDateResponse, err error) {
-	rsp = &pb.ListByDateResponse{Success: true}
-	if req.MaxReturn <= 0 {
-		req.MaxReturn = 100
+func (a *api) ListByDate(ctx context.Context, req *pb.ListByDateRequest) (*pb.ListByDateResponse, error) {
+	files := a.im.ListFromIndex()
+	log.Printf("[ListByDate] returning %d files from index", len(files))
+	paths := make([]string, len(files))
+	for i, f := range files {
+		paths[i] = f.Path
 	}
-	if req.Offset <= 0 {
-		req.Offset = 0
+	return &pb.ListByDateResponse{Success: true, Paths: paths}, nil
+}
+
+func (a *api) SyncIndex(ctx context.Context, req *pb.SyncIndexRequest) (*pb.SyncIndexResponse, error) {
+	count, err := a.im.SyncIndex()
+	if err != nil {
+		return &pb.SyncIndexResponse{Success: false, Message: err.Error()}, nil
 	}
-	var e error
-	start := time.Now()
-	if req.Date != "" {
-		start, e = time.Parse("2006:01:02", req.Date)
-		if e != nil {
-			rsp.Success, rsp.Message = false, fmt.Sprintf("param error: date format error: %s", req.Date)
-			return
-		}
+	return &pb.SyncIndexResponse{Success: true, TotalFiles: int32(count)}, nil
+}
+
+func (a *api) FullResyncIndex(ctx context.Context, req *pb.FullResyncIndexRequest) (*pb.FullResyncIndexResponse, error) {
+	count, err := a.im.FullResyncIndex()
+	if err != nil {
+		return &pb.FullResyncIndexResponse{Success: false, Message: err.Error()}, nil
 	}
-	rsp.Paths = make([]string, 0, req.MaxReturn)
-	offset := req.Offset
-	needReturn := req.MaxReturn
-	e = a.im.RangeByDate(start, func(path string, size int64) bool {
-		if offset > 0 {
-			offset--
-			return true
-		}
-		rsp.Paths = append(rsp.Paths, path)
-		needReturn--
-		return needReturn > 0
-	})
-	if e != nil {
-		rsp.Success, rsp.Message = false, e.Error()
-		return
-	}
-	return
+	return &pb.FullResyncIndexResponse{Success: true, TotalFiles: int32(count)}, nil
 }
 
 func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.DeleteResponse, err error) {
@@ -68,13 +60,41 @@ func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.Delete
 	return
 }
 
+// uuidPrefixRe matches a UUID prefix added by Cloudreve for version uploads
+// e.g. "7f4110d3-cbe9-4321-bb77-6536363abec5_20200723..."
+var uuidPrefixRe = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_`)
+
 func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error {
 	all := make(map[string]bool)
-	a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
-		name := filepath.Base(path)
-		all[name] = true
-		return true
-	})
+	// Use local store cache (instant) instead of RangeByDate (slow directory traversal)
+	store := a.im.Store()
+	if store != nil {
+		for _, f := range store.ListRemoteFiles() {
+			name := filepath.Base(f.Path)
+			all[name] = true
+			// Also index without UUID prefix (from Cloudreve version uploads)
+			stripped := uuidPrefixRe.ReplaceAllString(name, "")
+			if stripped != name {
+				all[stripped] = true
+			}
+		}
+	}
+	if len(all) == 0 {
+		// Fallback to RangeByDate if store is empty
+		if err := a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
+			name := filepath.Base(path)
+			all[name] = true
+			stripped := uuidPrefixRe.ReplaceAllString(name, "")
+			if stripped != name {
+				all[stripped] = true
+			}
+			return true
+		}); err != nil {
+			log.Printf("FilterNotUploaded: RangeByDate failed: %v", err)
+			return fmt.Errorf("failed to list remote files: %w", err)
+		}
+	}
+	log.Printf("FilterNotUploaded: indexed %d remote files", len(all))
 	for {
 		r, err := stream.Recv()
 		if err != nil {

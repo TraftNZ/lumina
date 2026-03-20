@@ -88,7 +88,7 @@ class ChooseAlbumRouteState extends State<ChooseAlbumRoute> {
               sliver: SliverGrid.count(
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                crossAxisCount: 2,
+                crossAxisCount: responsiveColumns(context, base: 2),
                 childAspectRatio: 0.75,
                 children: children,
               ),

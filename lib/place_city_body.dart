@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:photo_manager/photo_manager.dart' hide LatLng;
+import 'package:lumina/global.dart';
 import 'package:lumina/places_service.dart';
 
 class PlaceCityBody extends StatefulWidget {
@@ -86,8 +87,8 @@ class _PlaceCityBodyState extends State<PlaceCityBody> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(2),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: responsiveColumns(context),
                 mainAxisSpacing: 2,
                 crossAxisSpacing: 2,
               ),

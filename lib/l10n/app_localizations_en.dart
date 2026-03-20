@@ -429,4 +429,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categories => 'Categories';
+
+  @override
+  String get syncingIndex => 'Syncing cloud photo index...';
+
+  @override
+  String get rewalkAllPhotos => 'Rewalk all cloud photos';
+
+  @override
+  String get rewalkingPhotos => 'Rewalking all cloud photos...';
+
+  @override
+  String rewalkComplete(int count) {
+    return 'Rewalk complete: $count photos indexed';
+  }
+
+  @override
+  String get cloudreveStorage => 'Cloudreve';
+
+  @override
+  String get cloudreveServer => 'Server URL';
+
+  @override
+  String get cloudreveEmail => 'Email';
+
+  @override
+  String get cloudrevePassword => 'Password';
+
+  @override
+  String get cloudreveOtp => 'Verification Code';
+
+  @override
+  String get cloudreveOtpHint => 'Enter the 6-digit code from your authenticator app';
+
+  @override
+  String get cloudreveVerify => 'Verify';
+
+  @override
+  String get cloudreve2faRequired => 'Two-factor authentication required';
 }

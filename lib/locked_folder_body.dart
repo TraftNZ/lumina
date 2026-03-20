@@ -31,6 +31,7 @@ class _LockedFolderBodyState extends State<LockedFolderBody> {
   }
 
   Future<bool> _tryBiometricAuth() async {
+    if (!(Platform.isAndroid || Platform.isIOS)) return false;
     final localAuth = LocalAuthentication();
     try {
       final canAuth = await localAuth.canCheckBiometrics || await localAuth.isDeviceSupported();

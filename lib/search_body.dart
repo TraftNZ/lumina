@@ -188,8 +188,8 @@ class _SearchBodyState extends State<SearchBody> {
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(2),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: responsiveColumns(context, base: 3),
               mainAxisSpacing: 2,
               crossAxisSpacing: 2,
             ),
@@ -431,7 +431,9 @@ class SearchResultsViewerState extends State<SearchResultsViewer> {
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsBytes(data);
-      await Gal.putImage(file.path, album: 'Pho');
+      if (Platform.isAndroid || Platform.isIOS) {
+        await Gal.putImage(file.path, album: 'Pho');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.savedToGallery)),

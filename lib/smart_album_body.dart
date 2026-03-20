@@ -100,8 +100,8 @@ class _SmartAlbumBodyState extends State<SmartAlbumBody> {
                     Expanded(
                       child: GridView.builder(
                         padding: const EdgeInsets.all(2),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: responsiveColumns(context, base: 3),
                           mainAxisSpacing: 2,
                           crossAxisSpacing: 2,
                         ),

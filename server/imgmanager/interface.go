@@ -5,6 +5,8 @@ import (
 	"io"
 	"io/fs"
 	"time"
+
+	"github.com/traftai/lumina/server/localstore"
 )
 
 type StorageDrive interface {
@@ -15,6 +17,15 @@ type StorageDrive interface {
 	Delete(path string) error
 	Rename(oldPath string, newPath string) error
 	Range(dir string, deal func(fs.FileInfo) bool) error
+}
+
+// SmartBackend is an optional interface for storage backends that manage
+// their own file index and thumbnails (e.g. Cloudreve). When a drive
+// implements SmartBackend, imgmanager skips local index building and
+// thumbnail generation.
+type SmartBackend interface {
+	ListPhotos() ([]localstore.RemoteFile, error)
+	GetThumbnail(path string) ([]byte, error)
 }
 
 type Image struct {

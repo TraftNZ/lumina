@@ -423,4 +423,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get categories => '分类';
+
+  @override
+  String get syncingIndex => '正在同步云端照片索引...';
+
+  @override
+  String get rewalkAllPhotos => '重新扫描所有云端照片';
+
+  @override
+  String get rewalkingPhotos => '正在重新扫描所有云端照片...';
+
+  @override
+  String rewalkComplete(int count) {
+    return '扫描完成：已索引 $count 张照片';
+  }
+
+  @override
+  String get cloudreveStorage => 'Cloudreve';
+
+  @override
+  String get cloudreveServer => '服务器地址';
+
+  @override
+  String get cloudreveEmail => '邮箱';
+
+  @override
+  String get cloudrevePassword => '密码';
+
+  @override
+  String get cloudreveOtp => '验证码';
+
+  @override
+  String get cloudreveOtpHint => '输入验证器应用中的6位验证码';
+
+  @override
+  String get cloudreveVerify => '验证';
+
+  @override
+  String get cloudreve2faRequired => '需要两步验证';
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -9,6 +10,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -42,13 +44,63 @@ var (
 	unsupported atomic.Int64
 )
 
-func isSupportedImage(name string) bool {
+var hasFfmpeg bool
+
+func isSupportedMedia(name string) bool {
 	ext := strings.ToLower(filepath.Ext(name))
 	switch ext {
 	case ".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif":
 		return true
+	case ".mp4", ".mov", ".avi", ".mkv", ".3gp", ".flv", ".wmv",
+		".mpg", ".mpeg", ".webm", ".mts", ".m2ts", ".ts", ".rmvb", ".rm":
+		return hasFfmpeg
 	}
 	return false
+}
+
+func isVideoExt(ext string) bool {
+	switch ext {
+	case ".mp4", ".mov", ".avi", ".mkv", ".3gp", ".flv", ".wmv",
+		".mpg", ".mpeg", ".webm", ".mts", ".m2ts", ".ts", ".rmvb", ".rm":
+		return true
+	}
+	return false
+}
+
+func generateVideoThumbnail(data []byte, ext string) ([]byte, error) {
+	tmp, err := os.CreateTemp("", "genthumb-*"+ext)
+	if err != nil {
+		return nil, fmt.Errorf("create temp: %w", err)
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath)
+
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return nil, fmt.Errorf("write temp: %w", err)
+	}
+	tmp.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "ffmpeg",
+		"-ss", "00:00:01.00",
+		"-i", tmpPath,
+		"-vf", "scale=500:500:force_original_aspect_ratio=decrease",
+		"-vframes", "1",
+		"-f", "mjpeg",
+		"-q:v", "5",
+		"pipe:1",
+	)
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("ffmpeg: %w", err)
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("ffmpeg produced empty output")
+	}
+	return out, nil
 }
 
 func thumbnailExists(cli *gowebdav.Client, thumbPath string) bool {
@@ -100,7 +152,7 @@ func processPhoto(cli *gowebdav.Client, photoPath string) {
 		return
 	}
 
-	if !isSupportedImage(photoPath) {
+	if !isSupportedMedia(photoPath) {
 		unsupported.Add(1)
 		return
 	}
@@ -133,7 +185,13 @@ func processPhoto(cli *gowebdav.Client, photoPath string) {
 		break
 	}
 
-	thumbData, err := generateThumbnail(data, ext)
+	var thumbData []byte
+	var err error
+	if isVideoExt(ext) {
+		thumbData, err = generateVideoThumbnail(data, ext)
+	} else {
+		thumbData, err = generateThumbnail(data, ext)
+	}
 	if err != nil {
 		log.Printf("  FAIL generate %s: %v", photoPath, err)
 		failed.Add(1)
@@ -226,6 +284,13 @@ func main() {
 
 	if url == "" || user == "" || pass == "" {
 		log.Fatal("Set WEBDAV_URL, WEBDAV_USERNAME, WEBDAV_PASSWORD environment variables (or use .env)")
+	}
+
+	if _, err := exec.LookPath("ffmpeg"); err == nil {
+		hasFfmpeg = true
+		log.Println("ffmpeg found — video thumbnail generation enabled")
+	} else {
+		log.Println("WARNING: ffmpeg not found — video thumbnails will be skipped")
 	}
 
 	cli := gowebdav.NewClient(url, user, pass)

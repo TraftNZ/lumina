@@ -101,34 +101,56 @@ class RemoteStorage {
           throw Exception("upload failed: [${response.statusCode}] $body");
         }
         stateModel.finishUpload(asset.id, true);
+        // Upload video thumbnail from device (OS-generated frame)
+        if (asset.type == AssetType.video) {
+          try {
+            final thumb = await asset.thumbnailDataWithSize(
+                const ThumbnailSize.square(500),
+                quality: 75);
+            if (thumb != null && thumb.isNotEmpty) {
+              final thumbUrl =
+                  Uri.encodeFull('$httpBaseUrl/thumbnail/$name');
+              final thumbReq =
+                  http.Request("POST", Uri.parse(thumbUrl));
+              thumbReq.headers['Image-Date'] = dateStr;
+              thumbReq.bodyBytes = thumb;
+              await thumbReq.send();
+            }
+          } catch (_) {}
+        }
         return;
       } catch (e) {
-        if (attempt < maxUploadRetries - 1) {
-          final backoff = Duration(seconds: (attempt + 1) * 2);
-          await Future.delayed(backoff);
-          continue;
+        final errStr = e.toString();
+        final isAuthError = errStr.contains('auth failed') ||
+            errStr.contains('session expired') ||
+            errStr.contains('re-authenticate');
+        if (isAuthError || attempt >= maxUploadRetries - 1) {
+          stateModel.finishUpload(asset.id, false);
+          rethrow;
         }
-        stateModel.finishUpload(asset.id, false);
-        rethrow;
+        final backoff = Duration(seconds: (attempt + 1) * 2);
+        await Future.delayed(backoff);
+        continue;
       }
     }
   }
 
-  Future<List<RemoteImage>> listImages(
-      String date, int offset, maxReturn) async {
-    final rsp = await cli
-        .listByDate(
-          ListByDateRequest(
-            date: date,
-            offset: offset,
-            maxReturn: maxReturn,
-          ),
-        )
-        .timeout(const Duration(seconds: 60));
-    if (!rsp.success) {
-      throw Exception("list images failed: ${rsp.message}");
-    }
+  Future<List<RemoteImage>> listImages(String date) async {
+    final rsp = await cli.listByDate(ListByDateRequest(date: date));
+    if (!rsp.success) throw Exception("list images failed: ${rsp.message}");
     return rsp.paths.map((e) => RemoteImage(cli, e)).toList();
+  }
+
+  Future<int> syncIndex() async {
+    final rsp = await cli.syncIndex(SyncIndexRequest());
+    if (!rsp.success) throw Exception("sync index failed: ${rsp.message}");
+    return rsp.totalFiles;
+  }
+
+  Future<int> fullResyncIndex() async {
+    final rsp = await cli.fullResyncIndex(FullResyncIndexRequest());
+    if (!rsp.success) throw Exception("full resync index failed: ${rsp.message}");
+    return rsp.totalFiles;
   }
 }
 
@@ -147,6 +169,14 @@ class RemoteImage {
 
   bool isVideo() {
     return isVideoByPath(path);
+  }
+
+  String thumbnailUrl() {
+    var urlPath = path;
+    if (urlPath.isNotEmpty && urlPath[0] == '/') {
+      urlPath = urlPath.substring(1);
+    }
+    return Uri.encodeFull('$httpBaseUrl/thumbnail/$urlPath');
   }
 
   Future<Uint8List> thumbnail() async {
@@ -168,8 +198,7 @@ class RemoteImage {
       print("get $path thumbnail failed: $e");
     }
     final data = await rootBundle.load("assets/images/broken.png");
-    thumbnailData = data.buffer.asUint8List();
-    return thumbnailData!;
+    return data.buffer.asUint8List();
   }
 
   Stream<Uint8List> dataStream() async* {

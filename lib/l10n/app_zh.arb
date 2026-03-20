@@ -132,5 +132,17 @@
     "savedToGallery": "已保存到相册",
     "people": "人物",
     "peoplePets": "人物与宠物",
-    "categories": "分类"
+    "categories": "分类",
+    "syncingIndex": "正在同步云端照片索引...",
+    "rewalkAllPhotos": "重新扫描所有云端照片",
+    "rewalkingPhotos": "正在重新扫描所有云端照片...",
+    "rewalkComplete": "扫描完成：已索引 {count} 张照片",
+    "cloudreveStorage": "Cloudreve",
+    "cloudreveServer": "服务器地址",
+    "cloudreveEmail": "邮箱",
+    "cloudrevePassword": "密码",
+    "cloudreveOtp": "验证码",
+    "cloudreveOtpHint": "输入验证器应用中的6位验证码",
+    "cloudreveVerify": "验证",
+    "cloudreve2faRequired": "需要两步验证"
 }

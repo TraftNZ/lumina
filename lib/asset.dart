@@ -12,6 +12,8 @@ import 'package:exif/exif.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart';
 import 'dart:io';
+import 'package:extended_image/extended_image.dart';
+import 'package:lumina/global.dart';
 
 class Asset extends ImageProvider<Asset> {
   bool hasLocal = false;
@@ -88,7 +90,11 @@ class Asset extends ImageProvider<Asset> {
       return localFile;
     }
     if (hasLocal) {
-      localFile = await local!.originFile;
+      try {
+        localFile = await local!.originFile;
+      } catch (_) {
+        // originFile may fail on macOS; continue without the file path.
+      }
       localTitle = await local!.titleAsync;
     }
     return localFile;
@@ -212,10 +218,22 @@ class Asset extends ImageProvider<Asset> {
   }
 
   bool loadThumbnailFinished() {
+    // Remote-only assets use ExtendedNetworkImageProvider which handles its own loading
+    if (isCloudOnly && remote != null && isServerReady) {
+      return true;
+    }
     return _thumbnailData != null;
   }
 
   ImageProvider thumbnailProvider() {
+    // For remote-only assets, use cached network image (disk cache + auto retry)
+    if (isCloudOnly && remote != null && isServerReady) {
+      return ExtendedNetworkImageProvider(
+        remote!.thumbnailUrl(),
+        cache: true,
+        cacheKey: remote!.path.replaceAll('/', '_'),
+      );
+    }
     try {
       if (_thumbnailData != null && _thumbnailData!.isNotEmpty) {
         if (_cachedThumbnailProvider != null &&
@@ -241,11 +259,11 @@ class Asset extends ImageProvider<Asset> {
     }
     _thumbnailDataCompleter = Completer<Uint8List>();
     Uint8List? data;
-    if (hasLocal) {
+    if (hasLocal && local != null) {
       data = await local!
           .thumbnailDataWithSize(const ThumbnailSize.square(200), quality: 80);
     }
-    if (hasRemote) {
+    if (hasRemote && remote != null) {
       data = await remote!.thumbnail();
     }
     if (data == null || data.isEmpty || !await isValidImage(data)) {
@@ -253,7 +271,7 @@ class Asset extends ImageProvider<Asset> {
       _thumbnailDataCompleter!.complete(brokenData.buffer.asUint8List());
       // Reset so next call retries the download instead of returning fallback forever
       _thumbnailDataCompleter = null;
-      if (hasRemote) {
+      if (hasRemote && remote != null) {
         remote!.thumbnailData = null;
       }
       return brokenData.buffer.asUint8List();
@@ -321,7 +339,7 @@ class Asset extends ImageProvider<Asset> {
   }
 
   Future<void> delete() async {
-    if (hasLocal) {
+    if (hasLocal && (Platform.isAndroid || Platform.isIOS)) {
       await PhotoManager.editor.deleteWithIds([local!.id]);
     }
     if (hasRemote) {

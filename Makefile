@@ -8,7 +8,9 @@ export PATH     := $(GOPATH)/bin:$(HOME)/.pub-cache/bin:$(PATH)
 
 DESCRIBE := lumina grpc server
 
-.DEFAULT_GOAL := server-aar
+.DEFAULT_GOAL := mac
+
+.PHONY: prebuild protobuf server server-android server-ios server-mac server-linux server-windows android ios mac linux windows apk ipa testflight testflight-quick test
 
 prebuild:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -20,7 +22,6 @@ protobuf:
 		--dart_out=grpc:lib \
 		proto/*.proto
 
-.PHONY: server
 server:
 	CGO_ENABLED=0 go build -ldflags "\
 		-X '${VERSION_PACKAGE_NAME}.Version=${BUILD_VERSION}' \
@@ -30,21 +31,47 @@ server:
 		-X '${VERSION_PACKAGE_NAME}.Name=${BUILD_NAME}'" \
     -o server/output/${BUILD_NAME} ./server
 
-server-mobile: protobuf
-	CGO_ENABLED=0 gomobile bind -target=android -androidapi 24 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run
-	CGO_ENABLED=0 gomobile bind -target=ios -ldflags "-s -w" -o ios/Frameworks/RUN.xcframework ./server/run
-
-server-aar: protobuf
-	CGO_ENABLED=0 gomobile bind -target=android -androidapi 24 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run
+server-android: protobuf
+	CGO_ENABLED=0 gomobile bind -tags mobile -target=android -androidapi 24 -ldflags "-s -w" -o android/app/libs/server.aar ./server/run
 
 server-ios: protobuf
-	CGO_ENABLED=0 gomobile bind -target=ios -ldflags "-s -w" -o ios/Frameworks/RUN.xcframework ./server/run
+	CGO_ENABLED=0 gomobile bind -tags mobile -target=ios -ldflags "-s -w" -o ios/Frameworks/RUN.xcframework ./server/run
 
-apk:
+server-mac: protobuf
+	@mkdir -p build/desktop
+	CGO_ENABLED=1 go build -buildmode=c-shared \
+		-o build/desktop/liblumina_server.dylib ./server/ffi
+
+server-linux: protobuf
+	@mkdir -p build/desktop
+	CGO_ENABLED=1 go build -buildmode=c-shared \
+		-o build/desktop/liblumina_server.so ./server/ffi
+
+server-windows: protobuf
+	@mkdir -p build/desktop
+	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc go build -buildmode=c-shared \
+		-o build/desktop/lumina_server.dll ./server/ffi
+
+android: server-android
+mac: server-mac
+ios: server-ios
+linux: server-linux
+windows: server-windows
+
+apk: server-android
 	flutter build apk --release --obfuscate --split-debug-info=./debug-info
 
-ipa:
+ipa: server-ios
 	flutter build ipa --no-tree-shake-icons --obfuscate --split-debug-info=./debug-info
+
+app-mac: server-mac
+	flutter build macos --release
+
+app-linux: server-linux
+	flutter build linux --release
+
+app-windows: server-windows
+	flutter build windows --release
 
 testflight:
 	./deploy-testflight.sh
@@ -52,11 +79,9 @@ testflight:
 testflight-quick:
 	./deploy-testflight.sh --skip-server
 
-.PHONY: test
 test:
 	docker-compose -f test/docker-compose.yml up -d --build
 	sleep 3
 	go test -v ./server/api -p 1 -failfast
 	go test -v ./server/drive -p 1 -failfast
 	docker-compose -f test/docker-compose.yml down
-	

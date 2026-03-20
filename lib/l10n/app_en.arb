@@ -184,5 +184,24 @@
   "savedToGallery": "Saved to gallery",
   "people": "People",
   "peoplePets": "People & Pets",
-  "categories": "Categories"
+  "categories": "Categories",
+  "syncingIndex": "Syncing cloud photo index...",
+  "rewalkAllPhotos": "Rewalk all cloud photos",
+  "rewalkingPhotos": "Rewalking all cloud photos...",
+  "rewalkComplete": "Rewalk complete: {count} photos indexed",
+  "@rewalkComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cloudreveStorage": "Cloudreve",
+  "cloudreveServer": "Server URL",
+  "cloudreveEmail": "Email",
+  "cloudrevePassword": "Password",
+  "cloudreveOtp": "Verification Code",
+  "cloudreveOtpHint": "Enter the 6-digit code from your authenticator app",
+  "cloudreveVerify": "Verify",
+  "cloudreve2faRequired": "Two-factor authentication required"
 }

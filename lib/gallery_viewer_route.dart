@@ -44,7 +44,9 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
     all[currentIndex].readInfoFromData();
     assetModel.addListener(() {
       if (mounted) {
-        setState(() {});
+        setState(() {
+          all = assetModel.getUnifiedAssets();
+        });
       }
     });
   }
@@ -396,8 +398,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
             )
           : null,
       body: Hero(
-        tag:
-            "asset_${all[currentIndex].dedupKey ?? all[currentIndex].path()}",
+        tag: "asset_grid_$currentIndex",
         flightShuttleBuilder: (BuildContext flightContext,
             Animation<double> animation,
             HeroFlightDirection flightDirection,

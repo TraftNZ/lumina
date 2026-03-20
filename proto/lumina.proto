@@ -5,6 +5,8 @@ option go_package = "github.com/traftai/lumina/proto";
 
 service Lumina {
   rpc ListByDate (ListByDateRequest) returns (ListByDateResponse) {}
+  rpc SyncIndex (SyncIndexRequest) returns (SyncIndexResponse) {}
+  rpc FullResyncIndex (FullResyncIndexRequest) returns (FullResyncIndexResponse) {}
   rpc Delete (DeleteRequest) returns (DeleteResponse) {}
   rpc FilterNotUploaded (stream FilterNotUploadedRequest) returns (stream FilterNotUploadedResponse) {}
   // SAMBA Drive
@@ -21,6 +23,9 @@ service Lumina {
   // S3 Compatible Drive
   rpc SetDriveS3 (SetDriveS3Request) returns (SetDriveS3Response) {}
   rpc ListDriveS3Buckets (ListDriveS3BucketsRequest) returns (ListDriveS3BucketsResponse) {}
+  // Cloudreve Drive
+  rpc SetDriveCloudreve (SetDriveCloudrveRequest) returns (SetDriveCloudrveResponse) {}
+  rpc ListDriveCloudrveDir (ListDriveClourdreveDirRequest) returns (ListDriveClourdreveDirResponse) {}
   // Trash
   rpc MoveToTrash (MoveToTrashRequest) returns (MoveToTrashResponse) {}
   rpc ListTrash (ListTrashRequest) returns (ListTrashResponse) {}
@@ -281,4 +286,42 @@ message GetLabelSummaryResponse {
   repeated LabelSummaryItem labels = 2;
   int32 faceCount = 3;
   string faceSamplePath = 4;
+}
+
+message SyncIndexRequest {}
+message SyncIndexResponse {
+  bool success = 1;
+  string message = 2;
+  int32 totalFiles = 3;
+}
+
+message FullResyncIndexRequest {}
+message FullResyncIndexResponse {
+  bool success = 1;
+  string message = 2;
+  int32 totalFiles = 3;
+}
+
+message SetDriveCloudrveRequest {
+  string server = 1;
+  string email = 2;
+  string password = 3;
+  string root = 4;
+  string otp = 5;
+  string session_id = 6;
+}
+message SetDriveCloudrveResponse {
+  bool success = 1;
+  string message = 2;
+  bool require_2fa = 3;
+  string session_id = 4;
+}
+
+message ListDriveClourdreveDirRequest {
+  string dir = 1;
+}
+message ListDriveClourdreveDirResponse {
+  bool success = 1;
+  string message = 2;
+  repeated string dirs = 3;
 }

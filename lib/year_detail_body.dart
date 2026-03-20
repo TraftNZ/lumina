@@ -95,8 +95,8 @@ class _YearDetailBodyState extends State<YearDetailBody> {
       body: GridView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(2),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: responsiveColumns(context),
           mainAxisSpacing: 2,
           crossAxisSpacing: 2,
         ),

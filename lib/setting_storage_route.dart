@@ -3,6 +3,7 @@ import 'package:lumina/storageform/smbform.dart';
 import 'package:lumina/storageform/webdavform.dart';
 import 'package:lumina/storageform/nfsform.dart';
 import 'package:lumina/storageform/s3form.dart';
+import 'package:lumina/storageform/cloudreveform.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/global.dart';
@@ -32,6 +33,8 @@ IconData _driveIcon(Drive drive) {
       return Icons.dns_outlined;
     case Drive.s3:
       return Icons.cloud_outlined;
+    case Drive.cloudreve:
+      return Icons.cloud_queue;
   }
 }
 
@@ -68,6 +71,9 @@ class SettingStorageRouteState extends State<SettingStorageRoute> {
       case Drive.s3:
         form = const S3Form();
         break;
+      case Drive.cloudreve:
+        form = const CloudreveForm();
+        break;
     }
     return Scaffold(
         appBar: AppBar(
@@ -99,7 +105,9 @@ class SettingStorageRouteState extends State<SettingStorageRoute> {
                             value: entry.key,
                             label: entry.key == Drive.s3
                                 ? l10n.s3Storage
-                                : entry.value,
+                                : entry.key == Drive.cloudreve
+                                    ? l10n.cloudreveStorage
+                                    : entry.value,
                             leadingIcon: Icon(_driveIcon(entry.key)),
                           ))
                       .toList(),

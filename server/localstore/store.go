@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
@@ -25,6 +26,17 @@ CREATE TABLE IF NOT EXISTS ml_results (
     labels   TEXT NOT NULL DEFAULT '[]',
     face_ids TEXT NOT NULL DEFAULT '[]',
     text     TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS remote_files (
+    path      TEXT PRIMARY KEY,
+    size      INTEGER NOT NULL DEFAULT 0,
+    mod_time  INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS thumb_failures (
+    path      TEXT PRIMARY KEY,
+    failed_at INTEGER NOT NULL DEFAULT 0
 );
 `
 
@@ -136,5 +148,40 @@ func decodeStringSlice(s string) []string {
 	var result []string
 	json.Unmarshal([]byte(s), &result)
 	return result
+}
+
+func (s *LocalStore) BaseDataDir() string {
+	return s.baseDataDir
+}
+
+func DriveDataDir(baseDataDir, configHash string) string {
+	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(configHash)))[:16]
+	return filepath.Join(baseDataDir, "lumina", hash)
+}
+
+type SavedToken struct {
+	RefreshToken string    `json:"refresh_token"`
+	RefreshExp   time.Time `json:"refresh_exp"`
+}
+
+func SaveTokenFile(dir string, token SavedToken) error {
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("create token dir: %w", err)
+	}
+	data, err := json.Marshal(token)
+	if err != nil {
+		return fmt.Errorf("marshal token: %w", err)
+	}
+	return os.WriteFile(filepath.Join(dir, "token.json"), data, 0600)
+}
+
+func LoadTokenFile(dir string) (SavedToken, error) {
+	var token SavedToken
+	data, err := os.ReadFile(filepath.Join(dir, "token.json"))
+	if err != nil {
+		return token, err
+	}
+	err = json.Unmarshal(data, &token)
+	return token, err
 }
 

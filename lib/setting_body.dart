@@ -7,6 +7,9 @@ import 'package:lumina/setting_storage_route.dart';
 import 'package:lumina/background_sync_route.dart';
 import 'package:lumina/theme.dart';
 import 'package:lumina/global.dart';
+import 'package:lumina/state_model.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingBody extends StatefulWidget {
@@ -99,6 +102,24 @@ class _SettingBodyState extends State<SettingBody> {
     );
   }
 
+  Future<void> _rewalkAllPhotos() async {
+    if (stateModel.indexSyncing) return;
+    stateModel.startIndexSync(l10n.rewalkingPhotos);
+    try {
+      final count = await storage.fullResyncIndex();
+      stateModel.finishIndexSync(count);
+      if (mounted) {
+        SnackBarManager.showSnackBar(l10n.rewalkComplete(count));
+        assetModel.refreshRemote();
+      }
+    } catch (e) {
+      stateModel.finishIndexSync(0);
+      if (mounted) {
+        SnackBarManager.showSnackBar(e.toString());
+      }
+    }
+  }
+
   void _removePin() {
     showDialog(
       context: context,
@@ -179,6 +200,21 @@ class _SettingBodyState extends State<SettingBody> {
                           builder: (context) => const SettingStorageRoute(),
                         ));
                   },
+                ),
+                const Divider(height: 1, indent: 56),
+                Consumer<StateModel>(
+                  builder: (context, model, child) => ListTile(
+                    leading: Icon(Icons.refresh_outlined, color: colorScheme.primary),
+                    title: Text(l10n.rewalkAllPhotos),
+                    trailing: model.indexSyncing
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.chevron_right),
+                    onTap: model.indexSyncing ? null : _rewalkAllPhotos,
+                  ),
                 ),
               ],
             ),

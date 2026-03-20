@@ -39,6 +39,20 @@ class LuminaClient extends $grpc.Client {
     return $createUnaryCall(_$listByDate, request, options: options);
   }
 
+  $grpc.ResponseFuture<$0.SyncIndexResponse> syncIndex(
+    $0.SyncIndexRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$syncIndex, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.FullResyncIndexResponse> fullResyncIndex(
+    $0.FullResyncIndexRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$fullResyncIndex, request, options: options);
+  }
+
   $grpc.ResponseFuture<$0.DeleteResponse> delete(
     $0.DeleteRequest request, {
     $grpc.CallOptions? options,
@@ -125,6 +139,21 @@ class LuminaClient extends $grpc.Client {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$listDriveS3Buckets, request, options: options);
+  }
+
+  /// Cloudreve Drive
+  $grpc.ResponseFuture<$0.SetDriveCloudrveResponse> setDriveCloudreve(
+    $0.SetDriveCloudrveRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$setDriveCloudreve, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ListDriveClourdreveDirResponse> listDriveCloudrveDir(
+    $0.ListDriveClourdreveDirRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listDriveCloudrveDir, request, options: options);
   }
 
   /// Trash
@@ -214,6 +243,16 @@ class LuminaClient extends $grpc.Client {
           '/lumina.Lumina/ListByDate',
           ($0.ListByDateRequest value) => value.writeToBuffer(),
           $0.ListByDateResponse.fromBuffer);
+  static final _$syncIndex =
+      $grpc.ClientMethod<$0.SyncIndexRequest, $0.SyncIndexResponse>(
+          '/lumina.Lumina/SyncIndex',
+          ($0.SyncIndexRequest value) => value.writeToBuffer(),
+          $0.SyncIndexResponse.fromBuffer);
+  static final _$fullResyncIndex =
+      $grpc.ClientMethod<$0.FullResyncIndexRequest, $0.FullResyncIndexResponse>(
+          '/lumina.Lumina/FullResyncIndex',
+          ($0.FullResyncIndexRequest value) => value.writeToBuffer(),
+          $0.FullResyncIndexResponse.fromBuffer);
   static final _$delete =
       $grpc.ClientMethod<$0.DeleteRequest, $0.DeleteResponse>(
           '/lumina.Lumina/Delete',
@@ -274,6 +313,16 @@ class LuminaClient extends $grpc.Client {
       '/lumina.Lumina/ListDriveS3Buckets',
       ($0.ListDriveS3BucketsRequest value) => value.writeToBuffer(),
       $0.ListDriveS3BucketsResponse.fromBuffer);
+  static final _$setDriveCloudreve = $grpc.ClientMethod<
+          $0.SetDriveCloudrveRequest, $0.SetDriveCloudrveResponse>(
+      '/lumina.Lumina/SetDriveCloudreve',
+      ($0.SetDriveCloudrveRequest value) => value.writeToBuffer(),
+      $0.SetDriveCloudrveResponse.fromBuffer);
+  static final _$listDriveCloudrveDir = $grpc.ClientMethod<
+          $0.ListDriveClourdreveDirRequest, $0.ListDriveClourdreveDirResponse>(
+      '/lumina.Lumina/ListDriveCloudrveDir',
+      ($0.ListDriveClourdreveDirRequest value) => value.writeToBuffer(),
+      $0.ListDriveClourdreveDirResponse.fromBuffer);
   static final _$moveToTrash =
       $grpc.ClientMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
           '/lumina.Lumina/MoveToTrash',
@@ -343,6 +392,22 @@ abstract class LuminaServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.ListByDateRequest.fromBuffer(value),
         ($0.ListByDateResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SyncIndexRequest, $0.SyncIndexResponse>(
+        'SyncIndex',
+        syncIndex_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.SyncIndexRequest.fromBuffer(value),
+        ($0.SyncIndexResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.FullResyncIndexRequest,
+            $0.FullResyncIndexResponse>(
+        'FullResyncIndex',
+        fullResyncIndex_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.FullResyncIndexRequest.fromBuffer(value),
+        ($0.FullResyncIndexResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.DeleteRequest, $0.DeleteResponse>(
         'Delete',
         delete_Pre,
@@ -447,6 +512,24 @@ abstract class LuminaServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.ListDriveS3BucketsRequest.fromBuffer(value),
         ($0.ListDriveS3BucketsResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SetDriveCloudrveRequest,
+            $0.SetDriveCloudrveResponse>(
+        'SetDriveCloudreve',
+        setDriveCloudreve_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.SetDriveCloudrveRequest.fromBuffer(value),
+        ($0.SetDriveCloudrveResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ListDriveClourdreveDirRequest,
+            $0.ListDriveClourdreveDirResponse>(
+        'ListDriveCloudrveDir',
+        listDriveCloudrveDir_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.ListDriveClourdreveDirRequest.fromBuffer(value),
+        ($0.ListDriveClourdreveDirResponse value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$0.MoveToTrashRequest, $0.MoveToTrashResponse>(
             'MoveToTrash',
@@ -550,6 +633,23 @@ abstract class LuminaServiceBase extends $grpc.Service {
   $async.Future<$0.ListByDateResponse> listByDate(
       $grpc.ServiceCall call, $0.ListByDateRequest request);
 
+  $async.Future<$0.SyncIndexResponse> syncIndex_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SyncIndexRequest> $request) async {
+    return syncIndex($call, await $request);
+  }
+
+  $async.Future<$0.SyncIndexResponse> syncIndex(
+      $grpc.ServiceCall call, $0.SyncIndexRequest request);
+
+  $async.Future<$0.FullResyncIndexResponse> fullResyncIndex_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.FullResyncIndexRequest> $request) async {
+    return fullResyncIndex($call, await $request);
+  }
+
+  $async.Future<$0.FullResyncIndexResponse> fullResyncIndex(
+      $grpc.ServiceCall call, $0.FullResyncIndexRequest request);
+
   $async.Future<$0.DeleteResponse> delete_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.DeleteRequest> $request) async {
     return delete($call, await $request);
@@ -648,6 +748,24 @@ abstract class LuminaServiceBase extends $grpc.Service {
 
   $async.Future<$0.ListDriveS3BucketsResponse> listDriveS3Buckets(
       $grpc.ServiceCall call, $0.ListDriveS3BucketsRequest request);
+
+  $async.Future<$0.SetDriveCloudrveResponse> setDriveCloudreve_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.SetDriveCloudrveRequest> $request) async {
+    return setDriveCloudreve($call, await $request);
+  }
+
+  $async.Future<$0.SetDriveCloudrveResponse> setDriveCloudreve(
+      $grpc.ServiceCall call, $0.SetDriveCloudrveRequest request);
+
+  $async.Future<$0.ListDriveClourdreveDirResponse> listDriveCloudrveDir_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListDriveClourdreveDirRequest> $request) async {
+    return listDriveCloudrveDir($call, await $request);
+  }
+
+  $async.Future<$0.ListDriveClourdreveDirResponse> listDriveCloudrveDir(
+      $grpc.ServiceCall call, $0.ListDriveClourdreveDirRequest request);
 
   $async.Future<$0.MoveToTrashResponse> moveToTrash_Pre($grpc.ServiceCall $call,
       $async.Future<$0.MoveToTrashRequest> $request) async {

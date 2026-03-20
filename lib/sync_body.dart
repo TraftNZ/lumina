@@ -182,24 +182,44 @@ class SyncBodyState extends State<SyncBody> {
     for (final id in stateModel.notSyncedIDs) {
       ids[id] = true;
     }
+    int uploaded = 0;
+    int failed = 0;
+    int skipped = 0;
+    print("[Sync] Starting sync, ${ids.length} unsynchronized photos");
     for (var asset in all) {
       if (_needStopSync || !mounted) {
+        print("[Sync] Stopped by user or unmounted");
         break;
       }
       final id = asset.local!.id;
       if (ids[id] != true) {
+        skipped++;
         continue;
       }
       try {
+        final name = asset.name() ?? id;
+        print("[Sync] Uploading $name");
         await storage.uploadAssetEntity(asset.local!);
+        uploaded++;
+        print("[Sync] Uploaded $name successfully");
       } catch (e) {
-        print(e);
+        failed++;
+        print("[Sync] Upload failed: $e");
+        final errStr = e.toString();
+        if (errStr.contains('auth failed') ||
+            errStr.contains('session expired') ||
+            errStr.contains('re-authenticate')) {
+          SnackBarManager.showSnackBar("${l10n.uploadFailed}: $errStr");
+          print("[Sync] Auth error detected, stopping sync");
+          break;
+        }
         SnackBarManager.showSnackBar("${l10n.uploadFailed}: $e");
         continue;
       }
       // Yield to UI event loop between uploads
       await Future.delayed(Duration.zero);
     }
+    print("[Sync] Finished: $uploaded uploaded, $failed failed, $skipped skipped");
     if (!mounted) return;
     setState(() {
       syncing = false;

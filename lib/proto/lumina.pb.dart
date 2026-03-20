@@ -3453,6 +3453,578 @@ class GetLabelSummaryResponse extends $pb.GeneratedMessage {
   void clearFaceSamplePath() => $_clearField(4);
 }
 
+class SyncIndexRequest extends $pb.GeneratedMessage {
+  factory SyncIndexRequest() => create();
+
+  SyncIndexRequest._();
+
+  factory SyncIndexRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SyncIndexRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SyncIndexRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SyncIndexRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SyncIndexRequest copyWith(void Function(SyncIndexRequest) updates) =>
+      super.copyWith((message) => updates(message as SyncIndexRequest))
+          as SyncIndexRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SyncIndexRequest create() => SyncIndexRequest._();
+  @$core.override
+  SyncIndexRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SyncIndexRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SyncIndexRequest>(create);
+  static SyncIndexRequest? _defaultInstance;
+}
+
+class SyncIndexResponse extends $pb.GeneratedMessage {
+  factory SyncIndexResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.int? totalFiles,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (totalFiles != null) result.totalFiles = totalFiles;
+    return result;
+  }
+
+  SyncIndexResponse._();
+
+  factory SyncIndexResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SyncIndexResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SyncIndexResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aI(3, _omitFieldNames ? '' : 'totalFiles', protoName: 'totalFiles')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SyncIndexResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SyncIndexResponse copyWith(void Function(SyncIndexResponse) updates) =>
+      super.copyWith((message) => updates(message as SyncIndexResponse))
+          as SyncIndexResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SyncIndexResponse create() => SyncIndexResponse._();
+  @$core.override
+  SyncIndexResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SyncIndexResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SyncIndexResponse>(create);
+  static SyncIndexResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get totalFiles => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set totalFiles($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTotalFiles() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotalFiles() => $_clearField(3);
+}
+
+class FullResyncIndexRequest extends $pb.GeneratedMessage {
+  factory FullResyncIndexRequest() => create();
+
+  FullResyncIndexRequest._();
+
+  factory FullResyncIndexRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory FullResyncIndexRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FullResyncIndexRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FullResyncIndexRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FullResyncIndexRequest copyWith(
+          void Function(FullResyncIndexRequest) updates) =>
+      super.copyWith((message) => updates(message as FullResyncIndexRequest))
+          as FullResyncIndexRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static FullResyncIndexRequest create() => FullResyncIndexRequest._();
+  @$core.override
+  FullResyncIndexRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static FullResyncIndexRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<FullResyncIndexRequest>(create);
+  static FullResyncIndexRequest? _defaultInstance;
+}
+
+class FullResyncIndexResponse extends $pb.GeneratedMessage {
+  factory FullResyncIndexResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.int? totalFiles,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (totalFiles != null) result.totalFiles = totalFiles;
+    return result;
+  }
+
+  FullResyncIndexResponse._();
+
+  factory FullResyncIndexResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory FullResyncIndexResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FullResyncIndexResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aI(3, _omitFieldNames ? '' : 'totalFiles', protoName: 'totalFiles')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FullResyncIndexResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FullResyncIndexResponse copyWith(
+          void Function(FullResyncIndexResponse) updates) =>
+      super.copyWith((message) => updates(message as FullResyncIndexResponse))
+          as FullResyncIndexResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static FullResyncIndexResponse create() => FullResyncIndexResponse._();
+  @$core.override
+  FullResyncIndexResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static FullResyncIndexResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<FullResyncIndexResponse>(create);
+  static FullResyncIndexResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get totalFiles => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set totalFiles($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTotalFiles() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotalFiles() => $_clearField(3);
+}
+
+class SetDriveCloudrveRequest extends $pb.GeneratedMessage {
+  factory SetDriveCloudrveRequest({
+    $core.String? server,
+    $core.String? email,
+    $core.String? password,
+    $core.String? root,
+    $core.String? otp,
+    $core.String? sessionId,
+  }) {
+    final result = create();
+    if (server != null) result.server = server;
+    if (email != null) result.email = email;
+    if (password != null) result.password = password;
+    if (root != null) result.root = root;
+    if (otp != null) result.otp = otp;
+    if (sessionId != null) result.sessionId = sessionId;
+    return result;
+  }
+
+  SetDriveCloudrveRequest._();
+
+  factory SetDriveCloudrveRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveCloudrveRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveCloudrveRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'server')
+    ..aOS(2, _omitFieldNames ? '' : 'email')
+    ..aOS(3, _omitFieldNames ? '' : 'password')
+    ..aOS(4, _omitFieldNames ? '' : 'root')
+    ..aOS(5, _omitFieldNames ? '' : 'otp')
+    ..aOS(6, _omitFieldNames ? '' : 'sessionId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveCloudrveRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveCloudrveRequest copyWith(
+          void Function(SetDriveCloudrveRequest) updates) =>
+      super.copyWith((message) => updates(message as SetDriveCloudrveRequest))
+          as SetDriveCloudrveRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SetDriveCloudrveRequest create() => SetDriveCloudrveRequest._();
+  @$core.override
+  SetDriveCloudrveRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SetDriveCloudrveRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveCloudrveRequest>(create);
+  static SetDriveCloudrveRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get server => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set server($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasServer() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearServer() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get email => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set email($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasEmail() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearEmail() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get password => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set password($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasPassword() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPassword() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get root => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set root($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasRoot() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearRoot() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get otp => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set otp($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasOtp() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOtp() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get sessionId => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set sessionId($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasSessionId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSessionId() => $_clearField(6);
+}
+
+class SetDriveCloudrveResponse extends $pb.GeneratedMessage {
+  factory SetDriveCloudrveResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.bool? require2fa,
+    $core.String? sessionId,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (require2fa != null) result.require2fa = require2fa;
+    if (sessionId != null) result.sessionId = sessionId;
+    return result;
+  }
+
+  SetDriveCloudrveResponse._();
+
+  factory SetDriveCloudrveResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetDriveCloudrveResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetDriveCloudrveResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aOB(3, _omitFieldNames ? '' : 'require2fa', protoName: 'require_2fa')
+    ..aOS(4, _omitFieldNames ? '' : 'sessionId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveCloudrveResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetDriveCloudrveResponse copyWith(
+          void Function(SetDriveCloudrveResponse) updates) =>
+      super.copyWith((message) => updates(message as SetDriveCloudrveResponse))
+          as SetDriveCloudrveResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SetDriveCloudrveResponse create() => SetDriveCloudrveResponse._();
+  @$core.override
+  SetDriveCloudrveResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SetDriveCloudrveResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetDriveCloudrveResponse>(create);
+  static SetDriveCloudrveResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get require2fa => $_getBF(2);
+  @$pb.TagNumber(3)
+  set require2fa($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRequire2fa() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRequire2fa() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get sessionId => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set sessionId($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSessionId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSessionId() => $_clearField(4);
+}
+
+class ListDriveClourdreveDirRequest extends $pb.GeneratedMessage {
+  factory ListDriveClourdreveDirRequest({
+    $core.String? dir,
+  }) {
+    final result = create();
+    if (dir != null) result.dir = dir;
+    return result;
+  }
+
+  ListDriveClourdreveDirRequest._();
+
+  factory ListDriveClourdreveDirRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveClourdreveDirRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveClourdreveDirRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'dir')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveClourdreveDirRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveClourdreveDirRequest copyWith(
+          void Function(ListDriveClourdreveDirRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as ListDriveClourdreveDirRequest))
+          as ListDriveClourdreveDirRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ListDriveClourdreveDirRequest create() =>
+      ListDriveClourdreveDirRequest._();
+  @$core.override
+  ListDriveClourdreveDirRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ListDriveClourdreveDirRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveClourdreveDirRequest>(create);
+  static ListDriveClourdreveDirRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get dir => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set dir($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDir() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDir() => $_clearField(1);
+}
+
+class ListDriveClourdreveDirResponse extends $pb.GeneratedMessage {
+  factory ListDriveClourdreveDirResponse({
+    $core.bool? success,
+    $core.String? message,
+    $core.Iterable<$core.String>? dirs,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (message != null) result.message = message;
+    if (dirs != null) result.dirs.addAll(dirs);
+    return result;
+  }
+
+  ListDriveClourdreveDirResponse._();
+
+  factory ListDriveClourdreveDirResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ListDriveClourdreveDirResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListDriveClourdreveDirResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPS(3, _omitFieldNames ? '' : 'dirs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveClourdreveDirResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListDriveClourdreveDirResponse copyWith(
+          void Function(ListDriveClourdreveDirResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as ListDriveClourdreveDirResponse))
+          as ListDriveClourdreveDirResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ListDriveClourdreveDirResponse create() =>
+      ListDriveClourdreveDirResponse._();
+  @$core.override
+  ListDriveClourdreveDirResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ListDriveClourdreveDirResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListDriveClourdreveDirResponse>(create);
+  static ListDriveClourdreveDirResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$core.String> get dirs => $_getList(2);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

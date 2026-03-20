@@ -20,8 +20,9 @@ Future<void> reloadAutoSyncTimer() async {
       Duration(minutes: prefs.getInt('backgroundSyncInterval') ?? 60 * 12);
   print("backgroundSyncInterval: $backgroundSyncInterval");
   autoSyncTimer = Timer.periodic(backgroundSyncInterval, (timer) async {
-    print("start auto sync");
+    print("[AutoSync] Starting auto sync");
     if (settingModel.localFolder == "" || !settingModel.isRemoteStorageSetted) {
+      print("[AutoSync] Skipped: localFolder or remote storage not set");
       return;
     }
     if (stateModel.isUploading() || stateModel.isDownloading()) return;

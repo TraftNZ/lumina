@@ -784,3 +784,117 @@ final $typed_data.Uint8List getLabelSummaryResponseDescriptor = $convert.base64D
     'xhYmVscxgCIAMoCzIYLmx1bWluYS5MYWJlbFN1bW1hcnlJdGVtUgZsYWJlbHMSHAoJZmFjZUNv'
     'dW50GAMgASgFUglmYWNlQ291bnQSJgoOZmFjZVNhbXBsZVBhdGgYBCABKAlSDmZhY2VTYW1wbG'
     'VQYXRo');
+
+@$core.Deprecated('Use syncIndexRequestDescriptor instead')
+const SyncIndexRequest$json = {
+  '1': 'SyncIndexRequest',
+};
+
+/// Descriptor for `SyncIndexRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List syncIndexRequestDescriptor =
+    $convert.base64Decode('ChBTeW5jSW5kZXhSZXF1ZXN0');
+
+@$core.Deprecated('Use syncIndexResponseDescriptor instead')
+const SyncIndexResponse$json = {
+  '1': 'SyncIndexResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'totalFiles', '3': 3, '4': 1, '5': 5, '10': 'totalFiles'},
+  ],
+};
+
+/// Descriptor for `SyncIndexResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List syncIndexResponseDescriptor = $convert.base64Decode(
+    'ChFTeW5jSW5kZXhSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB21lc3NhZ2'
+    'UYAiABKAlSB21lc3NhZ2USHgoKdG90YWxGaWxlcxgDIAEoBVIKdG90YWxGaWxlcw==');
+
+@$core.Deprecated('Use fullResyncIndexRequestDescriptor instead')
+const FullResyncIndexRequest$json = {
+  '1': 'FullResyncIndexRequest',
+};
+
+/// Descriptor for `FullResyncIndexRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List fullResyncIndexRequestDescriptor =
+    $convert.base64Decode('ChZGdWxsUmVzeW5jSW5kZXhSZXF1ZXN0');
+
+@$core.Deprecated('Use fullResyncIndexResponseDescriptor instead')
+const FullResyncIndexResponse$json = {
+  '1': 'FullResyncIndexResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'totalFiles', '3': 3, '4': 1, '5': 5, '10': 'totalFiles'},
+  ],
+};
+
+/// Descriptor for `FullResyncIndexResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List fullResyncIndexResponseDescriptor = $convert.base64Decode(
+    'ChdGdWxsUmVzeW5jSW5kZXhSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhgKB2'
+    '1lc3NhZ2UYAiABKAlSB21lc3NhZ2USHgoKdG90YWxGaWxlcxgDIAEoBVIKdG90YWxGaWxlcw==');
+
+@$core.Deprecated('Use setDriveCloudrveRequestDescriptor instead')
+const SetDriveCloudrveRequest$json = {
+  '1': 'SetDriveCloudrveRequest',
+  '2': [
+    {'1': 'server', '3': 1, '4': 1, '5': 9, '10': 'server'},
+    {'1': 'email', '3': 2, '4': 1, '5': 9, '10': 'email'},
+    {'1': 'password', '3': 3, '4': 1, '5': 9, '10': 'password'},
+    {'1': 'root', '3': 4, '4': 1, '5': 9, '10': 'root'},
+    {'1': 'otp', '3': 5, '4': 1, '5': 9, '10': 'otp'},
+    {'1': 'session_id', '3': 6, '4': 1, '5': 9, '10': 'sessionId'},
+  ],
+};
+
+/// Descriptor for `SetDriveCloudrveRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setDriveCloudrveRequestDescriptor = $convert.base64Decode(
+    'ChdTZXREcml2ZUNsb3VkcnZlUmVxdWVzdBIWCgZzZXJ2ZXIYASABKAlSBnNlcnZlchIUCgVlbW'
+    'FpbBgCIAEoCVIFZW1haWwSGgoIcGFzc3dvcmQYAyABKAlSCHBhc3N3b3JkEhIKBHJvb3QYBCAB'
+    'KAlSBHJvb3QSEAoDb3RwGAUgASgJUgNvdHASHQoKc2Vzc2lvbl9pZBgGIAEoCVIJc2Vzc2lvbk'
+    'lk');
+
+@$core.Deprecated('Use setDriveCloudrveResponseDescriptor instead')
+const SetDriveCloudrveResponse$json = {
+  '1': 'SetDriveCloudrveResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'require_2fa', '3': 3, '4': 1, '5': 8, '10': 'require2fa'},
+    {'1': 'session_id', '3': 4, '4': 1, '5': 9, '10': 'sessionId'},
+  ],
+};
+
+/// Descriptor for `SetDriveCloudrveResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setDriveCloudrveResponseDescriptor = $convert.base64Decode(
+    'ChhTZXREcml2ZUNsb3VkcnZlUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIYCg'
+    'dtZXNzYWdlGAIgASgJUgdtZXNzYWdlEh8KC3JlcXVpcmVfMmZhGAMgASgIUgpyZXF1aXJlMmZh'
+    'Eh0KCnNlc3Npb25faWQYBCABKAlSCXNlc3Npb25JZA==');
+
+@$core.Deprecated('Use listDriveClourdreveDirRequestDescriptor instead')
+const ListDriveClourdreveDirRequest$json = {
+  '1': 'ListDriveClourdreveDirRequest',
+  '2': [
+    {'1': 'dir', '3': 1, '4': 1, '5': 9, '10': 'dir'},
+  ],
+};
+
+/// Descriptor for `ListDriveClourdreveDirRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listDriveClourdreveDirRequestDescriptor =
+    $convert.base64Decode(
+        'Ch1MaXN0RHJpdmVDbG91cmRyZXZlRGlyUmVxdWVzdBIQCgNkaXIYASABKAlSA2Rpcg==');
+
+@$core.Deprecated('Use listDriveClourdreveDirResponseDescriptor instead')
+const ListDriveClourdreveDirResponse$json = {
+  '1': 'ListDriveClourdreveDirResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'dirs', '3': 3, '4': 3, '5': 9, '10': 'dirs'},
+  ],
+};
+
+/// Descriptor for `ListDriveClourdreveDirResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listDriveClourdreveDirResponseDescriptor =
+    $convert.base64Decode(
+        'Ch5MaXN0RHJpdmVDbG91cmRyZXZlRGlyUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2'
+        'VzcxIYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlEhIKBGRpcnMYAyADKAlSBGRpcnM=');

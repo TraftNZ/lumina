@@ -898,6 +898,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Categories'**
   String get categories;
+
+  /// No description provided for @syncingIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing cloud photo index...'**
+  String get syncingIndex;
+
+  /// No description provided for @rewalkAllPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewalk all cloud photos'**
+  String get rewalkAllPhotos;
+
+  /// No description provided for @rewalkingPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewalking all cloud photos...'**
+  String get rewalkingPhotos;
+
+  /// No description provided for @rewalkComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewalk complete: {count} photos indexed'**
+  String rewalkComplete(int count);
+
+  /// No description provided for @cloudreveStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloudreve'**
+  String get cloudreveStorage;
+
+  /// No description provided for @cloudreveServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL'**
+  String get cloudreveServer;
+
+  /// No description provided for @cloudreveEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get cloudreveEmail;
+
+  /// No description provided for @cloudrevePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get cloudrevePassword;
+
+  /// No description provided for @cloudreveOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get cloudreveOtp;
+
+  /// No description provided for @cloudreveOtpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code from your authenticator app'**
+  String get cloudreveOtpHint;
+
+  /// No description provided for @cloudreveVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get cloudreveVerify;
+
+  /// No description provided for @cloudreve2faRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication required'**
+  String get cloudreve2faRequired;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
