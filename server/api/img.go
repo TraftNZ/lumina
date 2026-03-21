@@ -30,7 +30,6 @@ func NewApi(im *imgmanager.ImgManager) *api {
 
 func (a *api) ListByDate(ctx context.Context, req *pb.ListByDateRequest) (*pb.ListByDateResponse, error) {
 	files := a.im.ListFromIndex()
-	log.Printf("[ListByDate] returning %d files from index", len(files))
 	paths := make([]string, len(files))
 	for i, f := range files {
 		paths[i] = f.Path
@@ -294,6 +293,61 @@ func (a *api) GetLabelSummary(ctx context.Context, req *pb.GetLabelSummaryReques
 			Label:      l.Label,
 			Count:      int32(l.Count),
 			SamplePath: l.SamplePath,
+		})
+	}
+	return
+}
+
+func (a *api) GetYearSummary(ctx context.Context, req *pb.GetYearSummaryRequest) (rsp *pb.GetYearSummaryResponse, err error) {
+	rsp = &pb.GetYearSummaryResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		return
+	}
+	summary := store.GetYearSummary()
+	rsp.Years = make([]*pb.YearSummaryItem, 0, len(summary))
+	for _, ys := range summary {
+		rsp.Years = append(rsp.Years, &pb.YearSummaryItem{
+			Year:       int32(ys.Year),
+			Count:      int32(ys.Count),
+			SamplePath: ys.SamplePath,
+		})
+	}
+	return
+}
+
+func (a *api) GetPhotosByYear(ctx context.Context, req *pb.GetPhotosByYearRequest) (rsp *pb.GetPhotosByYearResponse, err error) {
+	rsp = &pb.GetPhotosByYearResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		return
+	}
+	limit := int(req.Limit)
+	if limit <= 0 {
+		limit = 100
+	}
+	paths, total := store.GetPhotosByYear(int(req.Year), int(req.Offset), limit)
+	rsp.Paths = paths
+	rsp.Total = int32(total)
+	return
+}
+
+func (a *api) GetCloudLocations(ctx context.Context, req *pb.GetCloudLocationsRequest) (rsp *pb.GetCloudLocationsResponse, err error) {
+	rsp = &pb.GetCloudLocationsResponse{Success: true}
+	store := a.im.Store()
+	if store == nil {
+		rsp.Success = false
+		return
+	}
+	files := store.GetPhotosWithLocation()
+	rsp.Locations = make([]*pb.CloudLocationItem, 0, len(files))
+	for _, f := range files {
+		rsp.Locations = append(rsp.Locations, &pb.CloudLocationItem{
+			Path:      f.Path,
+			Latitude:  f.Latitude,
+			Longitude: f.Longitude,
 		})
 	}
 	return

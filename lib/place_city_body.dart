@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:photo_manager/photo_manager.dart' hide LatLng;
 import 'package:lumina/global.dart';
 import 'package:lumina/places_service.dart';
+import 'package:lumina/search_body.dart';
 
 class PlaceCityBody extends StatefulWidget {
   final CityGroup group;
@@ -27,10 +28,12 @@ class _PlaceCityBodyState extends State<PlaceCityBody> {
 
   Future<void> _loadPhotoLocations() async {
     final locations = <LatLng>[];
-    for (final asset in widget.group.assets) {
-      final ll = await asset.latlngAsync();
-      if (ll != null) {
-        locations.add(LatLng(ll.latitude, ll.longitude));
+    for (final photo in widget.group.photos) {
+      if (photo.local != null) {
+        final ll = await photo.local!.latlngAsync();
+        if (ll != null) {
+          locations.add(LatLng(ll.latitude, ll.longitude));
+        }
       }
     }
     if (mounted) {
@@ -92,9 +95,13 @@ class _PlaceCityBodyState extends State<PlaceCityBody> {
                 mainAxisSpacing: 2,
                 crossAxisSpacing: 2,
               ),
-              itemCount: widget.group.assets.length,
+              itemCount: widget.group.photos.length,
               itemBuilder: (context, index) {
-                return _AssetThumbnail(asset: widget.group.assets[index]);
+                final photo = widget.group.photos[index];
+                if (photo.local != null) {
+                  return _AssetThumbnail(asset: photo.local!);
+                }
+                return _CloudThumbnail(path: photo.remotePath!);
               },
             ),
           ),
@@ -134,6 +141,45 @@ class _AssetThumbnailState extends State<_AssetThumbnail> {
   Widget build(BuildContext context) {
     if (_thumbData == null) {
       return Container(color: Colors.grey[300]);
+    }
+    return Image.memory(_thumbData!, fit: BoxFit.cover);
+  }
+}
+
+class _CloudThumbnail extends StatefulWidget {
+  final String path;
+
+  const _CloudThumbnail({required this.path});
+
+  @override
+  State<_CloudThumbnail> createState() => _CloudThumbnailState();
+}
+
+class _CloudThumbnailState extends State<_CloudThumbnail> {
+  Uint8List? _thumbData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThumbnail();
+  }
+
+  Future<void> _loadThumbnail() async {
+    var urlPath = widget.path;
+    if (urlPath.startsWith('/')) urlPath = urlPath.substring(1);
+    final url = '$httpBaseUrl/thumbnail/$urlPath';
+    try {
+      final response = await httpGetWithTimeout(url);
+      if (response != null && mounted) {
+        setState(() => _thumbData = response);
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_thumbData == null) {
+      return Container(color: Theme.of(context).colorScheme.surfaceContainerHighest);
     }
     return Image.memory(_thumbData!, fit: BoxFit.cover);
   }

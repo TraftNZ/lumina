@@ -3233,6 +3233,422 @@ func (x *ListDriveClourdreveDirResponse) GetDirs() []string {
 	return nil
 }
 
+type GetYearSummaryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetYearSummaryRequest) Reset() {
+	*x = GetYearSummaryRequest{}
+	mi := &file_proto_lumina_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetYearSummaryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetYearSummaryRequest) ProtoMessage() {}
+
+func (x *GetYearSummaryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetYearSummaryRequest.ProtoReflect.Descriptor instead.
+func (*GetYearSummaryRequest) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{59}
+}
+
+type YearSummaryItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Year          int32                  `protobuf:"varint,1,opt,name=year,proto3" json:"year,omitempty"`
+	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	SamplePath    string                 `protobuf:"bytes,3,opt,name=samplePath,proto3" json:"samplePath,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *YearSummaryItem) Reset() {
+	*x = YearSummaryItem{}
+	mi := &file_proto_lumina_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *YearSummaryItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*YearSummaryItem) ProtoMessage() {}
+
+func (x *YearSummaryItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use YearSummaryItem.ProtoReflect.Descriptor instead.
+func (*YearSummaryItem) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *YearSummaryItem) GetYear() int32 {
+	if x != nil {
+		return x.Year
+	}
+	return 0
+}
+
+func (x *YearSummaryItem) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *YearSummaryItem) GetSamplePath() string {
+	if x != nil {
+		return x.SamplePath
+	}
+	return ""
+}
+
+type GetYearSummaryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Years         []*YearSummaryItem     `protobuf:"bytes,2,rep,name=years,proto3" json:"years,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetYearSummaryResponse) Reset() {
+	*x = GetYearSummaryResponse{}
+	mi := &file_proto_lumina_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetYearSummaryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetYearSummaryResponse) ProtoMessage() {}
+
+func (x *GetYearSummaryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetYearSummaryResponse.ProtoReflect.Descriptor instead.
+func (*GetYearSummaryResponse) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *GetYearSummaryResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetYearSummaryResponse) GetYears() []*YearSummaryItem {
+	if x != nil {
+		return x.Years
+	}
+	return nil
+}
+
+type GetPhotosByYearRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Year          int32                  `protobuf:"varint,1,opt,name=year,proto3" json:"year,omitempty"`
+	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPhotosByYearRequest) Reset() {
+	*x = GetPhotosByYearRequest{}
+	mi := &file_proto_lumina_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPhotosByYearRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPhotosByYearRequest) ProtoMessage() {}
+
+func (x *GetPhotosByYearRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPhotosByYearRequest.ProtoReflect.Descriptor instead.
+func (*GetPhotosByYearRequest) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *GetPhotosByYearRequest) GetYear() int32 {
+	if x != nil {
+		return x.Year
+	}
+	return 0
+}
+
+func (x *GetPhotosByYearRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *GetPhotosByYearRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetPhotosByYearResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Paths         []string               `protobuf:"bytes,2,rep,name=paths,proto3" json:"paths,omitempty"`
+	Total         int32                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPhotosByYearResponse) Reset() {
+	*x = GetPhotosByYearResponse{}
+	mi := &file_proto_lumina_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPhotosByYearResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPhotosByYearResponse) ProtoMessage() {}
+
+func (x *GetPhotosByYearResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPhotosByYearResponse.ProtoReflect.Descriptor instead.
+func (*GetPhotosByYearResponse) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *GetPhotosByYearResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetPhotosByYearResponse) GetPaths() []string {
+	if x != nil {
+		return x.Paths
+	}
+	return nil
+}
+
+func (x *GetPhotosByYearResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type GetCloudLocationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCloudLocationsRequest) Reset() {
+	*x = GetCloudLocationsRequest{}
+	mi := &file_proto_lumina_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCloudLocationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCloudLocationsRequest) ProtoMessage() {}
+
+func (x *GetCloudLocationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCloudLocationsRequest.ProtoReflect.Descriptor instead.
+func (*GetCloudLocationsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{64}
+}
+
+type CloudLocationItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	Latitude      float64                `protobuf:"fixed64,2,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Longitude     float64                `protobuf:"fixed64,3,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CloudLocationItem) Reset() {
+	*x = CloudLocationItem{}
+	mi := &file_proto_lumina_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CloudLocationItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloudLocationItem) ProtoMessage() {}
+
+func (x *CloudLocationItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloudLocationItem.ProtoReflect.Descriptor instead.
+func (*CloudLocationItem) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *CloudLocationItem) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *CloudLocationItem) GetLatitude() float64 {
+	if x != nil {
+		return x.Latitude
+	}
+	return 0
+}
+
+func (x *CloudLocationItem) GetLongitude() float64 {
+	if x != nil {
+		return x.Longitude
+	}
+	return 0
+}
+
+type GetCloudLocationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Locations     []*CloudLocationItem   `protobuf:"bytes,2,rep,name=locations,proto3" json:"locations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCloudLocationsResponse) Reset() {
+	*x = GetCloudLocationsResponse{}
+	mi := &file_proto_lumina_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCloudLocationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCloudLocationsResponse) ProtoMessage() {}
+
+func (x *GetCloudLocationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lumina_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCloudLocationsResponse.ProtoReflect.Descriptor instead.
+func (*GetCloudLocationsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_lumina_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *GetCloudLocationsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCloudLocationsResponse) GetLocations() []*CloudLocationItem {
+	if x != nil {
+		return x.Locations
+	}
+	return nil
+}
+
 var File_proto_lumina_proto protoreflect.FileDescriptor
 
 const file_proto_lumina_proto_rawDesc = "" +
@@ -3447,7 +3863,33 @@ const file_proto_lumina_proto_rawDesc = "" +
 	"\x1eListDriveClourdreveDirResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x12\n" +
-	"\x04dirs\x18\x03 \x03(\tR\x04dirs2\x93\x12\n" +
+	"\x04dirs\x18\x03 \x03(\tR\x04dirs\"\x17\n" +
+	"\x15GetYearSummaryRequest\"[\n" +
+	"\x0fYearSummaryItem\x12\x12\n" +
+	"\x04year\x18\x01 \x01(\x05R\x04year\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x1e\n" +
+	"\n" +
+	"samplePath\x18\x03 \x01(\tR\n" +
+	"samplePath\"a\n" +
+	"\x16GetYearSummaryResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12-\n" +
+	"\x05years\x18\x02 \x03(\v2\x17.lumina.YearSummaryItemR\x05years\"Z\n" +
+	"\x16GetPhotosByYearRequest\x12\x12\n" +
+	"\x04year\x18\x01 \x01(\x05R\x04year\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"_\n" +
+	"\x17GetPhotosByYearResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05paths\x18\x02 \x03(\tR\x05paths\x12\x14\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\"\x1a\n" +
+	"\x18GetCloudLocationsRequest\"a\n" +
+	"\x11CloudLocationItem\x12\x12\n" +
+	"\x04path\x18\x01 \x01(\tR\x04path\x12\x1a\n" +
+	"\blatitude\x18\x02 \x01(\x01R\blatitude\x12\x1c\n" +
+	"\tlongitude\x18\x03 \x01(\x01R\tlongitude\"n\n" +
+	"\x19GetCloudLocationsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x127\n" +
+	"\tlocations\x18\x02 \x03(\v2\x19.lumina.CloudLocationItemR\tlocations2\x98\x14\n" +
 	"\x06Lumina\x12E\n" +
 	"\n" +
 	"ListByDate\x12\x19.lumina.ListByDateRequest\x1a\x1a.lumina.ListByDateResponse\"\x00\x12B\n" +
@@ -3480,7 +3922,10 @@ const file_proto_lumina_proto_rawDesc = "" +
 	"\x11UpdatePhotoLabels\x12 .lumina.UpdatePhotoLabelsRequest\x1a!.lumina.UpdatePhotoLabelsResponse\"\x00\x12K\n" +
 	"\fSearchPhotos\x12\x1b.lumina.SearchPhotosRequest\x1a\x1c.lumina.SearchPhotosResponse\"\x00\x12]\n" +
 	"\x12GetUnlabeledPhotos\x12!.lumina.GetUnlabeledPhotosRequest\x1a\".lumina.GetUnlabeledPhotosResponse\"\x00\x12T\n" +
-	"\x0fGetLabelSummary\x12\x1e.lumina.GetLabelSummaryRequest\x1a\x1f.lumina.GetLabelSummaryResponse\"\x00B!Z\x1fgithub.com/traftai/lumina/protob\x06proto3"
+	"\x0fGetLabelSummary\x12\x1e.lumina.GetLabelSummaryRequest\x1a\x1f.lumina.GetLabelSummaryResponse\"\x00\x12Q\n" +
+	"\x0eGetYearSummary\x12\x1d.lumina.GetYearSummaryRequest\x1a\x1e.lumina.GetYearSummaryResponse\"\x00\x12T\n" +
+	"\x0fGetPhotosByYear\x12\x1e.lumina.GetPhotosByYearRequest\x1a\x1f.lumina.GetPhotosByYearResponse\"\x00\x12Z\n" +
+	"\x11GetCloudLocations\x12 .lumina.GetCloudLocationsRequest\x1a!.lumina.GetCloudLocationsResponse\"\x00B!Z\x1fgithub.com/traftai/lumina/protob\x06proto3"
 
 var (
 	file_proto_lumina_proto_rawDescOnce sync.Once
@@ -3494,7 +3939,7 @@ func file_proto_lumina_proto_rawDescGZIP() []byte {
 	return file_proto_lumina_proto_rawDescData
 }
 
-var file_proto_lumina_proto_msgTypes = make([]protoimpl.MessageInfo, 59)
+var file_proto_lumina_proto_msgTypes = make([]protoimpl.MessageInfo, 67)
 var file_proto_lumina_proto_goTypes = []any{
 	(*ListByDateRequest)(nil),              // 0: lumina.ListByDateRequest
 	(*ListByDateResponse)(nil),             // 1: lumina.ListByDateResponse
@@ -3555,73 +4000,89 @@ var file_proto_lumina_proto_goTypes = []any{
 	(*SetDriveCloudrveResponse)(nil),       // 56: lumina.SetDriveCloudrveResponse
 	(*ListDriveClourdreveDirRequest)(nil),  // 57: lumina.ListDriveClourdreveDirRequest
 	(*ListDriveClourdreveDirResponse)(nil), // 58: lumina.ListDriveClourdreveDirResponse
+	(*GetYearSummaryRequest)(nil),          // 59: lumina.GetYearSummaryRequest
+	(*YearSummaryItem)(nil),                // 60: lumina.YearSummaryItem
+	(*GetYearSummaryResponse)(nil),         // 61: lumina.GetYearSummaryResponse
+	(*GetPhotosByYearRequest)(nil),         // 62: lumina.GetPhotosByYearRequest
+	(*GetPhotosByYearResponse)(nil),        // 63: lumina.GetPhotosByYearResponse
+	(*GetCloudLocationsRequest)(nil),       // 64: lumina.GetCloudLocationsRequest
+	(*CloudLocationItem)(nil),              // 65: lumina.CloudLocationItem
+	(*GetCloudLocationsResponse)(nil),      // 66: lumina.GetCloudLocationsResponse
 }
 var file_proto_lumina_proto_depIdxs = []int32{
 	4,  // 0: lumina.FilterNotUploadedRequest.photos:type_name -> lumina.FilterNotUploadedRequestInfo
 	29, // 1: lumina.ListTrashResponse.items:type_name -> lumina.TrashItem
 	29, // 2: lumina.ListLockedResponse.items:type_name -> lumina.TrashItem
 	49, // 3: lumina.GetLabelSummaryResponse.labels:type_name -> lumina.LabelSummaryItem
-	0,  // 4: lumina.Lumina.ListByDate:input_type -> lumina.ListByDateRequest
-	51, // 5: lumina.Lumina.SyncIndex:input_type -> lumina.SyncIndexRequest
-	53, // 6: lumina.Lumina.FullResyncIndex:input_type -> lumina.FullResyncIndexRequest
-	2,  // 7: lumina.Lumina.Delete:input_type -> lumina.DeleteRequest
-	5,  // 8: lumina.Lumina.FilterNotUploaded:input_type -> lumina.FilterNotUploadedRequest
-	7,  // 9: lumina.Lumina.SetDriveSMB:input_type -> lumina.SetDriveSMBRequest
-	9,  // 10: lumina.Lumina.ListDriveSMBShares:input_type -> lumina.ListDriveSMBSharesRequest
-	11, // 11: lumina.Lumina.ListDriveSMBDir:input_type -> lumina.ListDriveSMBDirRequest
-	13, // 12: lumina.Lumina.SetDriveSMBShare:input_type -> lumina.SetDriveSMBShareRequest
-	15, // 13: lumina.Lumina.SetDriveWebdav:input_type -> lumina.SetDriveWebdavRequest
-	17, // 14: lumina.Lumina.ListDriveWebdavDir:input_type -> lumina.ListDriveWebdavDirRequest
-	19, // 15: lumina.Lumina.SetDriveNFS:input_type -> lumina.SetDriveNFSRequest
-	21, // 16: lumina.Lumina.ListDriveNFSDir:input_type -> lumina.ListDriveNFSDirRequest
-	23, // 17: lumina.Lumina.SetDriveS3:input_type -> lumina.SetDriveS3Request
-	25, // 18: lumina.Lumina.ListDriveS3Buckets:input_type -> lumina.ListDriveS3BucketsRequest
-	55, // 19: lumina.Lumina.SetDriveCloudreve:input_type -> lumina.SetDriveCloudrveRequest
-	57, // 20: lumina.Lumina.ListDriveCloudrveDir:input_type -> lumina.ListDriveClourdreveDirRequest
-	27, // 21: lumina.Lumina.MoveToTrash:input_type -> lumina.MoveToTrashRequest
-	30, // 22: lumina.Lumina.ListTrash:input_type -> lumina.ListTrashRequest
-	32, // 23: lumina.Lumina.RestoreFromTrash:input_type -> lumina.RestoreFromTrashRequest
-	34, // 24: lumina.Lumina.EmptyTrash:input_type -> lumina.EmptyTrashRequest
-	36, // 25: lumina.Lumina.MoveToLocked:input_type -> lumina.MoveToLockedRequest
-	40, // 26: lumina.Lumina.ListLocked:input_type -> lumina.ListLockedRequest
-	38, // 27: lumina.Lumina.RestoreFromLocked:input_type -> lumina.RestoreFromLockedRequest
-	42, // 28: lumina.Lumina.UpdatePhotoLabels:input_type -> lumina.UpdatePhotoLabelsRequest
-	44, // 29: lumina.Lumina.SearchPhotos:input_type -> lumina.SearchPhotosRequest
-	46, // 30: lumina.Lumina.GetUnlabeledPhotos:input_type -> lumina.GetUnlabeledPhotosRequest
-	48, // 31: lumina.Lumina.GetLabelSummary:input_type -> lumina.GetLabelSummaryRequest
-	1,  // 32: lumina.Lumina.ListByDate:output_type -> lumina.ListByDateResponse
-	52, // 33: lumina.Lumina.SyncIndex:output_type -> lumina.SyncIndexResponse
-	54, // 34: lumina.Lumina.FullResyncIndex:output_type -> lumina.FullResyncIndexResponse
-	3,  // 35: lumina.Lumina.Delete:output_type -> lumina.DeleteResponse
-	6,  // 36: lumina.Lumina.FilterNotUploaded:output_type -> lumina.FilterNotUploadedResponse
-	8,  // 37: lumina.Lumina.SetDriveSMB:output_type -> lumina.SetDriveSMBResponse
-	10, // 38: lumina.Lumina.ListDriveSMBShares:output_type -> lumina.ListDriveSMBSharesResponse
-	12, // 39: lumina.Lumina.ListDriveSMBDir:output_type -> lumina.ListDriveSMBDirResponse
-	14, // 40: lumina.Lumina.SetDriveSMBShare:output_type -> lumina.SetDriveSMBShareResponse
-	16, // 41: lumina.Lumina.SetDriveWebdav:output_type -> lumina.SetDriveWebdavResponse
-	18, // 42: lumina.Lumina.ListDriveWebdavDir:output_type -> lumina.ListDriveWebdavDirResponse
-	20, // 43: lumina.Lumina.SetDriveNFS:output_type -> lumina.SetDriveNFSResponse
-	22, // 44: lumina.Lumina.ListDriveNFSDir:output_type -> lumina.ListDriveNFSDirResponse
-	24, // 45: lumina.Lumina.SetDriveS3:output_type -> lumina.SetDriveS3Response
-	26, // 46: lumina.Lumina.ListDriveS3Buckets:output_type -> lumina.ListDriveS3BucketsResponse
-	56, // 47: lumina.Lumina.SetDriveCloudreve:output_type -> lumina.SetDriveCloudrveResponse
-	58, // 48: lumina.Lumina.ListDriveCloudrveDir:output_type -> lumina.ListDriveClourdreveDirResponse
-	28, // 49: lumina.Lumina.MoveToTrash:output_type -> lumina.MoveToTrashResponse
-	31, // 50: lumina.Lumina.ListTrash:output_type -> lumina.ListTrashResponse
-	33, // 51: lumina.Lumina.RestoreFromTrash:output_type -> lumina.RestoreFromTrashResponse
-	35, // 52: lumina.Lumina.EmptyTrash:output_type -> lumina.EmptyTrashResponse
-	37, // 53: lumina.Lumina.MoveToLocked:output_type -> lumina.MoveToLockedResponse
-	41, // 54: lumina.Lumina.ListLocked:output_type -> lumina.ListLockedResponse
-	39, // 55: lumina.Lumina.RestoreFromLocked:output_type -> lumina.RestoreFromLockedResponse
-	43, // 56: lumina.Lumina.UpdatePhotoLabels:output_type -> lumina.UpdatePhotoLabelsResponse
-	45, // 57: lumina.Lumina.SearchPhotos:output_type -> lumina.SearchPhotosResponse
-	47, // 58: lumina.Lumina.GetUnlabeledPhotos:output_type -> lumina.GetUnlabeledPhotosResponse
-	50, // 59: lumina.Lumina.GetLabelSummary:output_type -> lumina.GetLabelSummaryResponse
-	32, // [32:60] is the sub-list for method output_type
-	4,  // [4:32] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	60, // 4: lumina.GetYearSummaryResponse.years:type_name -> lumina.YearSummaryItem
+	65, // 5: lumina.GetCloudLocationsResponse.locations:type_name -> lumina.CloudLocationItem
+	0,  // 6: lumina.Lumina.ListByDate:input_type -> lumina.ListByDateRequest
+	51, // 7: lumina.Lumina.SyncIndex:input_type -> lumina.SyncIndexRequest
+	53, // 8: lumina.Lumina.FullResyncIndex:input_type -> lumina.FullResyncIndexRequest
+	2,  // 9: lumina.Lumina.Delete:input_type -> lumina.DeleteRequest
+	5,  // 10: lumina.Lumina.FilterNotUploaded:input_type -> lumina.FilterNotUploadedRequest
+	7,  // 11: lumina.Lumina.SetDriveSMB:input_type -> lumina.SetDriveSMBRequest
+	9,  // 12: lumina.Lumina.ListDriveSMBShares:input_type -> lumina.ListDriveSMBSharesRequest
+	11, // 13: lumina.Lumina.ListDriveSMBDir:input_type -> lumina.ListDriveSMBDirRequest
+	13, // 14: lumina.Lumina.SetDriveSMBShare:input_type -> lumina.SetDriveSMBShareRequest
+	15, // 15: lumina.Lumina.SetDriveWebdav:input_type -> lumina.SetDriveWebdavRequest
+	17, // 16: lumina.Lumina.ListDriveWebdavDir:input_type -> lumina.ListDriveWebdavDirRequest
+	19, // 17: lumina.Lumina.SetDriveNFS:input_type -> lumina.SetDriveNFSRequest
+	21, // 18: lumina.Lumina.ListDriveNFSDir:input_type -> lumina.ListDriveNFSDirRequest
+	23, // 19: lumina.Lumina.SetDriveS3:input_type -> lumina.SetDriveS3Request
+	25, // 20: lumina.Lumina.ListDriveS3Buckets:input_type -> lumina.ListDriveS3BucketsRequest
+	55, // 21: lumina.Lumina.SetDriveCloudreve:input_type -> lumina.SetDriveCloudrveRequest
+	57, // 22: lumina.Lumina.ListDriveCloudrveDir:input_type -> lumina.ListDriveClourdreveDirRequest
+	27, // 23: lumina.Lumina.MoveToTrash:input_type -> lumina.MoveToTrashRequest
+	30, // 24: lumina.Lumina.ListTrash:input_type -> lumina.ListTrashRequest
+	32, // 25: lumina.Lumina.RestoreFromTrash:input_type -> lumina.RestoreFromTrashRequest
+	34, // 26: lumina.Lumina.EmptyTrash:input_type -> lumina.EmptyTrashRequest
+	36, // 27: lumina.Lumina.MoveToLocked:input_type -> lumina.MoveToLockedRequest
+	40, // 28: lumina.Lumina.ListLocked:input_type -> lumina.ListLockedRequest
+	38, // 29: lumina.Lumina.RestoreFromLocked:input_type -> lumina.RestoreFromLockedRequest
+	42, // 30: lumina.Lumina.UpdatePhotoLabels:input_type -> lumina.UpdatePhotoLabelsRequest
+	44, // 31: lumina.Lumina.SearchPhotos:input_type -> lumina.SearchPhotosRequest
+	46, // 32: lumina.Lumina.GetUnlabeledPhotos:input_type -> lumina.GetUnlabeledPhotosRequest
+	48, // 33: lumina.Lumina.GetLabelSummary:input_type -> lumina.GetLabelSummaryRequest
+	59, // 34: lumina.Lumina.GetYearSummary:input_type -> lumina.GetYearSummaryRequest
+	62, // 35: lumina.Lumina.GetPhotosByYear:input_type -> lumina.GetPhotosByYearRequest
+	64, // 36: lumina.Lumina.GetCloudLocations:input_type -> lumina.GetCloudLocationsRequest
+	1,  // 37: lumina.Lumina.ListByDate:output_type -> lumina.ListByDateResponse
+	52, // 38: lumina.Lumina.SyncIndex:output_type -> lumina.SyncIndexResponse
+	54, // 39: lumina.Lumina.FullResyncIndex:output_type -> lumina.FullResyncIndexResponse
+	3,  // 40: lumina.Lumina.Delete:output_type -> lumina.DeleteResponse
+	6,  // 41: lumina.Lumina.FilterNotUploaded:output_type -> lumina.FilterNotUploadedResponse
+	8,  // 42: lumina.Lumina.SetDriveSMB:output_type -> lumina.SetDriveSMBResponse
+	10, // 43: lumina.Lumina.ListDriveSMBShares:output_type -> lumina.ListDriveSMBSharesResponse
+	12, // 44: lumina.Lumina.ListDriveSMBDir:output_type -> lumina.ListDriveSMBDirResponse
+	14, // 45: lumina.Lumina.SetDriveSMBShare:output_type -> lumina.SetDriveSMBShareResponse
+	16, // 46: lumina.Lumina.SetDriveWebdav:output_type -> lumina.SetDriveWebdavResponse
+	18, // 47: lumina.Lumina.ListDriveWebdavDir:output_type -> lumina.ListDriveWebdavDirResponse
+	20, // 48: lumina.Lumina.SetDriveNFS:output_type -> lumina.SetDriveNFSResponse
+	22, // 49: lumina.Lumina.ListDriveNFSDir:output_type -> lumina.ListDriveNFSDirResponse
+	24, // 50: lumina.Lumina.SetDriveS3:output_type -> lumina.SetDriveS3Response
+	26, // 51: lumina.Lumina.ListDriveS3Buckets:output_type -> lumina.ListDriveS3BucketsResponse
+	56, // 52: lumina.Lumina.SetDriveCloudreve:output_type -> lumina.SetDriveCloudrveResponse
+	58, // 53: lumina.Lumina.ListDriveCloudrveDir:output_type -> lumina.ListDriveClourdreveDirResponse
+	28, // 54: lumina.Lumina.MoveToTrash:output_type -> lumina.MoveToTrashResponse
+	31, // 55: lumina.Lumina.ListTrash:output_type -> lumina.ListTrashResponse
+	33, // 56: lumina.Lumina.RestoreFromTrash:output_type -> lumina.RestoreFromTrashResponse
+	35, // 57: lumina.Lumina.EmptyTrash:output_type -> lumina.EmptyTrashResponse
+	37, // 58: lumina.Lumina.MoveToLocked:output_type -> lumina.MoveToLockedResponse
+	41, // 59: lumina.Lumina.ListLocked:output_type -> lumina.ListLockedResponse
+	39, // 60: lumina.Lumina.RestoreFromLocked:output_type -> lumina.RestoreFromLockedResponse
+	43, // 61: lumina.Lumina.UpdatePhotoLabels:output_type -> lumina.UpdatePhotoLabelsResponse
+	45, // 62: lumina.Lumina.SearchPhotos:output_type -> lumina.SearchPhotosResponse
+	47, // 63: lumina.Lumina.GetUnlabeledPhotos:output_type -> lumina.GetUnlabeledPhotosResponse
+	50, // 64: lumina.Lumina.GetLabelSummary:output_type -> lumina.GetLabelSummaryResponse
+	61, // 65: lumina.Lumina.GetYearSummary:output_type -> lumina.GetYearSummaryResponse
+	63, // 66: lumina.Lumina.GetPhotosByYear:output_type -> lumina.GetPhotosByYearResponse
+	66, // 67: lumina.Lumina.GetCloudLocations:output_type -> lumina.GetCloudLocationsResponse
+	37, // [37:68] is the sub-list for method output_type
+	6,  // [6:37] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_proto_lumina_proto_init() }
@@ -3635,7 +4096,7 @@ func file_proto_lumina_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_lumina_proto_rawDesc), len(file_proto_lumina_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   59,
+			NumMessages:   67,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

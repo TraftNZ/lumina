@@ -898,3 +898,126 @@ final $typed_data.Uint8List listDriveClourdreveDirResponseDescriptor =
     $convert.base64Decode(
         'Ch5MaXN0RHJpdmVDbG91cmRyZXZlRGlyUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2'
         'VzcxIYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlEhIKBGRpcnMYAyADKAlSBGRpcnM=');
+
+@$core.Deprecated('Use getYearSummaryRequestDescriptor instead')
+const GetYearSummaryRequest$json = {
+  '1': 'GetYearSummaryRequest',
+};
+
+/// Descriptor for `GetYearSummaryRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getYearSummaryRequestDescriptor =
+    $convert.base64Decode('ChVHZXRZZWFyU3VtbWFyeVJlcXVlc3Q=');
+
+@$core.Deprecated('Use yearSummaryItemDescriptor instead')
+const YearSummaryItem$json = {
+  '1': 'YearSummaryItem',
+  '2': [
+    {'1': 'year', '3': 1, '4': 1, '5': 5, '10': 'year'},
+    {'1': 'count', '3': 2, '4': 1, '5': 5, '10': 'count'},
+    {'1': 'samplePath', '3': 3, '4': 1, '5': 9, '10': 'samplePath'},
+  ],
+};
+
+/// Descriptor for `YearSummaryItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List yearSummaryItemDescriptor = $convert.base64Decode(
+    'Cg9ZZWFyU3VtbWFyeUl0ZW0SEgoEeWVhchgBIAEoBVIEeWVhchIUCgVjb3VudBgCIAEoBVIFY2'
+    '91bnQSHgoKc2FtcGxlUGF0aBgDIAEoCVIKc2FtcGxlUGF0aA==');
+
+@$core.Deprecated('Use getYearSummaryResponseDescriptor instead')
+const GetYearSummaryResponse$json = {
+  '1': 'GetYearSummaryResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {
+      '1': 'years',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.lumina.YearSummaryItem',
+      '10': 'years'
+    },
+  ],
+};
+
+/// Descriptor for `GetYearSummaryResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getYearSummaryResponseDescriptor =
+    $convert.base64Decode(
+        'ChZHZXRZZWFyU3VtbWFyeVJlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSLQoFeW'
+        'VhcnMYAiADKAsyFy5sdW1pbmEuWWVhclN1bW1hcnlJdGVtUgV5ZWFycw==');
+
+@$core.Deprecated('Use getPhotosByYearRequestDescriptor instead')
+const GetPhotosByYearRequest$json = {
+  '1': 'GetPhotosByYearRequest',
+  '2': [
+    {'1': 'year', '3': 1, '4': 1, '5': 5, '10': 'year'},
+    {'1': 'offset', '3': 2, '4': 1, '5': 5, '10': 'offset'},
+    {'1': 'limit', '3': 3, '4': 1, '5': 5, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `GetPhotosByYearRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPhotosByYearRequestDescriptor =
+    $convert.base64Decode(
+        'ChZHZXRQaG90b3NCeVllYXJSZXF1ZXN0EhIKBHllYXIYASABKAVSBHllYXISFgoGb2Zmc2V0GA'
+        'IgASgFUgZvZmZzZXQSFAoFbGltaXQYAyABKAVSBWxpbWl0');
+
+@$core.Deprecated('Use getPhotosByYearResponseDescriptor instead')
+const GetPhotosByYearResponse$json = {
+  '1': 'GetPhotosByYearResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'paths', '3': 2, '4': 3, '5': 9, '10': 'paths'},
+    {'1': 'total', '3': 3, '4': 1, '5': 5, '10': 'total'},
+  ],
+};
+
+/// Descriptor for `GetPhotosByYearResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPhotosByYearResponseDescriptor =
+    $convert.base64Decode(
+        'ChdHZXRQaG90b3NCeVllYXJSZXNwb25zZRIYCgdzdWNjZXNzGAEgASgIUgdzdWNjZXNzEhQKBX'
+        'BhdGhzGAIgAygJUgVwYXRocxIUCgV0b3RhbBgDIAEoBVIFdG90YWw=');
+
+@$core.Deprecated('Use getCloudLocationsRequestDescriptor instead')
+const GetCloudLocationsRequest$json = {
+  '1': 'GetCloudLocationsRequest',
+};
+
+/// Descriptor for `GetCloudLocationsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getCloudLocationsRequestDescriptor =
+    $convert.base64Decode('ChhHZXRDbG91ZExvY2F0aW9uc1JlcXVlc3Q=');
+
+@$core.Deprecated('Use cloudLocationItemDescriptor instead')
+const CloudLocationItem$json = {
+  '1': 'CloudLocationItem',
+  '2': [
+    {'1': 'path', '3': 1, '4': 1, '5': 9, '10': 'path'},
+    {'1': 'latitude', '3': 2, '4': 1, '5': 1, '10': 'latitude'},
+    {'1': 'longitude', '3': 3, '4': 1, '5': 1, '10': 'longitude'},
+  ],
+};
+
+/// Descriptor for `CloudLocationItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List cloudLocationItemDescriptor = $convert.base64Decode(
+    'ChFDbG91ZExvY2F0aW9uSXRlbRISCgRwYXRoGAEgASgJUgRwYXRoEhoKCGxhdGl0dWRlGAIgAS'
+    'gBUghsYXRpdHVkZRIcCglsb25naXR1ZGUYAyABKAFSCWxvbmdpdHVkZQ==');
+
+@$core.Deprecated('Use getCloudLocationsResponseDescriptor instead')
+const GetCloudLocationsResponse$json = {
+  '1': 'GetCloudLocationsResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {
+      '1': 'locations',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.lumina.CloudLocationItem',
+      '10': 'locations'
+    },
+  ],
+};
+
+/// Descriptor for `GetCloudLocationsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getCloudLocationsResponseDescriptor = $convert.base64Decode(
+    'ChlHZXRDbG91ZExvY2F0aW9uc1Jlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSNw'
+    'oJbG9jYXRpb25zGAIgAygLMhkubHVtaW5hLkNsb3VkTG9jYXRpb25JdGVtUglsb2NhdGlvbnM=');

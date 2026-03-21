@@ -47,6 +47,9 @@ const (
 	Lumina_SearchPhotos_FullMethodName         = "/lumina.Lumina/SearchPhotos"
 	Lumina_GetUnlabeledPhotos_FullMethodName   = "/lumina.Lumina/GetUnlabeledPhotos"
 	Lumina_GetLabelSummary_FullMethodName      = "/lumina.Lumina/GetLabelSummary"
+	Lumina_GetYearSummary_FullMethodName       = "/lumina.Lumina/GetYearSummary"
+	Lumina_GetPhotosByYear_FullMethodName      = "/lumina.Lumina/GetPhotosByYear"
+	Lumina_GetCloudLocations_FullMethodName    = "/lumina.Lumina/GetCloudLocations"
 )
 
 // LuminaClient is the client API for Lumina service.
@@ -89,6 +92,10 @@ type LuminaClient interface {
 	SearchPhotos(ctx context.Context, in *SearchPhotosRequest, opts ...grpc.CallOption) (*SearchPhotosResponse, error)
 	GetUnlabeledPhotos(ctx context.Context, in *GetUnlabeledPhotosRequest, opts ...grpc.CallOption) (*GetUnlabeledPhotosResponse, error)
 	GetLabelSummary(ctx context.Context, in *GetLabelSummaryRequest, opts ...grpc.CallOption) (*GetLabelSummaryResponse, error)
+	// Cloud Collections
+	GetYearSummary(ctx context.Context, in *GetYearSummaryRequest, opts ...grpc.CallOption) (*GetYearSummaryResponse, error)
+	GetPhotosByYear(ctx context.Context, in *GetPhotosByYearRequest, opts ...grpc.CallOption) (*GetPhotosByYearResponse, error)
+	GetCloudLocations(ctx context.Context, in *GetCloudLocationsRequest, opts ...grpc.CallOption) (*GetCloudLocationsResponse, error)
 }
 
 type luminaClient struct {
@@ -382,6 +389,36 @@ func (c *luminaClient) GetLabelSummary(ctx context.Context, in *GetLabelSummaryR
 	return out, nil
 }
 
+func (c *luminaClient) GetYearSummary(ctx context.Context, in *GetYearSummaryRequest, opts ...grpc.CallOption) (*GetYearSummaryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetYearSummaryResponse)
+	err := c.cc.Invoke(ctx, Lumina_GetYearSummary_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *luminaClient) GetPhotosByYear(ctx context.Context, in *GetPhotosByYearRequest, opts ...grpc.CallOption) (*GetPhotosByYearResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPhotosByYearResponse)
+	err := c.cc.Invoke(ctx, Lumina_GetPhotosByYear_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *luminaClient) GetCloudLocations(ctx context.Context, in *GetCloudLocationsRequest, opts ...grpc.CallOption) (*GetCloudLocationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCloudLocationsResponse)
+	err := c.cc.Invoke(ctx, Lumina_GetCloudLocations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LuminaServer is the server API for Lumina service.
 // All implementations must embed UnimplementedLuminaServer
 // for forward compatibility.
@@ -422,6 +459,10 @@ type LuminaServer interface {
 	SearchPhotos(context.Context, *SearchPhotosRequest) (*SearchPhotosResponse, error)
 	GetUnlabeledPhotos(context.Context, *GetUnlabeledPhotosRequest) (*GetUnlabeledPhotosResponse, error)
 	GetLabelSummary(context.Context, *GetLabelSummaryRequest) (*GetLabelSummaryResponse, error)
+	// Cloud Collections
+	GetYearSummary(context.Context, *GetYearSummaryRequest) (*GetYearSummaryResponse, error)
+	GetPhotosByYear(context.Context, *GetPhotosByYearRequest) (*GetPhotosByYearResponse, error)
+	GetCloudLocations(context.Context, *GetCloudLocationsRequest) (*GetCloudLocationsResponse, error)
 	mustEmbedUnimplementedLuminaServer()
 }
 
@@ -515,6 +556,15 @@ func (UnimplementedLuminaServer) GetUnlabeledPhotos(context.Context, *GetUnlabel
 }
 func (UnimplementedLuminaServer) GetLabelSummary(context.Context, *GetLabelSummaryRequest) (*GetLabelSummaryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLabelSummary not implemented")
+}
+func (UnimplementedLuminaServer) GetYearSummary(context.Context, *GetYearSummaryRequest) (*GetYearSummaryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetYearSummary not implemented")
+}
+func (UnimplementedLuminaServer) GetPhotosByYear(context.Context, *GetPhotosByYearRequest) (*GetPhotosByYearResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPhotosByYear not implemented")
+}
+func (UnimplementedLuminaServer) GetCloudLocations(context.Context, *GetCloudLocationsRequest) (*GetCloudLocationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCloudLocations not implemented")
 }
 func (UnimplementedLuminaServer) mustEmbedUnimplementedLuminaServer() {}
 func (UnimplementedLuminaServer) testEmbeddedByValue()                {}
@@ -1030,6 +1080,60 @@ func _Lumina_GetLabelSummary_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Lumina_GetYearSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetYearSummaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LuminaServer).GetYearSummary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Lumina_GetYearSummary_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LuminaServer).GetYearSummary(ctx, req.(*GetYearSummaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Lumina_GetPhotosByYear_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPhotosByYearRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LuminaServer).GetPhotosByYear(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Lumina_GetPhotosByYear_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LuminaServer).GetPhotosByYear(ctx, req.(*GetPhotosByYearRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Lumina_GetCloudLocations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCloudLocationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LuminaServer).GetCloudLocations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Lumina_GetCloudLocations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LuminaServer).GetCloudLocations(ctx, req.(*GetCloudLocationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Lumina_ServiceDesc is the grpc.ServiceDesc for Lumina service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1144,6 +1248,18 @@ var Lumina_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLabelSummary",
 			Handler:    _Lumina_GetLabelSummary_Handler,
+		},
+		{
+			MethodName: "GetYearSummary",
+			Handler:    _Lumina_GetYearSummary_Handler,
+		},
+		{
+			MethodName: "GetPhotosByYear",
+			Handler:    _Lumina_GetPhotosByYear_Handler,
+		},
+		{
+			MethodName: "GetCloudLocations",
+			Handler:    _Lumina_GetCloudLocations_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

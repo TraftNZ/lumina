@@ -236,6 +236,28 @@ class LuminaClient extends $grpc.Client {
     return $createUnaryCall(_$getLabelSummary, request, options: options);
   }
 
+  /// Cloud Collections
+  $grpc.ResponseFuture<$0.GetYearSummaryResponse> getYearSummary(
+    $0.GetYearSummaryRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getYearSummary, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.GetPhotosByYearResponse> getPhotosByYear(
+    $0.GetPhotosByYearRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getPhotosByYear, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.GetCloudLocationsResponse> getCloudLocations(
+    $0.GetCloudLocationsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getCloudLocations, request, options: options);
+  }
+
   // method descriptors
 
   static final _$listByDate =
@@ -378,6 +400,21 @@ class LuminaClient extends $grpc.Client {
           '/lumina.Lumina/GetLabelSummary',
           ($0.GetLabelSummaryRequest value) => value.writeToBuffer(),
           $0.GetLabelSummaryResponse.fromBuffer);
+  static final _$getYearSummary =
+      $grpc.ClientMethod<$0.GetYearSummaryRequest, $0.GetYearSummaryResponse>(
+          '/lumina.Lumina/GetYearSummary',
+          ($0.GetYearSummaryRequest value) => value.writeToBuffer(),
+          $0.GetYearSummaryResponse.fromBuffer);
+  static final _$getPhotosByYear =
+      $grpc.ClientMethod<$0.GetPhotosByYearRequest, $0.GetPhotosByYearResponse>(
+          '/lumina.Lumina/GetPhotosByYear',
+          ($0.GetPhotosByYearRequest value) => value.writeToBuffer(),
+          $0.GetPhotosByYearResponse.fromBuffer);
+  static final _$getCloudLocations = $grpc.ClientMethod<
+          $0.GetCloudLocationsRequest, $0.GetCloudLocationsResponse>(
+      '/lumina.Lumina/GetCloudLocations',
+      ($0.GetCloudLocationsRequest value) => value.writeToBuffer(),
+      $0.GetCloudLocationsResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('lumina.Lumina')
@@ -623,6 +660,33 @@ abstract class LuminaServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.GetLabelSummaryRequest.fromBuffer(value),
         ($0.GetLabelSummaryResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetYearSummaryRequest,
+            $0.GetYearSummaryResponse>(
+        'GetYearSummary',
+        getYearSummary_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetYearSummaryRequest.fromBuffer(value),
+        ($0.GetYearSummaryResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetPhotosByYearRequest,
+            $0.GetPhotosByYearResponse>(
+        'GetPhotosByYear',
+        getPhotosByYear_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetPhotosByYearRequest.fromBuffer(value),
+        ($0.GetPhotosByYearResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetCloudLocationsRequest,
+            $0.GetCloudLocationsResponse>(
+        'GetCloudLocations',
+        getCloudLocations_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetCloudLocationsRequest.fromBuffer(value),
+        ($0.GetCloudLocationsResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.ListByDateResponse> listByDate_Pre($grpc.ServiceCall $call,
@@ -861,4 +925,31 @@ abstract class LuminaServiceBase extends $grpc.Service {
 
   $async.Future<$0.GetLabelSummaryResponse> getLabelSummary(
       $grpc.ServiceCall call, $0.GetLabelSummaryRequest request);
+
+  $async.Future<$0.GetYearSummaryResponse> getYearSummary_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetYearSummaryRequest> $request) async {
+    return getYearSummary($call, await $request);
+  }
+
+  $async.Future<$0.GetYearSummaryResponse> getYearSummary(
+      $grpc.ServiceCall call, $0.GetYearSummaryRequest request);
+
+  $async.Future<$0.GetPhotosByYearResponse> getPhotosByYear_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetPhotosByYearRequest> $request) async {
+    return getPhotosByYear($call, await $request);
+  }
+
+  $async.Future<$0.GetPhotosByYearResponse> getPhotosByYear(
+      $grpc.ServiceCall call, $0.GetPhotosByYearRequest request);
+
+  $async.Future<$0.GetCloudLocationsResponse> getCloudLocations_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.GetCloudLocationsRequest> $request) async {
+    return getCloudLocations($call, await $request);
+  }
+
+  $async.Future<$0.GetCloudLocationsResponse> getCloudLocations(
+      $grpc.ServiceCall call, $0.GetCloudLocationsRequest request);
 }

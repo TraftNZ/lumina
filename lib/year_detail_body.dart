@@ -3,6 +3,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/global.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:lumina/state_model.dart';
+import 'package:lumina/search_body.dart';
 
 class YearDetailBody extends StatefulWidget {
   final int year;
@@ -15,6 +19,7 @@ class YearDetailBody extends StatefulWidget {
 
 class _YearDetailBodyState extends State<YearDetailBody> {
   final List<AssetEntity> _assets = [];
+  final List<String> _cloudPaths = [];
   int _currentPage = 0;
   bool _loading = false;
   bool _hasMore = true;
@@ -28,6 +33,7 @@ class _YearDetailBodyState extends State<YearDetailBody> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _initYearPath();
+    _loadCloudPhotos();
   }
 
   @override
@@ -86,8 +92,27 @@ class _YearDetailBodyState extends State<YearDetailBody> {
     });
   }
 
+  Future<void> _loadCloudPhotos() async {
+    while (!isServerReady || !settingModel.isRemoteStorageSetted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+    }
+    try {
+      final resp = await storage.cli
+          .getPhotosByYear(GetPhotosByYearRequest(
+            year: widget.year,
+            offset: 0,
+            limit: 1000,
+          ))
+          .timeout(const Duration(seconds: 15));
+      if (!resp.success || !mounted) return;
+      setState(() => _cloudPaths.addAll(resp.paths));
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
+    final totalCount = _assets.length + _cloudPaths.length;
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.year}'),
@@ -100,9 +125,13 @@ class _YearDetailBodyState extends State<YearDetailBody> {
           mainAxisSpacing: 2,
           crossAxisSpacing: 2,
         ),
-        itemCount: _assets.length,
+        itemCount: totalCount,
         itemBuilder: (context, index) {
-          return _AssetThumbnail(asset: _assets[index]);
+          if (index < _assets.length) {
+            return _AssetThumbnail(asset: _assets[index]);
+          }
+          final cloudIndex = index - _assets.length;
+          return _CloudThumbnail(path: _cloudPaths[cloudIndex]);
         },
       ),
     );
@@ -139,6 +168,45 @@ class _AssetThumbnailState extends State<_AssetThumbnail> {
   Widget build(BuildContext context) {
     if (_thumbData == null) {
       return Container(color: Colors.grey[300]);
+    }
+    return Image.memory(_thumbData!, fit: BoxFit.cover);
+  }
+}
+
+class _CloudThumbnail extends StatefulWidget {
+  final String path;
+
+  const _CloudThumbnail({required this.path});
+
+  @override
+  State<_CloudThumbnail> createState() => _CloudThumbnailState();
+}
+
+class _CloudThumbnailState extends State<_CloudThumbnail> {
+  Uint8List? _thumbData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThumbnail();
+  }
+
+  Future<void> _loadThumbnail() async {
+    var urlPath = widget.path;
+    if (urlPath.startsWith('/')) urlPath = urlPath.substring(1);
+    final url = '$httpBaseUrl/thumbnail/$urlPath';
+    try {
+      final response = await httpGetWithTimeout(url);
+      if (response != null && mounted) {
+        setState(() => _thumbData = response);
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_thumbData == null) {
+      return Container(color: Theme.of(context).colorScheme.surfaceContainerHighest);
     }
     return Image.memory(_thumbData!, fit: BoxFit.cover);
   }

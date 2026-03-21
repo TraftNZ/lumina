@@ -119,12 +119,13 @@ func (e *ErrRequire2FA) Error() string {
 }
 
 type fileObject struct {
-	Name      string    `json:"name"`
-	Path      string    `json:"path"`
-	Size      int64     `json:"size"`
-	Type      int       `json:"type"` // 0=file, 1=folder
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
+	Name      string            `json:"name"`
+	Path      string            `json:"path"`
+	Size      int64             `json:"size"`
+	Type      int               `json:"type"` // 0=file, 1=folder
+	UpdatedAt time.Time         `json:"updated_at"`
+	CreatedAt time.Time         `json:"created_at"`
+	Metadata  map[string]string `json:"metadata"`
 }
 
 type fileListData struct {
@@ -1048,11 +1049,27 @@ func (c *Cloudreve) ListPhotos() ([]localstore.RemoteFile, error) {
 						if fObj.Type == 1 {
 							continue
 						}
-						result = append(result, localstore.RemoteFile{
+						rf := localstore.RemoteFile{
 							Path:    path.Join(yObj.Name, mObj.Name, dObj.Name, fObj.Name),
 							Size:    fObj.Size,
 							ModTime: fObj.UpdatedAt,
-						})
+						}
+						if takenStr, ok := fObj.Metadata["image:taken_at"]; ok {
+							if t, err := time.Parse(time.RFC3339, takenStr); err == nil {
+								rf.TakenAt = t
+							}
+						}
+						if latStr, ok := fObj.Metadata["image:latitude"]; ok {
+							if lat, err := strconv.ParseFloat(latStr, 64); err == nil {
+								rf.Latitude = lat
+							}
+						}
+						if lngStr, ok := fObj.Metadata["image:longitude"]; ok {
+							if lng, err := strconv.ParseFloat(lngStr, 64); err == nil {
+								rf.Longitude = lng
+							}
+						}
+						result = append(result, rf)
 					}
 					if fileData.Pagination == nil || page*100 >= fileData.Pagination.Total {
 						break

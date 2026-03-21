@@ -4,6 +4,16 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/global.dart';
+import 'package:lumina/proto/lumina.pbgrpc.dart';
+import 'package:lumina/storage/storage.dart';
+import 'package:lumina/state_model.dart';
+
+class PlacePhoto {
+  final AssetEntity? local;
+  final String? remotePath;
+  PlacePhoto.local(this.local) : remotePath = null;
+  PlacePhoto.remote(this.remotePath) : local = null;
+}
 
 class CityGroup {
   final String cityName;
@@ -11,6 +21,7 @@ class CityGroup {
   final double lat;
   final double lng;
   final List<AssetEntity> assets;
+  final List<PlacePhoto> photos;
   Uint8List? thumbnail;
 
   CityGroup({
@@ -19,10 +30,11 @@ class CityGroup {
     required this.lat,
     required this.lng,
     required this.assets,
+    List<PlacePhoto>? photos,
     this.thumbnail,
-  });
+  }) : photos = photos ?? assets.map((a) => PlacePhoto.local(a)).toList();
 
-  int get photoCount => assets.length;
+  int get photoCount => photos.length;
 }
 
 class _City {
@@ -148,6 +160,7 @@ class PlacesService {
           final key = '${city.name}_${city.country}';
           if (groups.containsKey(key)) {
             groups[key]!.assets.add(asset);
+            groups[key]!.photos.add(PlacePhoto.local(asset));
           } else {
             groups[key] = CityGroup(
               cityName: city.name,
@@ -164,11 +177,15 @@ class PlacesService {
 
       onProgress?.call(totalCount, totalCount, withLocation);
 
+      // Merge cloud photos with GPS data
+      await _mergeCloudLocations(groups);
+
       final result = groups.values.toList()
         ..sort((a, b) => b.photoCount.compareTo(a.photoCount));
 
+      // Reload thumbnails after merge
       for (final group in result) {
-        if (group.assets.isNotEmpty) {
+        if (group.thumbnail == null && group.assets.isNotEmpty) {
           group.thumbnail = await group.assets.first.thumbnailDataWithSize(
             const ThumbnailSize.square(200),
             quality: 80,
@@ -183,6 +200,36 @@ class PlacesService {
     } finally {
       _scanning = false;
     }
+  }
+
+  Future<void> _mergeCloudLocations(Map<String, CityGroup> groups) async {
+    if (!isServerReady || !settingModel.isRemoteStorageSetted) return;
+    try {
+      final resp = await storage.cli
+          .getCloudLocations(GetCloudLocationsRequest())
+          .timeout(const Duration(seconds: 15));
+      if (!resp.success) return;
+
+      for (final loc in resp.locations) {
+        if (loc.latitude == 0 && loc.longitude == 0) continue;
+        final city = _findNearestCity(loc.latitude, loc.longitude);
+        if (city == null) continue;
+
+        final key = '${city.name}_${city.country}';
+        if (groups.containsKey(key)) {
+          groups[key]!.photos.add(PlacePhoto.remote(loc.path));
+        } else {
+          groups[key] = CityGroup(
+            cityName: city.name,
+            countryCode: city.country,
+            lat: city.lat,
+            lng: city.lng,
+            assets: [],
+            photos: [PlacePhoto.remote(loc.path)],
+          );
+        }
+      }
+    } catch (_) {}
   }
 
   void clearCache() {

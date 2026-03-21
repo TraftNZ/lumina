@@ -20,8 +20,9 @@ class _YearData {
   final int year;
   final int count;
   final Uint8List? thumbnail;
+  final String? cloudSamplePath;
 
-  _YearData({required this.year, required this.count, this.thumbnail});
+  _YearData({required this.year, required this.count, this.thumbnail, this.cloudSamplePath});
 }
 
 class CollectionsBody extends StatefulWidget {
@@ -143,6 +144,49 @@ class _CollectionsBodyState extends State<CollectionsBody> {
 
     if (mounted) {
       setState(() => _years = years);
+    }
+
+    // Merge cloud years
+    _loadCloudYears(years);
+  }
+
+  Future<void> _loadCloudYears(List<_YearData> localYears) async {
+    while (!isServerReady || !settingModel.isRemoteStorageSetted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+    }
+    try {
+      final cloudResp = await storage.cli
+          .getYearSummary(GetYearSummaryRequest())
+          .timeout(const Duration(seconds: 10));
+      if (!cloudResp.success || !mounted) return;
+
+      final Map<int, _YearData> yearMap = {for (final y in localYears) y.year: y};
+
+      for (final item in cloudResp.years) {
+        if (yearMap.containsKey(item.year)) {
+          final existing = yearMap[item.year]!;
+          yearMap[item.year] = _YearData(
+            year: existing.year,
+            count: existing.count + item.count,
+            thumbnail: existing.thumbnail,
+            cloudSamplePath: item.samplePath,
+          );
+        } else {
+          yearMap[item.year] = _YearData(
+            year: item.year,
+            count: item.count,
+            cloudSamplePath: item.samplePath,
+          );
+        }
+      }
+
+      final merged = yearMap.values.toList()..sort((a, b) => b.year.compareTo(a.year));
+      if (mounted) {
+        setState(() => _years = merged);
+      }
+    } catch (e) {
+      // Cloud years are optional
     }
   }
 
@@ -458,26 +502,54 @@ class _CollectionsBodyState extends State<CollectionsBody> {
   }
 }
 
-class _YearCard extends StatelessWidget {
+class _YearCard extends StatefulWidget {
   final _YearData yearData;
   final VoidCallback onTap;
 
   const _YearCard({required this.yearData, required this.onTap});
 
   @override
+  State<_YearCard> createState() => _YearCardState();
+}
+
+class _YearCardState extends State<_YearCard> {
+  Uint8List? _cloudThumb;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.yearData.thumbnail == null && widget.yearData.cloudSamplePath != null) {
+      _loadCloudThumbnail();
+    }
+  }
+
+  Future<void> _loadCloudThumbnail() async {
+    var urlPath = widget.yearData.cloudSamplePath!;
+    if (urlPath.startsWith('/')) urlPath = urlPath.substring(1);
+    final url = '$httpBaseUrl/thumbnail/$urlPath';
+    try {
+      final response = await httpGetWithTimeout(url);
+      if (response != null && mounted) {
+        setState(() => _cloudThumb = response);
+      }
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final thumb = widget.yearData.thumbnail ?? _cloudThumb;
     return Card(
         clipBehavior: Clip.antiAliasWithSaveLayer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
-          onTap: onTap,
+          onTap: widget.onTap,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (yearData.thumbnail != null)
-                Image.memory(yearData.thumbnail!, fit: BoxFit.cover)
+              if (thumb != null)
+                Image.memory(thumb, fit: BoxFit.cover)
               else
                 Container(color: colorScheme.surfaceContainerHighest),
               Container(
@@ -499,14 +571,14 @@ class _YearCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      '${yearData.year}',
+                      '${widget.yearData.year}',
                       style: textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      '${yearData.count} ${l10n.pics}',
+                      '${widget.yearData.count} ${l10n.pics}',
                       style: textTheme.bodySmall?.copyWith(
                         color: Colors.white70,
                       ),

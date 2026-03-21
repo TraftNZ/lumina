@@ -264,7 +264,38 @@ const (
 func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
 	// Smart backend handles its own thumbnails
 	if sb, ok := im.dri.(SmartBackend); ok {
-		return sb.GetThumbnail(path)
+		// Check on-disk cache first
+		if im.store != nil {
+			cachePath := filepath.Join(im.store.ThumbCacheDir(), path)
+			if data, err := os.ReadFile(cachePath); err == nil && len(data) > 0 {
+				return data, nil
+			}
+		}
+
+		// Check failure table
+		if im.store != nil && im.store.IsThumbFailed(path) {
+			return nil, fmt.Errorf("thumbnail previously failed for %s", filepath.Base(path))
+		}
+
+		// Fetch from SmartBackend
+		data, err := sb.GetThumbnail(path)
+		if err != nil {
+			if im.store != nil {
+				im.store.MarkThumbFailed(path)
+			}
+			return nil, err
+		}
+
+		// Write to disk cache asynchronously
+		if im.store != nil {
+			cachePath := filepath.Join(im.store.ThumbCacheDir(), path)
+			go func() {
+				os.MkdirAll(filepath.Dir(cachePath), 0755)
+				os.WriteFile(cachePath, data, 0644)
+			}()
+		}
+
+		return data, nil
 	}
 
 	// 1. Check failure table — skip known failures instantly
@@ -729,11 +760,13 @@ func (im *ImgManager) SyncIndex() (int, error) {
 				}
 			}
 		}
-		batch = append(batch, localstore.RemoteFile{
+		rf := localstore.RemoteFile{
 			Path:    path,
 			Size:    size,
 			ModTime: now,
-		})
+		}
+		rf.TakenAt = localstore.ParseDateFromPath(path)
+		batch = append(batch, rf)
 		return true
 	})
 	if err != nil {
@@ -768,11 +801,13 @@ func (im *ImgManager) FullResyncIndex() (int, error) {
 	now := time.Now()
 	var batch []localstore.RemoteFile
 	err := im.RangeByDate(now, func(path string, size int64) bool {
-		batch = append(batch, localstore.RemoteFile{
+		rf := localstore.RemoteFile{
 			Path:    path,
 			Size:    size,
 			ModTime: now,
-		})
+		}
+		rf.TakenAt = localstore.ParseDateFromPath(path)
+		batch = append(batch, rf)
 		return true
 	})
 	if err != nil {

@@ -4025,6 +4025,516 @@ class ListDriveClourdreveDirResponse extends $pb.GeneratedMessage {
   $pb.PbList<$core.String> get dirs => $_getList(2);
 }
 
+class GetYearSummaryRequest extends $pb.GeneratedMessage {
+  factory GetYearSummaryRequest() => create();
+
+  GetYearSummaryRequest._();
+
+  factory GetYearSummaryRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetYearSummaryRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetYearSummaryRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetYearSummaryRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetYearSummaryRequest copyWith(
+          void Function(GetYearSummaryRequest) updates) =>
+      super.copyWith((message) => updates(message as GetYearSummaryRequest))
+          as GetYearSummaryRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetYearSummaryRequest create() => GetYearSummaryRequest._();
+  @$core.override
+  GetYearSummaryRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetYearSummaryRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetYearSummaryRequest>(create);
+  static GetYearSummaryRequest? _defaultInstance;
+}
+
+class YearSummaryItem extends $pb.GeneratedMessage {
+  factory YearSummaryItem({
+    $core.int? year,
+    $core.int? count,
+    $core.String? samplePath,
+  }) {
+    final result = create();
+    if (year != null) result.year = year;
+    if (count != null) result.count = count;
+    if (samplePath != null) result.samplePath = samplePath;
+    return result;
+  }
+
+  YearSummaryItem._();
+
+  factory YearSummaryItem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory YearSummaryItem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'YearSummaryItem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'year')
+    ..aI(2, _omitFieldNames ? '' : 'count')
+    ..aOS(3, _omitFieldNames ? '' : 'samplePath', protoName: 'samplePath')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  YearSummaryItem clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  YearSummaryItem copyWith(void Function(YearSummaryItem) updates) =>
+      super.copyWith((message) => updates(message as YearSummaryItem))
+          as YearSummaryItem;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static YearSummaryItem create() => YearSummaryItem._();
+  @$core.override
+  YearSummaryItem createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static YearSummaryItem getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<YearSummaryItem>(create);
+  static YearSummaryItem? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get year => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set year($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasYear() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearYear() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get count => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set count($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasCount() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCount() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get samplePath => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set samplePath($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSamplePath() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSamplePath() => $_clearField(3);
+}
+
+class GetYearSummaryResponse extends $pb.GeneratedMessage {
+  factory GetYearSummaryResponse({
+    $core.bool? success,
+    $core.Iterable<YearSummaryItem>? years,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (years != null) result.years.addAll(years);
+    return result;
+  }
+
+  GetYearSummaryResponse._();
+
+  factory GetYearSummaryResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetYearSummaryResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetYearSummaryResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..pPM<YearSummaryItem>(2, _omitFieldNames ? '' : 'years',
+        subBuilder: YearSummaryItem.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetYearSummaryResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetYearSummaryResponse copyWith(
+          void Function(GetYearSummaryResponse) updates) =>
+      super.copyWith((message) => updates(message as GetYearSummaryResponse))
+          as GetYearSummaryResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetYearSummaryResponse create() => GetYearSummaryResponse._();
+  @$core.override
+  GetYearSummaryResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetYearSummaryResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetYearSummaryResponse>(create);
+  static GetYearSummaryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<YearSummaryItem> get years => $_getList(1);
+}
+
+class GetPhotosByYearRequest extends $pb.GeneratedMessage {
+  factory GetPhotosByYearRequest({
+    $core.int? year,
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (year != null) result.year = year;
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  GetPhotosByYearRequest._();
+
+  factory GetPhotosByYearRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetPhotosByYearRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPhotosByYearRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'year')
+    ..aI(2, _omitFieldNames ? '' : 'offset')
+    ..aI(3, _omitFieldNames ? '' : 'limit')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPhotosByYearRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPhotosByYearRequest copyWith(
+          void Function(GetPhotosByYearRequest) updates) =>
+      super.copyWith((message) => updates(message as GetPhotosByYearRequest))
+          as GetPhotosByYearRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetPhotosByYearRequest create() => GetPhotosByYearRequest._();
+  @$core.override
+  GetPhotosByYearRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetPhotosByYearRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPhotosByYearRequest>(create);
+  static GetPhotosByYearRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get year => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set year($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasYear() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearYear() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get offset => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set offset($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasOffset() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOffset() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get limit => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set limit($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLimit() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLimit() => $_clearField(3);
+}
+
+class GetPhotosByYearResponse extends $pb.GeneratedMessage {
+  factory GetPhotosByYearResponse({
+    $core.bool? success,
+    $core.Iterable<$core.String>? paths,
+    $core.int? total,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (paths != null) result.paths.addAll(paths);
+    if (total != null) result.total = total;
+    return result;
+  }
+
+  GetPhotosByYearResponse._();
+
+  factory GetPhotosByYearResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetPhotosByYearResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPhotosByYearResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..pPS(2, _omitFieldNames ? '' : 'paths')
+    ..aI(3, _omitFieldNames ? '' : 'total')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPhotosByYearResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPhotosByYearResponse copyWith(
+          void Function(GetPhotosByYearResponse) updates) =>
+      super.copyWith((message) => updates(message as GetPhotosByYearResponse))
+          as GetPhotosByYearResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetPhotosByYearResponse create() => GetPhotosByYearResponse._();
+  @$core.override
+  GetPhotosByYearResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetPhotosByYearResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPhotosByYearResponse>(create);
+  static GetPhotosByYearResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<$core.String> get paths => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.int get total => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set total($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTotal() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotal() => $_clearField(3);
+}
+
+class GetCloudLocationsRequest extends $pb.GeneratedMessage {
+  factory GetCloudLocationsRequest() => create();
+
+  GetCloudLocationsRequest._();
+
+  factory GetCloudLocationsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetCloudLocationsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetCloudLocationsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetCloudLocationsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetCloudLocationsRequest copyWith(
+          void Function(GetCloudLocationsRequest) updates) =>
+      super.copyWith((message) => updates(message as GetCloudLocationsRequest))
+          as GetCloudLocationsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetCloudLocationsRequest create() => GetCloudLocationsRequest._();
+  @$core.override
+  GetCloudLocationsRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetCloudLocationsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetCloudLocationsRequest>(create);
+  static GetCloudLocationsRequest? _defaultInstance;
+}
+
+class CloudLocationItem extends $pb.GeneratedMessage {
+  factory CloudLocationItem({
+    $core.String? path,
+    $core.double? latitude,
+    $core.double? longitude,
+  }) {
+    final result = create();
+    if (path != null) result.path = path;
+    if (latitude != null) result.latitude = latitude;
+    if (longitude != null) result.longitude = longitude;
+    return result;
+  }
+
+  CloudLocationItem._();
+
+  factory CloudLocationItem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory CloudLocationItem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CloudLocationItem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'path')
+    ..aD(2, _omitFieldNames ? '' : 'latitude')
+    ..aD(3, _omitFieldNames ? '' : 'longitude')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CloudLocationItem clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CloudLocationItem copyWith(void Function(CloudLocationItem) updates) =>
+      super.copyWith((message) => updates(message as CloudLocationItem))
+          as CloudLocationItem;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static CloudLocationItem create() => CloudLocationItem._();
+  @$core.override
+  CloudLocationItem createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static CloudLocationItem getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CloudLocationItem>(create);
+  static CloudLocationItem? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get path => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set path($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get latitude => $_getN(1);
+  @$pb.TagNumber(2)
+  set latitude($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLatitude() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLatitude() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get longitude => $_getN(2);
+  @$pb.TagNumber(3)
+  set longitude($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLongitude() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLongitude() => $_clearField(3);
+}
+
+class GetCloudLocationsResponse extends $pb.GeneratedMessage {
+  factory GetCloudLocationsResponse({
+    $core.bool? success,
+    $core.Iterable<CloudLocationItem>? locations,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (locations != null) result.locations.addAll(locations);
+    return result;
+  }
+
+  GetCloudLocationsResponse._();
+
+  factory GetCloudLocationsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetCloudLocationsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetCloudLocationsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lumina'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..pPM<CloudLocationItem>(2, _omitFieldNames ? '' : 'locations',
+        subBuilder: CloudLocationItem.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetCloudLocationsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetCloudLocationsResponse copyWith(
+          void Function(GetCloudLocationsResponse) updates) =>
+      super.copyWith((message) => updates(message as GetCloudLocationsResponse))
+          as GetCloudLocationsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetCloudLocationsResponse create() => GetCloudLocationsResponse._();
+  @$core.override
+  GetCloudLocationsResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetCloudLocationsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetCloudLocationsResponse>(create);
+  static GetCloudLocationsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<CloudLocationItem> get locations => $_getList(1);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

@@ -86,6 +86,16 @@ func (s *LocalStore) SwitchDrive(configHash string) error {
 		return fmt.Errorf("create schema: %w", err)
 	}
 
+	// Idempotent migrations: add columns if they don't exist
+	for _, stmt := range []string{
+		`ALTER TABLE remote_files ADD COLUMN taken_at INTEGER NOT NULL DEFAULT 0`,
+		`ALTER TABLE remote_files ADD COLUMN latitude REAL NOT NULL DEFAULT 0`,
+		`ALTER TABLE remote_files ADD COLUMN longitude REAL NOT NULL DEFAULT 0`,
+	} {
+		db.Exec(stmt) // ignore "duplicate column" errors
+	}
+	db.Exec(`CREATE INDEX IF NOT EXISTS idx_remote_files_taken_at ON remote_files(taken_at)`)
+
 	s.db = db
 
 	clientID := s.getMeta("client_id")
@@ -152,6 +162,14 @@ func decodeStringSlice(s string) []string {
 
 func (s *LocalStore) BaseDataDir() string {
 	return s.baseDataDir
+}
+
+func (s *LocalStore) ThumbCacheDir() string {
+	return filepath.Join(filepath.Dir(s.dbPath), "thumbcache")
+}
+
+func (s *LocalStore) ClearThumbCache() error {
+	return os.RemoveAll(s.ThumbCacheDir())
 }
 
 func DriveDataDir(baseDataDir, configHash string) string {

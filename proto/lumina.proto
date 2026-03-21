@@ -40,6 +40,10 @@ service Lumina {
   rpc SearchPhotos (SearchPhotosRequest) returns (SearchPhotosResponse) {}
   rpc GetUnlabeledPhotos (GetUnlabeledPhotosRequest) returns (GetUnlabeledPhotosResponse) {}
   rpc GetLabelSummary (GetLabelSummaryRequest) returns (GetLabelSummaryResponse) {}
+  // Cloud Collections
+  rpc GetYearSummary (GetYearSummaryRequest) returns (GetYearSummaryResponse) {}
+  rpc GetPhotosByYear (GetPhotosByYearRequest) returns (GetPhotosByYearResponse) {}
+  rpc GetCloudLocations (GetCloudLocationsRequest) returns (GetCloudLocationsResponse) {}
 }
 
 // enum ContentType {
@@ -324,4 +328,37 @@ message ListDriveClourdreveDirResponse {
   bool success = 1;
   string message = 2;
   repeated string dirs = 3;
+}
+
+message GetYearSummaryRequest {}
+message YearSummaryItem {
+  int32 year = 1;
+  int32 count = 2;
+  string samplePath = 3;
+}
+message GetYearSummaryResponse {
+  bool success = 1;
+  repeated YearSummaryItem years = 2;
+}
+
+message GetPhotosByYearRequest {
+  int32 year = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+message GetPhotosByYearResponse {
+  bool success = 1;
+  repeated string paths = 2;
+  int32 total = 3;
+}
+
+message GetCloudLocationsRequest {}
+message CloudLocationItem {
+  string path = 1;
+  double latitude = 2;
+  double longitude = 3;
+}
+message GetCloudLocationsResponse {
+  bool success = 1;
+  repeated CloudLocationItem locations = 2;
 }
