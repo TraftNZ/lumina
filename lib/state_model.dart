@@ -1,17 +1,14 @@
 import 'dart:io';
-import 'package:date_format/date_format.dart';
-import 'package:grpc/grpc.dart';
 import 'package:flutter/material.dart';
 import 'event_bus.dart';
 import 'package:lumina/asset.dart';
 import 'dart:async';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/storage/storage.dart';
-import 'package:lumina/storage/hash_cache.dart';
+import 'package:lumina/sync_engine.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
-import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/global.dart';
 
 SettingModel settingModel = SettingModel();
@@ -509,96 +506,19 @@ Future<void> refreshUnsynchronizedPhotos() async {
   if (!re) return;
   stateModel.setRefreshingUnsynchronized(true);
   stateModel.setNotSyncedPhotos([]);
-  final requests = StreamController<FilterNotUploadedRequest>();
-  final responses = storage.cli.filterNotUploaded(requests.stream);
-  await Future.wait([
-    sendFilterNotUploadedRequests(requests),
-    receiveResponses(responses),
-  ]);
+
+  final engine = SyncEngine(
+    grpcPort: grpcPort,
+    httpPort: httpPort,
+    localFolder: settingModel.localFolder,
+  );
+  try {
+    final ids = await engine.findNotUploadedIds();
+    stateModel.setNotSyncedPhotos(ids);
+  } catch (e) {
+    print('Error: $e');
+    SnackBarManager.showSnackBar("Error: $e");
+  }
 
   stateModel.setRefreshingUnsynchronized(false);
-}
-
-Future<void> sendFilterNotUploadedRequests(
-    StreamController<FilterNotUploadedRequest> requests) async {
-  final localFloder = settingModel.localFolder;
-  final List<AssetPathEntity> paths =
-      await PhotoManager.getAssetPathList(type: RequestType.common);
-  for (var path in paths) {
-    if (path.name == localFloder) {
-      final newpath = await path.fetchPathProperties(
-          filterOptionGroup: FilterOptionGroup(
-        orders: [
-          const OrderOption(
-            type: OrderOptionType.createDate,
-            asc: false,
-          ),
-        ],
-      ));
-      int offset = 0;
-      int pageSize = 50;
-
-      while (true) {
-        FilterNotUploadedRequest req = FilterNotUploadedRequest(
-            photos: List<FilterNotUploadedRequestInfo>.empty(growable: true));
-        final List<AssetEntity> assets = await newpath!
-            .getAssetListRange(start: offset, end: offset + pageSize);
-        if (assets.isEmpty) {
-          req.isFinished = true;
-          break;
-        }
-        var futures = <Future<FilterNotUploadedRequestInfo>>[];
-        for (var asset in assets) {
-          futures.add(_createFilterNotUploadedRequestInfo(asset));
-        }
-        req.photos.addAll(await Future.wait(futures));
-        offset += pageSize;
-        requests.add(req);
-      }
-      // final rsp = await storage.cli.filterNotUploaded(req);
-      // if (rsp.success) {
-      //   stateModel.setNotSyncedPhotos(rsp.notUploaedIDs);
-      // } else {
-      //   throw Exception("Refresh unsynchronized photos failed: ${rsp.message}");
-      // }
-    }
-  }
-  await requests.close();
-}
-
-Future<void> receiveResponses(
-    ResponseStream<FilterNotUploadedResponse> responses) async {
-  await for (var response in responses) {
-    if (!response.success) {
-      print('Error: ${response.message}');
-      SnackBarManager.showSnackBar("Error: ${response.message}");
-      continue;
-    }
-    stateModel
-        .setNotSyncedPhotos(stateModel.notSyncedIDs + response.notUploaedIDs);
-  }
-}
-
-Future<FilterNotUploadedRequestInfo> _createFilterNotUploadedRequestInfo(
-    asset) async {
-  var date = asset.createDateTime;
-  if (date.isBefore(DateTime(1990, 1, 1))) {
-    date = asset.modifiedDateTime;
-  }
-  final dateStr =
-      formatDate(date, [yyyy, ':', mm, ':', dd, ' ', HH, ':', nn, ':', ss]);
-  var name = await asset.titleAsync;
-  // Compute content hash (with cache) for dedup
-  String contentHash = '';
-  try {
-    contentHash = await HashCache.instance.getHash(asset);
-  } catch (_) {
-    // If hashing fails, proceed without hash — server will fall back to name match
-  }
-  return FilterNotUploadedRequestInfo(
-    id: asset.id,
-    name: name,
-    date: dateStr,
-    contentHash: contentHash,
-  );
 }

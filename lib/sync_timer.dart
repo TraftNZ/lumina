@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:lumina/state_model.dart';
+import 'package:lumina/sync_engine.dart';
+import 'package:lumina/sync_state_persistence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:lumina/storage/storage.dart';
 import 'package:lumina/event_bus.dart';
-import 'package:path/path.dart';
 import 'package:lumina/global.dart';
 
 Timer? autoSyncTimer;
@@ -26,68 +24,42 @@ Future<void> reloadAutoSyncTimer() async {
     if (settingModel.localFolder == "" || !settingModel.isRemoteStorageSetted) {
       return;
     }
-    final wifiOnly = prefs.getBool('backgroundSyncWifiOnly') ?? true;
-    if (wifiOnly) {
-      final result = await Connectivity().checkConnectivity();
-      if (!result.contains(ConnectivityResult.wifi)) {
-        return;
-      }
-    }
     if (stateModel.isUploading() || stateModel.isDownloading()) return;
-    await refreshUnsynchronizedPhotos();
-    Map ids = {};
-    for (final id in stateModel.notSyncedIDs) {
-      ids[id] = true;
-    }
-    final all = await getPhotos();
-    for (var asset in all) {
-      final id = asset.id;
-      if (ids[id] != true) {
-        continue;
-      }
-      try {
-        await storage.uploadAssetEntity(asset);
-      } catch (e) {
-        print(e);
-        continue;
-      }
-      // Yield to UI event loop between uploads to keep interface fluid
-      await Future.delayed(Duration.zero);
-    }
-    eventBus.fire(RemoteRefreshEvent());
-  });
-}
 
-Future<List<AssetEntity>> getPhotos() async {
-  List<AssetEntity> all = [];
-  final re = await requestPermission();
-  if (!re) return all;
-  final List<AssetPathEntity> paths =
-      await PhotoManager.getAssetPathList(type: RequestType.common);
-  for (var path in paths) {
-    if (path.name == settingModel.localFolder) {
-      final newpath = await path.fetchPathProperties(
-          filterOptionGroup: FilterOptionGroup(
-        orders: [
-          const OrderOption(
-            type: OrderOptionType.createDate,
-            asc: false,
-          ),
-        ],
-      ));
-      int assetOffset = 0;
-      int assetPageSize = 100;
-      while (true) {
-        final List<AssetEntity> assets = await newpath!.getAssetListRange(
-            start: assetOffset, end: assetOffset + assetPageSize);
-        if (assets.isEmpty) {
-          break;
+    final persistence = SyncStatePersistence(prefs);
+    if (persistence.isSyncInProgress) return;
+
+    final wifiOnly = prefs.getBool('backgroundSyncWifiOnly') ?? true;
+    final engine = SyncEngine(
+      grpcPort: grpcPort,
+      httpPort: httpPort,
+      localFolder: settingModel.localFolder,
+      wifiOnly: wifiOnly,
+      onProgress: (progress) {
+        if (progress.total > 0) {
+          stateModel.startSync(progress.total);
+          stateModel.advanceSync(progress.currentFile);
         }
-        all.addAll(assets);
-        assetOffset += assetPageSize;
-      }
-      break;
+      },
+    );
+
+    await persistence.setSyncInProgress(true);
+    try {
+      final pendingIds = persistence.pendingSyncQueue;
+      final result = await engine.syncPhotos(
+        pendingIds: pendingIds.isNotEmpty ? pendingIds : null,
+      );
+      await persistence.clearPendingSyncQueue();
+      await persistence
+          .setLastSyncTimestamp(DateTime.now().millisecondsSinceEpoch);
+      print(
+          "auto sync done: uploaded=${result.uploaded}, failed=${result.failed}");
+    } catch (e) {
+      print("auto sync error: $e");
+    } finally {
+      await persistence.setSyncInProgress(false);
+      stateModel.finishSync();
+      eventBus.fire(RemoteRefreshEvent());
     }
-  }
-  return all;
+  });
 }

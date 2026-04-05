@@ -6,18 +6,15 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import run.Run
 
-import android.content.ContentUris
-import android.content.ContentValues
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
-
-import android.content.Intent
 import java.io.File
 
 
 class MainActivity : FlutterFragmentActivity() {
   private val CHANNEL = "com.traftai.lumina/RunGrpcServer"
+  private val BG_CHANNEL = "com.traftai.lumina/BackgroundSync"
 
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
@@ -36,28 +33,44 @@ class MainActivity : FlutterFragmentActivity() {
         result.notImplemented()
       }
     }
+
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, BG_CHANNEL).setMethodCallHandler {
+        call,
+        result ->
+      when (call.method) {
+        "scheduleSync" -> {
+          val intervalMinutes = call.argument<Int>("intervalMinutes") ?: 720
+          SyncAlarmReceiver.schedule(this, intervalMinutes)
+          result.success(null)
+        }
+        "cancelScheduledSync" -> {
+          SyncAlarmReceiver.cancel(this)
+          result.success(null)
+        }
+        "startBackgroundSync" -> {
+          if (!PhotoSyncService.isRunning) {
+            val intent = Intent(this, PhotoSyncService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              startForegroundService(intent)
+            } else {
+              startService(intent)
+            }
+          }
+          result.success(null)
+        }
+        "isSyncRunning" -> {
+          result.success(PhotoSyncService.isRunning)
+        }
+        else -> result.notImplemented()
+      }
+    }
   }
 
   private fun scanFile(path: String?, volumeName: String?, relativePath: String?, mimeType: String?) {
-    // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        // val values = ContentValues().apply {
-        //     put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
-        //     put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-        //     put(MediaStore.MediaColumns.IS_PENDING, 1)
-        // }
-
-        // val contentUri: Uri = MediaStore.Files.getContentUri(volumeName)
-        // val itemUri = contentResolver.insert(contentUri, values)
-        
-        // values.clear()
-        // values.put(MediaStore.MediaColumns.IS_PENDING, 0)
-        // contentResolver.update(itemUri!!, values, null, null)
-        // } else {
-            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            val file = File(path)
-            val contentUri = Uri.fromFile(file)
-            mediaScanIntent.data = contentUri
-            sendBroadcast(mediaScanIntent)
-        // }
+    val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+    val file = File(path)
+    val contentUri = Uri.fromFile(file)
+    mediaScanIntent.data = contentUri
+    sendBroadcast(mediaScanIntent)
   }
 }

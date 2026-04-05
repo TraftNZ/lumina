@@ -4,6 +4,7 @@ import 'package:lumina/run_server.dart';
 import 'package:lumina/sync_timer.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
+import 'package:lumina/sync_state_persistence.dart';
 import 'package:lumina/ml_indexer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lumina/logger.dart';
@@ -55,6 +56,8 @@ class Global {
         }
       }
       isServerReady = true;
+      final persistence = SyncStatePersistence(prefs);
+      await persistence.setActivePorts(grpcPort, httpPort);
       await resolveLocalFolderAbsPath();
       await initDrive();
       initMLIndexer();
@@ -87,6 +90,8 @@ Future<void> checkServer() async {
     grpcPort = int.parse(ports[0]);
     httpPort = int.parse(ports[1]);
     storage = RemoteStorage("127.0.0.1", int.parse(ports[0]));
+    final persistence = await SyncStatePersistence.create();
+    await persistence.setActivePorts(grpcPort, httpPort);
     await initDrive();
   }
 }

@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lumina/background_sync_service.dart';
+import 'package:lumina/sync_state_persistence.dart';
 import 'package:lumina/sync_timer.dart';
 import 'package:lumina/global.dart';
 import 'package:lumina/theme.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BackgroundSyncSettingRoute extends StatefulWidget {
   const BackgroundSyncSettingRoute({Key? key}) : super(key: key);
@@ -19,6 +24,7 @@ class _BackgroundSyncSettingRouteState
   bool _backgroundSyncWifiOnly = true;
   Duration _backgroundSyncInterval = const Duration(minutes: 60);
   List<AssetPathEntity> albums = [];
+  String? _lastSyncTime;
 
   @override
   void initState() {
@@ -28,11 +34,26 @@ class _BackgroundSyncSettingRouteState
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final persistence = SyncStatePersistence(prefs);
+    final lastTs = persistence.lastSyncTimestamp;
     setState(() {
       _backgroundSyncEnabled = prefs.getBool('backgroundSyncEnabled') ?? false;
       _backgroundSyncWifiOnly = prefs.getBool('backgroundSyncWifiOnly') ?? true;
       _backgroundSyncInterval =
           Duration(minutes: prefs.getInt('backgroundSyncInterval') ?? 60);
+      if (lastTs != null) {
+        final dt = DateTime.fromMillisecondsSinceEpoch(lastTs);
+        final diff = DateTime.now().difference(dt);
+        if (diff.inMinutes < 1) {
+          _lastSyncTime = 'Just now';
+        } else if (diff.inHours < 1) {
+          _lastSyncTime = '${diff.inMinutes}m ago';
+        } else if (diff.inDays < 1) {
+          _lastSyncTime = '${diff.inHours}h ago';
+        } else {
+          _lastSyncTime = '${diff.inDays}d ago';
+        }
+      }
     });
     final re = await requestPermission();
     if (!re) return;
@@ -44,6 +65,32 @@ class _BackgroundSyncSettingRouteState
       }
     }
     setState(() {});
+  }
+
+  Future<void> _onToggleBackgroundSync(bool value) async {
+    if (value && Platform.isAndroid) {
+      final status = await Permission.notification.status;
+      if (!status.isGranted) {
+        await Permission.notification.request();
+      }
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('backgroundSyncEnabled', value);
+    setState(() {
+      _backgroundSyncEnabled = value;
+    });
+
+    if (value) {
+      await BackgroundSyncService.scheduleSync(
+        intervalMinutes: _backgroundSyncInterval.inMinutes,
+        wifiOnly: _backgroundSyncWifiOnly,
+      );
+    } else {
+      await BackgroundSyncService.cancelScheduledSync();
+    }
+
+    reloadAutoSyncTimer();
   }
 
   @override
@@ -65,15 +112,11 @@ class _BackgroundSyncSettingRouteState
                   secondary:
                       Icon(Icons.sync_outlined, color: colorScheme.primary),
                   title: Text(l10n.enableBackgroundSync),
+                  subtitle: _lastSyncTime != null
+                      ? Text('Last sync: $_lastSyncTime')
+                      : null,
                   value: _backgroundSyncEnabled,
-                  onChanged: (value) async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('backgroundSyncEnabled', value);
-                    setState(() {
-                      _backgroundSyncEnabled = value;
-                    });
-                    reloadAutoSyncTimer();
-                  },
+                  onChanged: _onToggleBackgroundSync,
                 ),
                 const Divider(height: 1, indent: 56),
                 SwitchListTile(
@@ -87,6 +130,12 @@ class _BackgroundSyncSettingRouteState
                     setState(() {
                       _backgroundSyncWifiOnly = value;
                     });
+                    if (_backgroundSyncEnabled) {
+                      await BackgroundSyncService.scheduleSync(
+                        intervalMinutes: _backgroundSyncInterval.inMinutes,
+                        wifiOnly: value,
+                      );
+                    }
                     reloadAutoSyncTimer();
                   },
                 ),
@@ -139,6 +188,12 @@ class _BackgroundSyncSettingRouteState
                       setState(() {
                         _backgroundSyncInterval = value;
                       });
+                      if (_backgroundSyncEnabled) {
+                        await BackgroundSyncService.scheduleSync(
+                          intervalMinutes: value.inMinutes,
+                          wifiOnly: _backgroundSyncWifiOnly,
+                        );
+                      }
                       reloadAutoSyncTimer();
                     },
                   ),
@@ -146,6 +201,23 @@ class _BackgroundSyncSettingRouteState
               ],
             ),
           ),
+          if (Platform.isAndroid) ...[
+            const SizedBox(height: AppSpacing.md),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.play_arrow_outlined,
+                    color: colorScheme.primary),
+                title: const Text('Sync Now'),
+                subtitle: const Text('Start an immediate background sync'),
+                onTap: () async {
+                  await BackgroundSyncService.startImmediateSync();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Background sync started')),
+                  );
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );

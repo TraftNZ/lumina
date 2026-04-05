@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+
 
 import 'package:flutter/material.dart';
 import 'package:lumina/asset.dart';
@@ -150,23 +150,21 @@ class SyncBodyState extends State<SyncBody> {
                   ));
             },
           ),
-          if (Platform.isAndroid) ...[
-            const Divider(height: 1, indent: 56),
-            ListTile(
-              leading:
-                  Icon(Icons.cloud_sync_outlined, color: colorScheme.primary),
-              title: Text(l10n.backgroundSync),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const BackgroundSyncSettingRoute()),
-                );
-              },
-            ),
-          ],
+          const Divider(height: 1, indent: 56),
+          ListTile(
+            leading:
+                Icon(Icons.cloud_sync_outlined, color: colorScheme.primary),
+            title: Text(l10n.backgroundSync),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const BackgroundSyncSettingRoute()),
+              );
+            },
+          ),
         ],
       ),
     );
