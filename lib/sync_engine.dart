@@ -150,6 +150,21 @@ class SyncEngine {
           return rsp.success;
         }
         return false;
+      case Drive.cloudreve:
+        final server = prefs.getString('cloudreve_server');
+        final email = prefs.getString('cloudreve_email');
+        final password = prefs.getString('cloudreve_password');
+        final root = prefs.getString('cloudreve_root_path');
+        if (server != null && email != null && password != null) {
+          final rsp = await _cli.setDriveCloudreve(SetDriveCloudrveRequest(
+            server: server,
+            email: email,
+            password: password,
+            root: root ?? '',
+          ));
+          return rsp.success;
+        }
+        return false;
     }
   }
 
