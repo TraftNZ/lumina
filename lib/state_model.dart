@@ -300,6 +300,7 @@ class AssetModel extends ChangeNotifier {
     if (localGetting != null) {
       await localGetting!.future;
     }
+    final isFirstLoad = localAssets.isEmpty;
     final reuseMap = <String, Asset>{};
     for (final a in localAssets) {
       if (a.hasLocal) {
@@ -307,10 +308,25 @@ class AssetModel extends ChangeNotifier {
       }
     }
     localHasMore = true;
-    localAssets = [];
-    _unifiedDirty = true;
-    stateModel.setNotSyncedPhotos([]);
-    await getLocalPhotos(reuseMap: reuseMap);
+    if (isFirstLoad) {
+      // Cold start: preserve incremental notify for fast first-paint.
+      localAssets = [];
+      _unifiedDirty = true;
+      stateModel.setNotSyncedPhotos([]);
+      await getLocalPhotos(reuseMap: reuseMap);
+    } else {
+      // True refresh: build the next snapshot into a buffer and swap atomically
+      // so the grid never renders a half-empty intermediate state.
+      final buffer = <Asset>[];
+      await getLocalPhotos(reuseMap: reuseMap, targetList: buffer);
+      localAssets = buffer;
+      _unifiedDirty = true;
+      stateModel.setNotSyncedPhotos([]);
+      notifyListeners();
+      if (!stateModel.refreshingUnsynchronized) {
+        refreshUnsynchronizedPhotos();
+      }
+    }
   }
 
   Future<void> refreshRemote() async {
@@ -397,7 +413,10 @@ class AssetModel extends ChangeNotifier {
     });
   }
 
-  Future<void> getLocalPhotos({Map<String, Asset>? reuseMap}) async {
+  Future<void> getLocalPhotos({
+    Map<String, Asset>? reuseMap,
+    List<Asset>? targetList,
+  }) async {
     if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) {
       localHasMore = false;
       return;
@@ -407,9 +426,18 @@ class AssetModel extends ChangeNotifier {
       return;
     }
     localGetting = Completer<bool>();
-    final offset = localAssets.length;
+    // When targetList is non-null we're populating a detached buffer (used by
+    // refreshLocal's atomic-swap path); skip incremental notifyListeners and
+    // post-load hooks so the live list isn't touched until the final swap.
+    final list = targetList ?? localAssets;
+    final atomic = targetList != null;
+    final offset = list.length;
     final re = await requestPermission();
-    if (!re) return;
+    if (!re) {
+      localGetting?.complete(true);
+      localGetting = null;
+      return;
+    }
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
       type: RequestType.common,
       hasAll: true,
@@ -452,23 +480,29 @@ class AssetModel extends ChangeNotifier {
       } else {
         asset = Asset(local: entities[i]);
       }
-      localAssets.add(asset);
-      // Notify immediately for the first batch so the grid appears fast,
-      // then batch every 100 assets to avoid excessive rebuilds.
-      if (i == 0 && offset == 0) {
-        _unifiedDirty = true;
-        notifyListeners();
-      } else if (i % 100 == 0) {
-        notifyListeners();
+      list.add(asset);
+      if (!atomic) {
+        // Notify immediately for the first batch so the grid appears fast,
+        // then batch every 100 assets to avoid excessive rebuilds.
+        if (i == 0 && offset == 0) {
+          _unifiedDirty = true;
+          notifyListeners();
+        } else if (i % 100 == 0) {
+          notifyListeners();
+        }
       }
       await asset.getLocalFile();
     }
-    _unifiedDirty = true;
-    notifyListeners();
-    // Only trigger unsync check on initial load (offset == 0), not pagination,
-    // and only if we haven't already fetched the list.
-    if (offset == 0 && stateModel.notSyncedIDs.isEmpty && !stateModel.refreshingUnsynchronized) {
-      refreshUnsynchronizedPhotos();
+    if (!atomic) {
+      _unifiedDirty = true;
+      notifyListeners();
+      // Only trigger unsync check on initial load (offset == 0), not pagination,
+      // and only if we haven't already fetched the list.
+      if (offset == 0 &&
+          stateModel.notSyncedIDs.isEmpty &&
+          !stateModel.refreshingUnsynchronized) {
+        refreshUnsynchronizedPhotos();
+      }
     }
 
     localGetting?.complete(true);

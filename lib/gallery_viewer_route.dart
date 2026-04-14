@@ -398,7 +398,7 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
             )
           : null,
       body: Hero(
-        tag: "asset_grid_$currentIndex",
+        tag: "asset_${all[currentIndex].stableId()}",
         flightShuttleBuilder: (BuildContext flightContext,
             Animation<double> animation,
             HeroFlightDirection flightDirection,

@@ -14,7 +14,11 @@ import 'package:lumina/theme.dart';
 
 const seedThemeColor = Color(0xFF5B9BD5);
 
+const int _imageCacheMaxBytes = 200 << 20;
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  PaintingBinding.instance.imageCache.maximumSizeBytes = _imageCacheMaxBytes;
   Global.init().then((e) => runApp(
         MultiProvider(
           providers: [

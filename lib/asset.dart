@@ -81,6 +81,14 @@ class Asset extends ImageProvider<Asset> {
         "${d.day.toString().padLeft(2, '0')}_$n";
   }
 
+  String stableId() {
+    if (hasLocal && local != null) return 'l:${local!.id}';
+    if (hasRemote && remote != null) return 'r:${remote!.path}';
+    final k = dedupKey;
+    if (k != null) return 'k:$k';
+    return 'o:${identityHashCode(this)}';
+  }
+
   bool hasGotTitle() {
     return localTitle != null;
   }

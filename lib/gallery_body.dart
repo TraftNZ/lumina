@@ -42,16 +42,14 @@ class GalleryBodyState extends State<GalleryBody>
   bool _showToTopBtn = false;
   bool _syncPanelExpanded = false;
   bool _isDeleting = false;
-  Timer? _thumbnailDebounce;
-  bool _thumbnailDirty = false;
   @override
   bool get wantKeepAlive => true;
   final ScrollController _scrollController = ScrollController();
   final _scrollSubject = PublishSubject<double>();
   int columCount = 3;
-  double scrollOffset = 0;
 
-  final Map<int, bool> _selectedIndices = {};
+  // Keyed by Asset.stableId() so selection survives list reorders/refreshes.
+  final Set<String> _selectedIds = {};
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
@@ -66,14 +64,11 @@ class GalleryBodyState extends State<GalleryBody>
     assetModel.addListener(_scheduleAutoSync);
     _scrollSubject.stream
         .debounceTime(const Duration(milliseconds: 150))
-        .listen((scrollPosition) {
+        .listen((_) {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 4000) {
         getPhotos();
       }
-      setState(() {
-        scrollOffset = scrollPosition;
-      });
     });
     _scrollController.addListener(() {
       _scrollSubject.add(_scrollController.position.pixels);
@@ -98,7 +93,6 @@ class GalleryBodyState extends State<GalleryBody>
   void dispose() {
     assetModel.removeListener(_scheduleAutoSync);
     _autoSyncTimer?.cancel();
-    _thumbnailDebounce?.cancel();
     _scrollController.dispose();
     _scrollSubject.close();
     super.dispose();
@@ -127,33 +121,24 @@ class GalleryBodyState extends State<GalleryBody>
     assetModel.getMorePhotos();
   }
 
-  void toggleSelection(int index) async {
+  void toggleSelection(String id) async {
     if (Platform.isAndroid || Platform.isIOS) {
       final hasVibrator = await Vibration.hasVibrator();
       if (hasVibrator!) {
         Vibration.vibrate(duration: 10);
       }
     }
-    if (_selectedIndices[index] == null) {
-      _selectedIndices[index] = true;
+    if (_selectedIds.contains(id)) {
+      _selectedIds.remove(id);
     } else {
-      _selectedIndices[index] = !_selectedIndices[index]!;
+      _selectedIds.add(id);
     }
-    var hasSelected = false;
-    _selectedIndices.forEach((key, value) {
-      if (value) {
-        hasSelected = true;
-      }
-    });
-    stateModel.setSelectionMode(hasSelected);
-    if (!hasSelected) {
-      _selectedIndices.clear();
-    }
+    stateModel.setSelectionMode(_selectedIds.isNotEmpty);
     setState(() {});
   }
 
   void clearSelection() {
-    _selectedIndices.clear();
+    _selectedIds.clear();
     stateModel.setSelectionMode(false);
     setState(() {});
   }
@@ -217,13 +202,9 @@ class GalleryBodyState extends State<GalleryBody>
   void _deleteSelected() {
     if (_isDeleting) return;
     _isDeleting = true;
-    var toDelete = <Asset>[];
     final all = assetModel.getUnifiedAssets();
-    _selectedIndices.forEach((key, value) {
-      if (value) {
-        toDelete.add(all[key]);
-      }
-    });
+    final toDelete =
+        all.where((a) => _selectedIds.contains(a.stableId())).toList();
     clearSelection();
     final localToDelete = toDelete.where((e) => e.hasLocal).toList();
     final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
@@ -256,12 +237,8 @@ class GalleryBodyState extends State<GalleryBody>
       return;
     }
     final all = assetModel.getUnifiedAssets();
-    final assets = <Asset>[];
-    _selectedIndices.forEach((key, isSelected) {
-      if (isSelected) {
-        assets.add(all[key]);
-      }
-    });
+    final assets =
+        all.where((a) => _selectedIds.contains(a.stableId())).toList();
     List<XFile> xfiles = [];
     for (var asset in assets) {
       final data = await asset.imageDataAsync();
@@ -283,12 +260,9 @@ class GalleryBodyState extends State<GalleryBody>
       return;
     }
     final all = assetModel.getUnifiedAssets();
-    final assets = <Asset>[];
-    _selectedIndices.forEach((key, isSelected) {
-      if (isSelected && all[key].isCloudOnly) {
-        assets.add(all[key]);
-      }
-    });
+    final assets = all
+        .where((a) => _selectedIds.contains(a.stableId()) && a.isCloudOnly)
+        .toList();
     int count = 0;
     try {
       for (var asset in assets) {
@@ -335,12 +309,9 @@ class GalleryBodyState extends State<GalleryBody>
       return;
     }
     final all = assetModel.getUnifiedAssets();
-    final assets = <Asset>[];
-    _selectedIndices.forEach((key, isSelected) {
-      if (isSelected && all[key].hasLocal) {
-        assets.add(all[key]);
-      }
-    });
+    final assets = all
+        .where((a) => _selectedIds.contains(a.stableId()) && a.hasLocal)
+        .toList();
     clearSelection();
     int uploaded = 0;
     for (var asset in assets) {
@@ -554,13 +525,8 @@ class GalleryBodyState extends State<GalleryBody>
 
   void _performMoveToLockedFolder() async {
     final all = assetModel.getUnifiedAssets();
-    final assets = <Asset>[];
-
-    _selectedIndices.forEach((key, isSelected) {
-      if (isSelected) {
-        assets.add(all[key]);
-      }
-    });
+    final assets =
+        all.where((a) => _selectedIds.contains(a.stableId())).toList();
 
     if (assets.isEmpty) {
       SnackBarManager.showSnackBar(l10n.noPhotosSelected);
@@ -805,273 +771,121 @@ class GalleryBodyState extends State<GalleryBody>
     );
   }
 
-  Widget contentBuilder(BuildContext context, AssetModel model, Widget? child) {
+  List<Widget> _buildContentSlivers(BuildContext context, AssetModel model) {
+    switch (widget.viewMode) {
+      case GalleryViewMode.years:
+        return [_buildYearsGrid(context, model)];
+      case GalleryViewMode.months:
+        return [_buildMonthsGrid(context, model)];
+      case GalleryViewMode.all:
+        return _buildAllSlivers(context, model);
+    }
+  }
+
+  List<Widget> _buildAllSlivers(BuildContext context, AssetModel model) {
     columCount = responsiveColumns(context, base: 3);
     final all = model.getUnifiedAssets();
-    var children = <Widget>[];
-    final totalwidth = MediaQuery.of(context).size.width - (columCount - 1) * 2;
-    final totalHeight = MediaQuery.of(context).size.height;
-    final imgWidth = totalwidth / columCount;
-    final imgHeight = imgWidth;
     final colorScheme = Theme.of(context).colorScheme;
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateFormat =
+        DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE', locale);
 
-    var currentChildren = <Widget>[];
-    DateTime? currentDateTime;
-    double currentScrollOffset = 0;
-    for (int i = 0; i < all.length; i++) {
-      if (all[i].name() == null) {
-        continue;
+    final slivers = <Widget>[];
+    int cursor = 0;
+    while (cursor < all.length) {
+      while (cursor < all.length && all[cursor].name() == null) {
+        cursor++;
       }
-      final date = all[i].dateCreated();
-      if (currentDateTime == null ||
-          date.year != currentDateTime.year ||
-          date.month != currentDateTime.month ||
-          date.day != currentDateTime.day) {
-        children.add(Wrap(
-          spacing: 2,
-          runSpacing: 2.0,
-          alignment: WrapAlignment.start,
-          children: currentChildren,
-        ));
-        currentScrollOffset -= 2;
-        currentChildren = <Widget>[];
-        DateFormat format = DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE',
-            Localizations.localeOf(context).languageCode);
-        children.add(Padding(
+      if (cursor >= all.length) break;
+      final dayDate = all[cursor].dateCreated();
+      final dayItems = <int>[];
+      int scan = cursor;
+      while (scan < all.length) {
+        if (all[scan].name() == null) {
+          scan++;
+          continue;
+        }
+        final d = all[scan].dateCreated();
+        if (d.year != dayDate.year ||
+            d.month != dayDate.month ||
+            d.day != dayDate.day) {
+          break;
+        }
+        dayItems.add(scan);
+        scan++;
+      }
+      cursor = scan;
+
+      slivers.add(SliverToBoxAdapter(
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
           child: Text(
-            format.format(date),
+            dateFormat.format(dayDate),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
           ),
-        ));
-        currentScrollOffset += 40;
-      }
-      bool needLoadThumbnail = false;
-      if (currentScrollOffset > scrollOffset - (2 * totalHeight) &&
-          currentScrollOffset < scrollOffset + (3 * totalHeight)) {
-        needLoadThumbnail = true;
-        if (!all[i].loadThumbnailFinished()) {
-          all[i].thumbnailDataAsync().then((value) {
-            _thumbnailDirty = true;
-            _thumbnailDebounce ??=
-                Timer(const Duration(milliseconds: 100), () {
-              _thumbnailDebounce = null;
-              if (_thumbnailDirty && mounted) {
-                _thumbnailDirty = false;
-                setState(() {});
-              }
-            });
-          });
-        }
-      }
-      var child = GestureDetector(
-          onTap: () async {
-            if (stateModel.isSelectionMode) {
-              toggleSelection(i);
-            } else {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  opaque: false,
-                  transitionDuration: const Duration(milliseconds: 300),
-                  reverseTransitionDuration: const Duration(milliseconds: 300),
-                  transitionsBuilder: (BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                      Widget child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  },
-                  pageBuilder: (BuildContext context, _, __) =>
-                      GalleryViewerRoute(
-                    originIndex: i,
-                  ),
-                ),
-              );
-            }
-          },
-          onLongPress: () {
-            if (!stateModel.isSelectionMode) {
-              toggleSelection(i);
-            }
-          },
-          child: Stack(
-            children: [
-              SizedBox(
-                    width: imgWidth,
-                    height: imgHeight,
-                    child: Hero(
-                      tag: "asset_grid_$i",
-                      child:
-                          needLoadThumbnail && all[i].loadThumbnailFinished()
-                              ? Image(
-                                  image: all[i].thumbnailProvider(),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                        color: colorScheme.surfaceContainerHighest,
-                                        child: Icon(
-                                          all[i].isVideo() ? Icons.videocam : Icons.broken_image,
-                                          color: colorScheme.onSurfaceVariant,
-                                          size: 32,
-                                        ),
-                                      ),
-                                )
-                              : Container(
-                                  color: colorScheme.surfaceContainerHighest),
-                      flightShuttleBuilder: (BuildContext flightContext,
-                          Animation<double> animation,
-                          HeroFlightDirection flightDirection,
-                          BuildContext fromHeroContext,
-                          BuildContext toHeroContext) {
-                        return AnimatedBuilder(
-                          animation: animation,
-                          builder: (BuildContext context, Widget? child) {
-                            return Opacity(
-                                opacity: animation.value,
-                                child: all[i].loadThumbnailFinished()
-                                    ? Image(
-                                        image: all[i].thumbnailProvider(),
-                                        fit: BoxFit.contain,
-                                      )
-                                    : Container(
-                                        color: colorScheme
-                                            .surfaceContainerHighest));
-                          },
-                        );
-                      },
-                    )),
-              Consumer<StateModel>(builder: (context, stateModel, child) {
-                final asset = all[i];
-                // Active upload progress
-                if (asset.hasLocal) {
-                  final uploadPercent = stateModel.getUploadPercent(asset.local!.id);
-                  if (uploadPercent > 0) {
-                    return Positioned(
-                      bottom: 4,
-                      right: 4,
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                        value: uploadPercent,
-                      ),
-                    );
-                  }
-                }
-                // Active download progress
-                if (asset.isCloudOnly) {
-                  final downloadPercent = stateModel.getDownloadPercent(asset.name()!);
-                  if (downloadPercent > 0) {
-                    return Positioned(
-                      bottom: 4,
-                      right: 4,
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                        value: downloadPercent,
-                      ),
-                    );
-                  }
-                }
-                // Synced: subtle cloud-done icon
-                if (asset.hasLocal && asset.hasRemote) {
-                  return const Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Icon(
-                      Icons.cloud_done_outlined,
-                      color: Colors.white,
-                      size: 16,
-                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
-                    ),
-                  );
-                }
-                // Local only: not yet uploaded
-                if (asset.hasLocal && !asset.hasRemote) {
-                  return const Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Icon(
-                      Icons.cloud_upload_outlined,
-                      color: Colors.white,
-                      size: 16,
-                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
-                    ),
-                  );
-                }
-                // Cloud only: not on device
-                if (asset.isCloudOnly) {
-                  return const Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Icon(
-                      Icons.cloud_outlined,
-                      color: Colors.white,
-                      size: 16,
-                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-              if (all[i].isVideo())
-                const Positioned(
-                  top: 4,
-                  right: 4,
-                  child: Icon(
-                    Icons.play_circle_fill,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              if (stateModel.isSelectionMode)
-                Positioned(
-                  top: 2,
-                  left: 2,
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Checkbox(
-                      value: _selectedIndices[i] ?? false,
-                      onChanged: (value) {
-                        toggleSelection(i);
-                      },
-                      fillColor: WidgetStateProperty.all(
-                          colorScheme.primary),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                ),
-            ],
-          ));
-      currentChildren.add(child);
-      if (currentChildren.length % columCount == 1) {
-        currentScrollOffset += imgHeight + 2;
-      }
-      currentDateTime = all[i].dateCreated();
+        ),
+      ));
 
-      if (i == all.length - 1) {
-        children.add(Wrap(
-          spacing: 2,
-          runSpacing: 2.0,
-          alignment: WrapAlignment.start,
-          children: currentChildren,
-        ));
-      }
+      slivers.add(SliverPadding(
+        padding: EdgeInsets.zero,
+        sliver: SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columCount,
+            mainAxisSpacing: 2,
+            crossAxisSpacing: 2,
+            childAspectRatio: 1,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, localIndex) {
+              final globalIndex = dayItems[localIndex];
+              final asset = all[globalIndex];
+              final id = asset.stableId();
+              return _PhotoTile(
+                key: ValueKey(id),
+                asset: asset,
+                isSelected: _selectedIds.contains(id),
+                onTap: () {
+                  if (stateModel.isSelectionMode) {
+                    toggleSelection(id);
+                  } else {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        opaque: false,
+                        transitionDuration:
+                            const Duration(milliseconds: 300),
+                        reverseTransitionDuration:
+                            const Duration(milliseconds: 300),
+                        transitionsBuilder: (_, animation, __, child) =>
+                            FadeTransition(opacity: animation, child: child),
+                        pageBuilder: (_, __, ___) => GalleryViewerRoute(
+                          originIndex: globalIndex,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                onLongPress: () {
+                  if (!stateModel.isSelectionMode) toggleSelection(id);
+                },
+              );
+            },
+            childCount: dayItems.length,
+            findChildIndexCallback: (key) {
+              final id = (key as ValueKey<String>).value;
+              for (int i = 0; i < dayItems.length; i++) {
+                if (all[dayItems[i]].stableId() == id) return i;
+              }
+              return null;
+            },
+          ),
+        ),
+      ));
     }
-    children.add(const SizedBox(height: 80));
-    return SliverList.list(
-      children: children,
-    );
+    slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 80)));
+    return slivers;
   }
 
   Widget _buildYearsGrid(BuildContext context, AssetModel model) {
@@ -1204,25 +1018,18 @@ class GalleryBodyState extends State<GalleryBody>
           onRefresh: () async {
             refresh(); // Fire-and-forget, returns immediately
           },
-          child: CustomScrollView(
+          child: Consumer<AssetModel>(
+            builder: (context, model, child) => CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
+              cacheExtent: 1000,
               slivers: [
                 _buildToolbar(),
                 _buildSyncPanel(),
-                Consumer<AssetModel>(
-                  builder: (context, model, child) {
-                    switch (widget.viewMode) {
-                      case GalleryViewMode.years:
-                        return _buildYearsGrid(context, model);
-                      case GalleryViewMode.months:
-                        return _buildMonthsGrid(context, model);
-                      case GalleryViewMode.all:
-                        return contentBuilder(context, model, child);
-                    }
-                  },
-                ),
-              ]),
+                ..._buildContentSlivers(context, model),
+              ],
+            ),
+          ),
         ),
         Positioned(
           bottom: 80,
@@ -1260,6 +1067,161 @@ class _GroupInfo {
   int count = 0;
 
   _GroupInfo({required this.asset});
+}
+
+class _PhotoTile extends StatefulWidget {
+  final Asset asset;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  const _PhotoTile({
+    required Key key,
+    required this.asset,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
+  }) : super(key: key);
+
+  @override
+  State<_PhotoTile> createState() => _PhotoTileState();
+}
+
+class _PhotoTileState extends State<_PhotoTile> {
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _kickOffThumbnail();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PhotoTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.asset != widget.asset) {
+      _loaded = widget.asset.loadThumbnailFinished();
+      _kickOffThumbnail();
+    }
+  }
+
+  void _kickOffThumbnail() {
+    if (widget.asset.loadThumbnailFinished()) {
+      _loaded = true;
+      return;
+    }
+    widget.asset.thumbnailDataAsync().then((_) {
+      if (mounted) setState(() => _loaded = true);
+    }).catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Hero(
+            tag: "asset_${widget.asset.stableId()}",
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              child: _loaded && widget.asset.loadThumbnailFinished()
+                  ? Image(
+                      key: const ValueKey('img'),
+                      image: widget.asset.thumbnailProvider(),
+                      fit: BoxFit.cover,
+                      gaplessPlayback: true,
+                    )
+                  : Container(
+                      key: const ValueKey('ph'),
+                      color: colorScheme.surfaceContainerHighest,
+                    ),
+            ),
+          ),
+          if (widget.asset.isVideo())
+            const Center(
+              child: Icon(
+                Icons.play_circle_outline,
+                color: Colors.white,
+                size: 36,
+              ),
+            ),
+          Positioned(
+            right: 4,
+            bottom: 4,
+            child: Consumer<StateModel>(
+              builder: (context, model, child) {
+                final a = widget.asset;
+                if (a.hasLocal && a.local != null &&
+                    model.uploadProgress.containsKey(a.local!.id)) {
+                  return SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      value: model.getUploadPercent(a.local!.id),
+                      color: Colors.white,
+                    ),
+                  );
+                }
+                if (a.name() != null &&
+                    model.downloadProgress.containsKey(a.name()!)) {
+                  return SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      value: model.getDownloadPercent(a.name()!),
+                      color: Colors.white,
+                    ),
+                  );
+                }
+                if (a.isCloudOnly) {
+                  return const Icon(Icons.cloud_outlined,
+                      size: 14, color: Colors.white);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          Consumer<StateModel>(
+            builder: (context, model, child) {
+              if (!model.isSelectionMode) return const SizedBox.shrink();
+              return Positioned(
+                left: 4,
+                top: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: widget.isSelected
+                        ? colorScheme.primary
+                        : Colors.black38,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    widget.isSelected
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
+          ),
+          if (widget.isSelected)
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.primary, width: 3),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TimeGroupTile extends StatefulWidget {
