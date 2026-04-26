@@ -43,12 +43,27 @@ PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 ARCHIVE_PATH="$PROJECT_DIR/build/ios/archive/Runner.xcarchive"
 IPA_DIR="$PROJECT_DIR/build/ios/ipa"
 EXPORT_OPTIONS="$PROJECT_DIR/ios/ExportOptions.plist"
+ENV_FILE="$PROJECT_DIR/.env"
+
+#──────────────────────────────────────────────────────────────
+# Load .env (KEYCHAIN_PASSWORD, optional API keys)
+#──────────────────────────────────────────────────────────────
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
 
 #──────────────────────────────────────────────────────────────
 # Pre-flight checks
 #──────────────────────────────────────────────────────────────
 step "Unlocking keychain"
-security unlock-keychain ~/Library/Keychains/login.keychain-db
+if [ -n "${KEYCHAIN_PASSWORD:-}" ]; then
+  security unlock-keychain -p "$KEYCHAIN_PASSWORD" ~/Library/Keychains/login.keychain-db
+else
+  security unlock-keychain ~/Library/Keychains/login.keychain-db
+fi
 ok "Keychain unlocked"
 
 step "Pre-flight checks"

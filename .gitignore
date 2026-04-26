@@ -50,3 +50,4 @@ baidu_drive_test.go
 debug-info
 ios/Frameworks/RUN.xcframework
 android/app/libs/server.aar
+.env
