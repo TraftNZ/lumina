@@ -23,9 +23,13 @@ int responsiveColumns(BuildContext context, {int base = 3}) {
   return base;
 }
 
-late String httpBaseUrl;
-late int grpcPort;
-late int httpPort;
+// Initialized to empty/zero so callers that fire before runServer() resolves
+// don't trigger LateInitializationError. All real network paths are gated by
+// isServerReady — these defaults exist only to keep the app alive during the
+// brief window before the embedded gRPC server starts.
+String httpBaseUrl = "";
+int grpcPort = 0;
+int httpPort = 0;
 bool isServerReady = false;
 
 class Global {
@@ -40,7 +44,6 @@ class Global {
       grpcPort = int.parse(ports[0]);
       httpPort = int.parse(ports[1]);
       storage = RemoteStorage("127.0.0.1", int.parse(ports[0]));
-      // storage = RemoteStorage("192.168.100.235", 50051);
       final prefs = await SharedPreferences.getInstance();
       final localFolder = prefs.getString("localFolder");
       if (localFolder != null && localFolder.isNotEmpty) {

@@ -184,7 +184,7 @@ class RemoteImage {
       return thumbnailData!;
     }
     var urlPath = path;
-    if (urlPath[0] == '/') {
+    if (urlPath.isNotEmpty && urlPath[0] == '/') {
       urlPath = urlPath.substring(1);
     }
     try {
@@ -203,7 +203,7 @@ class RemoteImage {
 
   Stream<Uint8List> dataStream() async* {
     var urlPath = path;
-    if (urlPath[0] == '/') {
+    if (urlPath.isNotEmpty && urlPath[0] == '/') {
       urlPath = urlPath.substring(1);
     }
     final url = '$httpBaseUrl/$urlPath';

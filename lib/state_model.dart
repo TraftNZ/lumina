@@ -19,16 +19,6 @@ SettingModel settingModel = SettingModel();
 AssetModel assetModel = AssetModel();
 StateModel stateModel = StateModel();
 
-IOSink? _debugSink;
-void _debugLog(String msg) {
-  try {
-    _debugSink ??= File('/Users/pzhu/Library/Containers/B0A88356-59CC-40D9-B21C-24CF195D3681/Data/Documents/lumina_debug.log').openWrite(mode: FileMode.append);
-    final ts = DateTime.now().toIso8601String();
-    _debugSink!.writeln('[$ts] $msg');
-    _debugSink!.flush();
-  } catch (_) {}
-}
-
 enum Drive { smb, webDav, nfs, s3, cloudreve }
 
 Map<Drive, String> driveName = {
@@ -137,8 +127,6 @@ class StateModel extends ChangeNotifier {
   }
 
   void setNotSyncedPhotos(List<String> ids) {
-    _debugLog('setNotSyncedPhotos: ${ids.length} ids (was ${notSyncedIDs.length})');
-    _debugLog('stack: ${StackTrace.current.toString().split('\n').take(5).join(' <- ')}');
     notSyncedIDs = ids;
     notifyListeners();
   }
@@ -337,7 +325,6 @@ class AssetModel extends ChangeNotifier {
   }
 
   Future<void> refreshRemote({bool force = false}) async {
-    _debugLog('refreshRemote called (force=$force) from: ${StackTrace.current.toString().split('\n').take(6).join(' <- ')}');
     if (remoteGetting != null) {
       await remoteGetting!.future;
     }
@@ -452,7 +439,9 @@ class AssetModel extends ChangeNotifier {
   Future<void> hydrateFromCache() async {
     try {
       final persistence = await SyncStatePersistence.create();
-      final paths = persistence.cachedRemotePaths;
+      final paths = persistence.cachedRemotePaths
+          .where((p) => p.isNotEmpty)
+          .toList();
       if (paths.isNotEmpty && remoteAssets.isEmpty) {
         remoteAssets = paths
             .map((p) => Asset(remote: RemoteImage(storage.cli, p)))
@@ -626,7 +615,6 @@ Future<void> scanFile(String filePath) async {
 }
 
 Future<void> refreshUnsynchronizedPhotos({bool force = false}) async {
-  _debugLog('refreshUnsynchronizedPhotos called (force=$force)');
   if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
   if (!isServerReady) return;
   await checkServer();
@@ -640,7 +628,6 @@ Future<void> refreshUnsynchronizedPhotos({bool force = false}) async {
     if (last != null) {
       final age = DateTime.now().millisecondsSinceEpoch - last;
       if (age >= 0 && age < _kUnsyncedRefreshThrottle.inMilliseconds) {
-        _debugLog('refreshUnsynchronizedPhotos throttled, age=${age}ms');
         return;
       }
     }
