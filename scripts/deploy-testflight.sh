@@ -5,9 +5,9 @@ set -euo pipefail
 # deploy-testflight.sh — Build & upload Lumina to TestFlight
 #
 # Usage:
-#   ./deploy-testflight.sh              # full build (server + app + upload)
-#   ./deploy-testflight.sh --skip-server # skip Go server rebuild
-#   ./deploy-testflight.sh --build-only  # build archive but don't upload
+#   ./scripts/deploy-testflight.sh              # full build (server + app + upload)
+#   ./scripts/deploy-testflight.sh --skip-server # skip Go server rebuild
+#   ./scripts/deploy-testflight.sh --build-only  # build archive but don't upload
 #──────────────────────────────────────────────────────────────
 
 SKIP_SERVER=false
@@ -39,7 +39,7 @@ ok()   { echo -e "${GREEN}✓ $1${NC}"; }
 warn() { echo -e "${YELLOW}⚠ $1${NC}"; }
 fail() { echo -e "${RED}✗ $1${NC}"; exit 1; }
 
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 ARCHIVE_PATH="$PROJECT_DIR/build/ios/archive/Runner.xcarchive"
 IPA_DIR="$PROJECT_DIR/build/ios/ipa"
 EXPORT_OPTIONS="$PROJECT_DIR/ios/ExportOptions.plist"
