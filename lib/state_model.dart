@@ -6,10 +6,14 @@ import 'dart:async';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/storage/storage.dart';
 import 'package:lumina/sync_engine.dart';
+import 'package:lumina/sync_state_persistence.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
 import 'package:lumina/global.dart';
+
+const Duration _kIndexSyncThrottle = Duration(minutes: 10);
+const Duration _kUnsyncedRefreshThrottle = Duration(minutes: 10);
 
 SettingModel settingModel = SettingModel();
 AssetModel assetModel = AssetModel();
@@ -200,6 +204,9 @@ class StateModel extends ChangeNotifier {
 class AssetModel extends ChangeNotifier {
   AssetModel() {
     eventBus.on<LocalRefreshEvent>().listen((event) => refreshLocal());
+    // Event-bus fires (cold start initDrive, post-upload, post-delete, timer)
+    // go through the throttled path — the backend DB already reflects the
+    // change, so a full syncIndex within _kIndexSyncThrottle is skipped.
     eventBus.on<RemoteRefreshEvent>().listen((event) => refreshRemote());
   }
   List<Asset> localAssets = [];
@@ -289,7 +296,7 @@ class AssetModel extends ChangeNotifier {
     _isRefreshing = true;
     notifyListeners();
     try {
-      await Future.wait([refreshLocal(), refreshRemote()]);
+      await Future.wait([refreshLocal(), refreshRemote(force: true)]);
     } finally {
       _isRefreshing = false;
       notifyListeners();
@@ -324,23 +331,23 @@ class AssetModel extends ChangeNotifier {
       stateModel.setNotSyncedPhotos([]);
       notifyListeners();
       if (!stateModel.refreshingUnsynchronized) {
-        refreshUnsynchronizedPhotos();
+        refreshUnsynchronizedPhotos(force: true);
       }
     }
   }
 
-  Future<void> refreshRemote() async {
-    _debugLog('refreshRemote called from: ${StackTrace.current.toString().split('\n').take(6).join(' <- ')}');
+  Future<void> refreshRemote({bool force = false}) async {
+    _debugLog('refreshRemote called (force=$force) from: ${StackTrace.current.toString().split('\n').take(6).join(' <- ')}');
     if (remoteGetting != null) {
       await remoteGetting!.future;
     }
     // Keep old data visible while fetching new data in background
     remoteHasMore = true;
     remoteGetting = null;
-    await _fetchRemotePhotos();
+    await _fetchRemotePhotos(force: force);
   }
 
-  Future<void> _fetchRemotePhotos() async {
+  Future<void> _fetchRemotePhotos({bool force = false}) async {
     if (!isServerReady) return;
     if (!settingModel.isRemoteStorageSetted) return;
     await checkServer();
@@ -372,10 +379,12 @@ class AssetModel extends ChangeNotifier {
         remoteAssets = cachedAssets;
         _unifiedDirty = true;
         notifyListeners();
+        _persistRemotePaths(cachedAssets);
       }
 
-      // Sync index in background (slow for Cloudreve) — don't block UI
-      _syncIndexInBackground();
+      // Sync index in background (slow for Cloudreve) — don't block UI.
+      // Throttled so cold starts within _kIndexSyncThrottle skip the scan.
+      _syncIndexInBackground(force: force);
     } catch (e) {
       remoteLastError = e.toString();
     }
@@ -386,7 +395,17 @@ class AssetModel extends ChangeNotifier {
     remoteGetting = null;
   }
 
-  void _syncIndexInBackground() {
+  void _syncIndexInBackground({bool force = false}) async {
+    final persistence = await SyncStatePersistence.create();
+    if (!force) {
+      final last = persistence.lastIndexSyncAt;
+      if (last != null) {
+        final age = DateTime.now().millisecondsSinceEpoch - last;
+        if (age >= 0 && age < _kIndexSyncThrottle.inMilliseconds) {
+          return;
+        }
+      }
+    }
     storage.syncIndex().then((_) async {
       final images = await storage.listImages("");
       final reuseMap = <String, Asset>{};
@@ -408,9 +427,48 @@ class AssetModel extends ChangeNotifier {
       remoteAssets = newRemoteAssets;
       _unifiedDirty = true;
       notifyListeners();
+      await persistence
+          .setLastIndexSyncAt(DateTime.now().millisecondsSinceEpoch);
+      _persistRemotePaths(newRemoteAssets);
     }).catchError((e) {
       print("[AssetModel] Background sync error: $e");
     });
+  }
+
+  Future<void> _persistRemotePaths(List<Asset> assets) async {
+    try {
+      final persistence = await SyncStatePersistence.create();
+      final paths = <String>[];
+      for (final a in assets) {
+        if (a.hasRemote && a.remote != null) paths.add(a.remote!.path);
+      }
+      await persistence.setCachedRemotePaths(paths);
+    } catch (_) {}
+  }
+
+  /// Hydrate remoteAssets + notSyncedIDs from SharedPreferences so the grid
+  /// paints yesterday's data instantly on cold start, before the gRPC server
+  /// has finished starting. Safe to call before isServerReady.
+  Future<void> hydrateFromCache() async {
+    try {
+      final persistence = await SyncStatePersistence.create();
+      final paths = persistence.cachedRemotePaths;
+      if (paths.isNotEmpty && remoteAssets.isEmpty) {
+        remoteAssets = paths
+            .map((p) => Asset(remote: RemoteImage(storage.cli, p)))
+            .toList();
+        // Prevent scroll-triggered getMorePhotos from repeatedly hitting the
+        // !isServerReady early-return before the real fetch runs. The
+        // eventBus-driven refreshRemote() after initDrive resets this to true.
+        remoteHasMore = false;
+        _unifiedDirty = true;
+      }
+      final cachedIDs = persistence.cachedNotSyncedIDs;
+      if (cachedIDs.isNotEmpty && stateModel.notSyncedIDs.isEmpty) {
+        stateModel.notSyncedIDs = cachedIDs;
+      }
+      notifyListeners();
+    } catch (_) {}
   }
 
   Future<void> getLocalPhotos({
@@ -491,7 +549,11 @@ class AssetModel extends ChangeNotifier {
           notifyListeners();
         }
       }
-      await asset.getLocalFile();
+      // Do NOT await asset.getLocalFile() here: on iOS it triggers an iCloud
+      // download per photo, serializing the whole page. Asset.name() falls
+      // back to local!.title when localTitle is null, and thumbnails use
+      // thumbnailDataWithSize which doesn't need originFile. The detail
+      // viewer still lazy-loads the origin file on demand.
     }
     if (!atomic) {
       _unifiedDirty = true;
@@ -563,14 +625,25 @@ Future<void> scanFile(String filePath) async {
   }
 }
 
-Future<void> refreshUnsynchronizedPhotos() async {
-  _debugLog('refreshUnsynchronizedPhotos called');
+Future<void> refreshUnsynchronizedPhotos({bool force = false}) async {
+  _debugLog('refreshUnsynchronizedPhotos called (force=$force)');
   if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
   if (!isServerReady) return;
   await checkServer();
   if (!settingModel.isRemoteStorageSetted) {
     stateModel.setNotSyncedPhotos([]);
     return;
+  }
+  final persistence = await SyncStatePersistence.create();
+  if (!force) {
+    final last = persistence.lastUnsyncedRefreshAt;
+    if (last != null) {
+      final age = DateTime.now().millisecondsSinceEpoch - last;
+      if (age >= 0 && age < _kUnsyncedRefreshThrottle.inMilliseconds) {
+        _debugLog('refreshUnsynchronizedPhotos throttled, age=${age}ms');
+        return;
+      }
+    }
   }
   final re = await requestPermission();
   if (!re) return;
@@ -585,6 +658,9 @@ Future<void> refreshUnsynchronizedPhotos() async {
   try {
     final ids = await engine.findNotUploadedIds();
     stateModel.setNotSyncedPhotos(ids);
+    await persistence
+        .setLastUnsyncedRefreshAt(DateTime.now().millisecondsSinceEpoch);
+    await persistence.setCachedNotSyncedIDs(ids);
   } catch (e) {
     print('Error: $e');
     SnackBarManager.showSnackBar("Error: $e");

@@ -16,19 +16,24 @@ const seedThemeColor = Color(0xFF5B9BD5);
 
 const int _imageCacheMaxBytes = 200 << 20;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PaintingBinding.instance.imageCache.maximumSizeBytes = _imageCacheMaxBytes;
-  Global.init().then((e) => runApp(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: settingModel),
-            ChangeNotifierProvider.value(value: assetModel),
-            ChangeNotifierProvider.value(value: stateModel),
-          ],
-          child: const MyApp(),
-        ),
-      ));
+  // Hydrate the grid from persisted remote paths + not-synced IDs so the
+  // first frame shows yesterday's state instead of an empty grid while the
+  // embedded gRPC server is still starting.
+  await assetModel.hydrateFromCache();
+  Global.init();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: settingModel),
+        ChangeNotifierProvider.value(value: assetModel),
+        ChangeNotifierProvider.value(value: stateModel),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

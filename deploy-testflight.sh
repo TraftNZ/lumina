@@ -47,6 +47,10 @@ EXPORT_OPTIONS="$PROJECT_DIR/ios/ExportOptions.plist"
 #──────────────────────────────────────────────────────────────
 # Pre-flight checks
 #──────────────────────────────────────────────────────────────
+step "Unlocking keychain"
+security unlock-keychain ~/Library/Keychains/login.keychain-db
+ok "Keychain unlocked"
+
 step "Pre-flight checks"
 
 command -v flutter >/dev/null || fail "flutter not found in PATH"

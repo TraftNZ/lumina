@@ -8,6 +8,10 @@ class SyncStatePersistence {
   static const _syncInProgressTimestampKey = 'syncInProgressTimestamp';
   static const _activeGrpcPortKey = 'activeGrpcPort';
   static const _activeHttpPortKey = 'activeHttpPort';
+  static const _lastIndexSyncAtKey = 'lastIndexSyncAt';
+  static const _lastUnsyncedRefreshAtKey = 'lastUnsyncedRefreshAt';
+  static const _cachedRemotePathsKey = 'cachedRemotePaths';
+  static const _cachedNotSyncedIDsKey = 'cachedNotSyncedIDs';
   static const _staleThreshold = Duration(hours: 1);
 
   final SharedPreferences _prefs;
@@ -68,4 +72,40 @@ class SyncStatePersistence {
     await _prefs.remove(_activeGrpcPortKey);
     await _prefs.remove(_activeHttpPortKey);
   }
+
+  int? get lastIndexSyncAt => _prefs.getInt(_lastIndexSyncAtKey);
+
+  Future<void> setLastIndexSyncAt(int epochMs) =>
+      _prefs.setInt(_lastIndexSyncAtKey, epochMs);
+
+  int? get lastUnsyncedRefreshAt => _prefs.getInt(_lastUnsyncedRefreshAtKey);
+
+  Future<void> setLastUnsyncedRefreshAt(int epochMs) =>
+      _prefs.setInt(_lastUnsyncedRefreshAtKey, epochMs);
+
+  List<String> get cachedRemotePaths {
+    final json = _prefs.getString(_cachedRemotePathsKey);
+    if (json == null) return [];
+    try {
+      return List<String>.from(jsonDecode(json));
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> setCachedRemotePaths(List<String> paths) =>
+      _prefs.setString(_cachedRemotePathsKey, jsonEncode(paths));
+
+  List<String> get cachedNotSyncedIDs {
+    final json = _prefs.getString(_cachedNotSyncedIDsKey);
+    if (json == null) return [];
+    try {
+      return List<String>.from(jsonDecode(json));
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> setCachedNotSyncedIDs(List<String> ids) =>
+      _prefs.setString(_cachedNotSyncedIDsKey, jsonEncode(ids));
 }
