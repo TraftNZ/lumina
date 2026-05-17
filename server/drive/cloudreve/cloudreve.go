@@ -140,11 +140,11 @@ type pagination struct {
 }
 
 type uploadSessionResponse struct {
-	SessionID      string              `json:"session_id"`
-	ChunkSize      int64               `json:"chunk_size"`
-	UploadURLs     []string            `json:"upload_urls"`
-	CallbackSecret string              `json:"callback_secret"`
-	StoragePolicy  *uploadPolicyInfo   `json:"storage_policy"`
+	SessionID      string            `json:"session_id"`
+	ChunkSize      int64             `json:"chunk_size"`
+	UploadURLs     []string          `json:"upload_urls"`
+	CallbackSecret string            `json:"callback_secret"`
+	StoragePolicy  *uploadPolicyInfo `json:"storage_policy"`
 }
 
 type uploadPolicyInfo struct {
@@ -599,11 +599,6 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 	}
 	defer reader.Close()
 
-	data, err := io.ReadAll(reader)
-	if err != nil {
-		return fmt.Errorf("read upload data: %w", err)
-	}
-
 	if err := c.ensureParentDirs(filePath); err != nil {
 		c.logger.Printf("Warning: ensureParentDirs for %s: %v", filePath, err)
 	}
@@ -633,10 +628,17 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 			if unlockErr := c.forceUnlock(tokens); unlockErr != nil {
 				c.logger.Printf("Upload: force unlock failed for %s: %v", filePath, unlockErr)
 			} else {
-				// Retry after unlock
-				session, err = c.createUploadSession(fileURI, size, modMs, "version")
+				// Retry the same upload after clearing stale Cloudreve locks.
+				// Do not switch to entity_type=version here: sync uploads should be
+				// idempotent and an existing remote file must remain a skip, not a
+				// new Cloudreve version.
+				session, err = c.createUploadSession(fileURI, size, modMs, "")
 			}
 		}
+	}
+	if errors.Is(err, errObjectExisted) {
+		c.logger.Printf("Upload: %s already exists after unlock, skipping", filePath)
+		return nil
 	}
 	if err != nil {
 		c.logger.Printf("Upload: create session failed for %s: %v", filePath, err)
@@ -645,33 +647,44 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 	c.logger.Printf("Upload: session created for %s: sessionID=%s, chunkSize=%d, uploadURLs=%v", filePath, session.SessionID, session.ChunkSize, session.UploadURLs)
 
 	// Upload chunks according to session.ChunkSize
+	if size <= 0 {
+		return fmt.Errorf("zero-size uploads are not supported")
+	}
 	chunkSize := session.ChunkSize
 	if chunkSize <= 0 {
-		chunkSize = int64(len(data))
-	}
-
-	totalChunks := (int64(len(data)) + chunkSize - 1) / chunkSize
-	if totalChunks == 0 {
-		totalChunks = 1
+		chunkSize = size
 	}
 
 	// If server provides upload_urls, use those (non-local storage policy).
 	// Otherwise use the standard Cloudreve chunk upload endpoint (local storage).
 	useUploadURLs := len(session.UploadURLs) > 0
+	totalChunks := (size + chunkSize - 1) / chunkSize
+	if totalChunks == 0 {
+		totalChunks = 1
+	}
+	if useUploadURLs && int64(len(session.UploadURLs)) < totalChunks {
+		return fmt.Errorf("upload URL count %d is less than chunk count %d", len(session.UploadURLs), totalChunks)
+	}
 
 	for i := int64(0); i < totalChunks; i++ {
-		start := i * chunkSize
-		end := start + chunkSize
-		if end > int64(len(data)) {
-			end = int64(len(data))
+		remaining := size - i*chunkSize
+		if remaining < 0 {
+			remaining = 0
 		}
-		chunk := data[start:end]
+		currentChunkSize := chunkSize
+		if remaining < currentChunkSize {
+			currentChunkSize = remaining
+		}
+		chunk := make([]byte, currentChunkSize)
+		if _, err := io.ReadFull(reader, chunk); err != nil {
+			return fmt.Errorf("read upload chunk %d for %s: %w", i, filePath, err)
+		}
 
 		c.logger.Printf("Upload: chunk %d/%d for %s (size=%d, useUploadURLs=%v)", i+1, totalChunks, filePath, len(chunk), useUploadURLs)
 
 		if useUploadURLs && int(i) < len(session.UploadURLs) {
 			// Upload directly to the external storage URL provided by server
-			if err := c.uploadChunkToURL(session.UploadURLs[i], chunk, start, size); err != nil {
+			if err := c.uploadChunkToURL(session.UploadURLs[i], chunk, i*chunkSize, size); err != nil {
 				return fmt.Errorf("upload chunk %d for %s: %w", i, filePath, err)
 			}
 		} else {
@@ -1179,7 +1192,7 @@ type cloudreveFileInfo struct {
 	isDir   bool
 }
 
-func (f *cloudreveFileInfo) Name() string      { return f.name }
+func (f *cloudreveFileInfo) Name() string       { return f.name }
 func (f *cloudreveFileInfo) Size() int64        { return f.size }
 func (f *cloudreveFileInfo) Mode() fs.FileMode  { return 0644 }
 func (f *cloudreveFileInfo) ModTime() time.Time { return f.modTime }

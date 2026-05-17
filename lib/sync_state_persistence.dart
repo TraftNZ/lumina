@@ -43,8 +43,9 @@ class SyncStatePersistence {
     final inProgress = _prefs.getBool(_syncInProgressKey) ?? false;
     if (!inProgress) return false;
     final timestamp = _prefs.getInt(_syncInProgressTimestampKey) ?? 0;
-    final age =
-        DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(timestamp));
+    final age = DateTime.now().difference(
+      DateTime.fromMillisecondsSinceEpoch(timestamp),
+    );
     if (age > _staleThreshold) {
       _prefs.setBool(_syncInProgressKey, false);
       return false;
@@ -56,7 +57,9 @@ class SyncStatePersistence {
     await _prefs.setBool(_syncInProgressKey, value);
     if (value) {
       await _prefs.setInt(
-          _syncInProgressTimestampKey, DateTime.now().millisecondsSinceEpoch);
+        _syncInProgressTimestampKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
     }
   }
 
@@ -77,6 +80,12 @@ class SyncStatePersistence {
 
   Future<void> setLastIndexSyncAt(int epochMs) =>
       _prefs.setInt(_lastIndexSyncAtKey, epochMs);
+
+  int? lastIndexSyncAtForDrive(String driveKey) =>
+      _prefs.getInt('$_lastIndexSyncAtKey:$driveKey');
+
+  Future<void> setLastIndexSyncAtForDrive(String driveKey, int epochMs) =>
+      _prefs.setInt('$_lastIndexSyncAtKey:$driveKey', epochMs);
 
   int? get lastUnsyncedRefreshAt => _prefs.getInt(_lastUnsyncedRefreshAtKey);
 

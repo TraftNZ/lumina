@@ -34,18 +34,18 @@ class HashCache {
       }
     }
 
-    // Compute hash from file content
+    // Compute hash from file content without loading the whole asset into memory.
     final file = await asset.originFile;
     if (file == null) {
       throw Exception('Cannot read asset file for hashing');
     }
-    final bytes = await file.readAsBytes();
-    final hash = sha256.convert(bytes).toString();
+    final hash = await sha256.bind(file.openRead()).first;
+    final hashString = hash.toString();
 
     // Persist to cache
-    await prefs.setString(key, hash);
+    await prefs.setString(key, hashString);
     await prefs.setString(modKey, modMs);
 
-    return hash;
+    return hashString;
   }
 }

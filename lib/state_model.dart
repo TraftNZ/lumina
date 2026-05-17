@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'event_bus.dart';
 import 'package:lumina/asset.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/storage/storage.dart';
 import 'package:lumina/sync_engine.dart';
@@ -11,9 +13,50 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
 import 'package:lumina/global.dart';
+import 'package:lumina/setting_storage_route.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const Duration _kIndexSyncThrottle = Duration(minutes: 10);
 const Duration _kUnsyncedRefreshThrottle = Duration(minutes: 10);
+
+String _driveSyncKey(SharedPreferences prefs) {
+  final drive = prefs.getString("drive") ?? "SMB";
+  String raw;
+  switch (getDrive(drive)) {
+    case Drive.smb:
+      raw =
+          'smb://${prefs.getString("username") ?? ""}@'
+          '${prefs.getString("addr") ?? ""}/'
+          '${prefs.getString("share") ?? ""}/'
+          '${prefs.getString("rootPath") ?? ""}';
+      break;
+    case Drive.webDav:
+      raw =
+          'webdav://${prefs.getString("webdav_username") ?? ""}@'
+          '${prefs.getString("webdav_url") ?? ""}/'
+          '${prefs.getString("webdav_root_path") ?? ""}';
+      break;
+    case Drive.nfs:
+      raw =
+          'nfs://${prefs.getString("nfs_url") ?? ""}/'
+          '${prefs.getString("nfs_root_path") ?? ""}';
+      break;
+    case Drive.s3:
+      raw =
+          's3://${prefs.getString("s3_access_key_id") ?? ""}@'
+          '${prefs.getString("s3_endpoint") ?? ""}/'
+          '${prefs.getString("s3_bucket") ?? ""}/'
+          '${prefs.getString("s3_root_path") ?? ""}';
+      break;
+    case Drive.cloudreve:
+      raw =
+          'cloudreve://${prefs.getString("cloudreve_email") ?? ""}@'
+          '${prefs.getString("cloudreve_server") ?? ""}/'
+          '${prefs.getString("cloudreve_root_path") ?? ""}';
+      break;
+  }
+  return sha256.convert(utf8.encode(raw)).toString().substring(0, 16);
+}
 
 SettingModel settingModel = SettingModel();
 AssetModel assetModel = AssetModel();
@@ -350,6 +393,10 @@ class AssetModel extends ChangeNotifier {
       }
     }
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final driveSyncKey = _driveSyncKey(prefs);
+      final persistence = await SyncStatePersistence.create();
+      final lastIndexSyncAt = persistence.lastIndexSyncAtForDrive(driveSyncKey);
       // Show cached data immediately (from local DB)
       final cachedImages = await storage.listImages("");
       if (cachedImages.isNotEmpty) {
@@ -369,9 +416,17 @@ class AssetModel extends ChangeNotifier {
         _persistRemotePaths(cachedAssets);
       }
 
-      // Sync index in background (slow for Cloudreve) — don't block UI.
-      // Throttled so cold starts within _kIndexSyncThrottle skip the scan.
-      _syncIndexInBackground(force: force);
+      if (force || cachedImages.isEmpty && lastIndexSyncAt == null) {
+        await _syncIndexAndRefreshRemote(force: true);
+        await persistence.setLastIndexSyncAtForDrive(
+          driveSyncKey,
+          DateTime.now().millisecondsSinceEpoch,
+        );
+      } else {
+        // Sync index in background (slow for Cloudreve) — don't block UI.
+        // Throttled so cold starts within _kIndexSyncThrottle skip the scan.
+        _syncIndexInBackground(force: force);
+      }
     } catch (e) {
       remoteLastError = e.toString();
     }
@@ -383,9 +438,11 @@ class AssetModel extends ChangeNotifier {
   }
 
   void _syncIndexInBackground({bool force = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final driveSyncKey = _driveSyncKey(prefs);
     final persistence = await SyncStatePersistence.create();
     if (!force) {
-      final last = persistence.lastIndexSyncAt;
+      final last = persistence.lastIndexSyncAtForDrive(driveSyncKey);
       if (last != null) {
         final age = DateTime.now().millisecondsSinceEpoch - last;
         if (age >= 0 && age < _kIndexSyncThrottle.inMilliseconds) {
@@ -393,33 +450,45 @@ class AssetModel extends ChangeNotifier {
         }
       }
     }
-    storage.syncIndex().then((_) async {
-      final images = await storage.listImages("");
-      final reuseMap = <String, Asset>{};
-      for (final a in remoteAssets) {
-        if (a.hasRemote) {
-          reuseMap[a.remote!.path] = a;
-        }
+    _syncIndexAndRefreshRemote(force: false)
+        .then((_) async {
+          await persistence.setLastIndexSyncAtForDrive(
+            driveSyncKey,
+            DateTime.now().millisecondsSinceEpoch,
+          );
+        })
+        .catchError((e) {
+          print("[AssetModel] Background sync error: $e");
+        });
+  }
+
+  Future<void> _syncIndexAndRefreshRemote({required bool force}) async {
+    if (force) {
+      await storage.fullResyncIndex();
+    } else {
+      await storage.syncIndex();
+    }
+    final images = await storage.listImages("");
+    final reuseMap = <String, Asset>{};
+    for (final a in remoteAssets) {
+      if (a.hasRemote) {
+        reuseMap[a.remote!.path] = a;
       }
-      final List<Asset> newRemoteAssets = [];
-      for (var image in images) {
-        final existing = reuseMap[image.path];
-        if (existing != null) {
-          existing.remote = image;
-          newRemoteAssets.add(existing);
-        } else {
-          newRemoteAssets.add(Asset(remote: image));
-        }
+    }
+    final List<Asset> newRemoteAssets = [];
+    for (var image in images) {
+      final existing = reuseMap[image.path];
+      if (existing != null) {
+        existing.remote = image;
+        newRemoteAssets.add(existing);
+      } else {
+        newRemoteAssets.add(Asset(remote: image));
       }
-      remoteAssets = newRemoteAssets;
-      _unifiedDirty = true;
-      notifyListeners();
-      await persistence
-          .setLastIndexSyncAt(DateTime.now().millisecondsSinceEpoch);
-      _persistRemotePaths(newRemoteAssets);
-    }).catchError((e) {
-      print("[AssetModel] Background sync error: $e");
-    });
+    }
+    remoteAssets = newRemoteAssets;
+    _unifiedDirty = true;
+    notifyListeners();
+    await _persistRemotePaths(newRemoteAssets);
   }
 
   Future<void> _persistRemotePaths(List<Asset> assets) async {
@@ -505,16 +574,16 @@ class AssetModel extends ChangeNotifier {
     }
 
     final newpath = await allPath.fetchPathProperties(
-        filterOptionGroup: FilterOptionGroup(
-      orders: [
-        const OrderOption(
-          type: OrderOptionType.createDate,
-          asc: false,
-        ),
-      ],
-    ));
-    final List<AssetEntity> entities = await newpath!
-        .getAssetListRange(start: offset, end: offset + pageSize);
+      filterOptionGroup: FilterOptionGroup(
+        orders: [
+          const OrderOption(type: OrderOptionType.createDate, asc: false),
+        ],
+      ),
+    );
+    final List<AssetEntity> entities = await newpath!.getAssetListRange(
+      start: offset,
+      end: offset + pageSize,
+    );
     if (entities.length < pageSize) {
       localHasMore = false;
     }
@@ -606,8 +675,9 @@ Future<void> scanFile(String filePath) async {
         'mimeType': mimeType,
       };
 
-      await const MethodChannel('com.traftai.lumina/RunGrpcServer')
-          .invokeMethod('scanFile', params);
+      await const MethodChannel(
+        'com.traftai.lumina/RunGrpcServer',
+      ).invokeMethod('scanFile', params);
     } on PlatformException catch (e) {
       print('Failed to scan file $filePath: ${e.message}');
     }
@@ -645,8 +715,9 @@ Future<void> refreshUnsynchronizedPhotos({bool force = false}) async {
   try {
     final ids = await engine.findNotUploadedIds();
     stateModel.setNotSyncedPhotos(ids);
-    await persistence
-        .setLastUnsyncedRefreshAt(DateTime.now().millisecondsSinceEpoch);
+    await persistence.setLastUnsyncedRefreshAt(
+      DateTime.now().millisecondsSinceEpoch,
+    );
     await persistence.setCachedNotSyncedIDs(ids);
   } catch (e) {
     print('Error: $e');

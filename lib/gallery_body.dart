@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:lumina/proto/lumina.pb.dart';
 import 'package:lumina/state_model.dart';
@@ -27,11 +26,13 @@ import 'package:local_auth/local_auth.dart';
 
 enum GalleryViewMode { years, months, all }
 
+const int _autoSyncBatchLimit = 20;
+
 class GalleryBody extends StatefulWidget {
   final GalleryViewMode viewMode;
 
   const GalleryBody({Key? key, this.viewMode = GalleryViewMode.all})
-      : super(key: key);
+    : super(key: key);
 
   @override
   GalleryBodyState createState() => GalleryBodyState();
@@ -65,11 +66,11 @@ class GalleryBodyState extends State<GalleryBody>
     _scrollSubject.stream
         .debounceTime(const Duration(milliseconds: 150))
         .listen((_) {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 4000) {
-        getPhotos();
-      }
-    });
+          if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 4000) {
+            getPhotos();
+          }
+        });
     _scrollController.addListener(() {
       _scrollSubject.add(_scrollController.position.pixels);
       if (_scrollController.offset > 1000 && !_showToTopBtn) {
@@ -124,7 +125,7 @@ class GalleryBodyState extends State<GalleryBody>
   void toggleSelection(String id) async {
     if (Platform.isAndroid || Platform.isIOS) {
       final hasVibrator = await Vibration.hasVibrator();
-      if (hasVibrator!) {
+      if (hasVibrator == true) {
         Vibration.vibrate(duration: 10);
       }
     }
@@ -154,8 +155,10 @@ class GalleryBodyState extends State<GalleryBody>
       if (assetModel.remoteGetting != null) return;
       // Wait until remote photos have been fetched at least once
       if (assetModel.remoteAssets.isEmpty && assetModel.remoteHasMore) return;
-      final unsynced = assetModel.getUnifiedAssets()
+      final unsynced = assetModel
+          .getUnifiedAssets()
           .where((a) => a.hasLocal && !a.hasRemote)
+          .take(_autoSyncBatchLimit)
           .toList();
       if (unsynced.isEmpty) return;
       _runAutoSync(unsynced);
@@ -203,8 +206,9 @@ class GalleryBodyState extends State<GalleryBody>
     if (_isDeleting) return;
     _isDeleting = true;
     final all = assetModel.getUnifiedAssets();
-    final toDelete =
-        all.where((a) => _selectedIds.contains(a.stableId())).toList();
+    final toDelete = all
+        .where((a) => _selectedIds.contains(a.stableId()))
+        .toList();
     clearSelection();
     final localToDelete = toDelete.where((e) => e.hasLocal).toList();
     final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
@@ -218,13 +222,16 @@ class GalleryBodyState extends State<GalleryBody>
     () async {
       try {
         if (localToDelete.isNotEmpty) {
-          await PhotoManager.editor
-              .deleteWithIds(localToDelete.map((e) => e.local!.id).toList());
+          await PhotoManager.editor.deleteWithIds(
+            localToDelete.map((e) => e.local!.id).toList(),
+          );
         }
         if (remoteToDelete.isNotEmpty) {
-          await storage.cli.moveToTrash(MoveToTrashRequest(
-            paths: remoteToDelete.map((e) => e.remote!.path).toList(),
-          ));
+          await storage.cli.moveToTrash(
+            MoveToTrashRequest(
+              paths: remoteToDelete.map((e) => e.remote!.path).toList(),
+            ),
+          );
         }
       } catch (e) {
         SnackBarManager.showSnackBar(e.toString());
@@ -237,18 +244,33 @@ class GalleryBodyState extends State<GalleryBody>
       return;
     }
     final all = assetModel.getUnifiedAssets();
-    final assets =
-        all.where((a) => _selectedIds.contains(a.stableId())).toList();
+    final assets = all
+        .where((a) => _selectedIds.contains(a.stableId()))
+        .toList();
     List<XFile> xfiles = [];
     for (var asset in assets) {
-      final data = await asset.imageDataAsync();
-      xfiles.add(XFile.fromData(
-        data,
-        name: asset.name(),
-        mimeType: asset.mimeType(),
-      ));
+      final name = asset.name();
+      if (name == null || name.isEmpty) continue;
+      if (asset.isCloudOnly && asset.remote != null) {
+        final tempDir = await getTemporaryDirectory();
+        final savePath = '${tempDir.path}/$name';
+        await asset.remote!.downloadToFile(savePath);
+        xfiles.add(XFile(savePath, name: name, mimeType: asset.mimeType()));
+      } else {
+        final file = await asset.getLocalFile();
+        if (file != null) {
+          xfiles.add(XFile(file.path, name: name, mimeType: asset.mimeType()));
+        } else {
+          final data = await asset.imageDataAsync();
+          xfiles.add(
+            XFile.fromData(data, name: name, mimeType: asset.mimeType()),
+          );
+        }
+      }
     }
-    SharePlus.instance.share(ShareParams(files: xfiles));
+    if (xfiles.isNotEmpty) {
+      SharePlus.instance.share(ShareParams(files: xfiles));
+    }
   }
 
   void downloadSelected() async {
@@ -269,23 +291,17 @@ class GalleryBodyState extends State<GalleryBody>
         if (asset.name() == null) {
           continue;
         }
-        Uint8List data;
-        if (!asset.isVideo()) {
-          data = await asset.imageDataAsync();
-        } else {
-          data = await asset.remote!.imageData();
-        }
         if (Platform.isAndroid) {
           final absPath = '${settingModel.localFolderAbsPath}/${asset.name()}';
+          await asset.remote!.downloadToFile(absPath);
           final file = File(absPath);
-          await file.writeAsBytes(data);
           await file.setLastModified(asset.dateCreated());
           await scanFile(absPath);
         } else if (Platform.isIOS) {
           var appDocDir = await getTemporaryDirectory();
           String savePath = "${appDocDir.path}/${asset.name()}";
+          await asset.remote!.downloadToFile(savePath);
           final file = File(savePath);
-          await file.writeAsBytes(data);
           await file.setLastModified(asset.dateCreated());
           await Gal.putImage(savePath);
         }
@@ -327,7 +343,8 @@ class GalleryBodyState extends State<GalleryBody>
       await Future.delayed(Duration.zero);
     }
     SnackBarManager.showSnackBar(
-        "${l10n.successfullyUpload} $uploaded ${l10n.photos}");
+      "${l10n.successfullyUpload} $uploaded ${l10n.photos}",
+    );
     eventBus.fire(RemoteRefreshEvent());
   }
 
@@ -342,28 +359,34 @@ class GalleryBodyState extends State<GalleryBody>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                _selectionBarButton(Icons.close, l10n.cancel, clearSelection),
                 _selectionBarButton(
-                    Icons.close, l10n.cancel, clearSelection),
+                  Icons.share_outlined,
+                  l10n.share,
+                  _shareAsset,
+                ),
                 _selectionBarButton(
-                    Icons.share_outlined, l10n.share, _shareAsset),
-                _selectionBarButton(Icons.delete_outline, l10n.delete,
-                    () => _deleteSelected()),
+                  Icons.delete_outline,
+                  l10n.delete,
+                  () => _deleteSelected(),
+                ),
                 _selectionBarButton(
-                    Icons.lock_outline,
-                    l10n.moveToLockedFolder,
-                    _moveToLockedFolder),
+                  Icons.lock_outline,
+                  l10n.moveToLockedFolder,
+                  _moveToLockedFolder,
+                ),
                 _selectionBarButton(
-                    Icons.cloud_upload_outlined,
-                    l10n.upload,
-                    uploadSelected,
-                    isEnable: !model.isDownloading() &&
-                        !model.isUploading()),
+                  Icons.cloud_upload_outlined,
+                  l10n.upload,
+                  uploadSelected,
+                  isEnable: !model.isDownloading() && !model.isUploading(),
+                ),
                 _selectionBarButton(
-                    Icons.cloud_download_outlined,
-                    l10n.download,
-                    downloadSelected,
-                    isEnable: !model.isDownloading() &&
-                        !model.isUploading()),
+                  Icons.cloud_download_outlined,
+                  l10n.download,
+                  downloadSelected,
+                  isEnable: !model.isDownloading() && !model.isUploading(),
+                ),
               ],
             ),
           ),
@@ -373,8 +396,11 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   Widget _selectionBarButton(
-      IconData icon, String text, Function()? onTap,
-      {bool isEnable = true}) {
+    IconData icon,
+    String text,
+    Function()? onTap, {
+    bool isEnable = true,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     return InkResponse(
       containedInkWell: true,
@@ -395,12 +421,15 @@ class GalleryBodyState extends State<GalleryBody>
                   : colorScheme.onSurface.withAlpha(97),
             ),
             const SizedBox(height: 4),
-            Text(text,
-                style: TextStyle(
-                    color: isEnable
-                        ? colorScheme.onSurface
-                        : colorScheme.onSurface.withAlpha(97),
-                    fontSize: 12)),
+            Text(
+              text,
+              style: TextStyle(
+                color: isEnable
+                    ? colorScheme.onSurface
+                    : colorScheme.onSurface.withAlpha(97),
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
       ),
@@ -428,7 +457,8 @@ class GalleryBodyState extends State<GalleryBody>
               });
               Navigator.of(context).pop();
               SnackBarManager.showSnackBar(
-                  '${l10n.delete} ${uploaded.length} ${l10n.photos}.');
+                '${l10n.delete} ${uploaded.length} ${l10n.photos}.',
+              );
             },
             child: Text(l10n.yes),
           ),
@@ -442,7 +472,9 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   Future<bool> _tryBiometricAuth() async {
-    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return false;
+    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) {
+      return false;
+    }
     final localAuth = LocalAuthentication();
     try {
       final canCheck = await localAuth.canCheckBiometrics;
@@ -480,8 +512,14 @@ class GalleryBodyState extends State<GalleryBody>
           decoration: InputDecoration(hintText: l10n.enterPin),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
-          TextButton(onPressed: () => Navigator.pop(ctx, controller.text == correctPin), child: Text(l10n.yes)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text == correctPin),
+            child: Text(l10n.yes),
+          ),
         ],
       ),
     );
@@ -489,7 +527,9 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void _moveToLockedFolder() async {
-    print("_moveToLockedFolder called, isSelectionMode: ${stateModel.isSelectionMode}");
+    print(
+      "_moveToLockedFolder called, isSelectionMode: ${stateModel.isSelectionMode}",
+    );
     if (!stateModel.isSelectionMode) return;
 
     // Try biometric auth first
@@ -525,8 +565,9 @@ class GalleryBodyState extends State<GalleryBody>
 
   void _performMoveToLockedFolder() async {
     final all = assetModel.getUnifiedAssets();
-    final assets =
-        all.where((a) => _selectedIds.contains(a.stableId())).toList();
+    final assets = all
+        .where((a) => _selectedIds.contains(a.stableId()))
+        .toList();
 
     if (assets.isEmpty) {
       SnackBarManager.showSnackBar(l10n.noPhotosSelected);
@@ -535,7 +576,10 @@ class GalleryBodyState extends State<GalleryBody>
     }
 
     // Delete local copies
-    final localIds = assets.where((e) => e.hasLocal).map((e) => e.local!.id).toList();
+    final localIds = assets
+        .where((e) => e.hasLocal)
+        .map((e) => e.local!.id)
+        .toList();
     if (localIds.isNotEmpty) {
       try {
         await PhotoManager.editor.deleteWithIds(localIds);
@@ -545,10 +589,15 @@ class GalleryBodyState extends State<GalleryBody>
     }
 
     // Move remote copies to locked folder on server
-    final remotePaths = assets.where((e) => e.hasRemote).map((e) => e.remote!.path).toList();
+    final remotePaths = assets
+        .where((e) => e.hasRemote)
+        .map((e) => e.remote!.path)
+        .toList();
     if (remotePaths.isNotEmpty) {
       try {
-        final rsp = await storage.cli.moveToLocked(MoveToLockedRequest(paths: remotePaths));
+        final rsp = await storage.cli.moveToLocked(
+          MoveToLockedRequest(paths: remotePaths),
+        );
         if (!rsp.success) {
           print("Move to locked failed: ${rsp.message}");
         }
@@ -560,7 +609,9 @@ class GalleryBodyState extends State<GalleryBody>
     clearSelection();
     eventBus.fire(LocalRefreshEvent());
     eventBus.fire(RemoteRefreshEvent());
-    SnackBarManager.showSnackBar('${assets.length} ${l10n.photos} ${l10n.moveToLockedFolder}');
+    SnackBarManager.showSnackBar(
+      '${assets.length} ${l10n.photos} ${l10n.moveToLockedFolder}',
+    );
   }
 
   Widget _buildToolbar() {
@@ -573,7 +624,11 @@ class GalleryBodyState extends State<GalleryBody>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Image.asset('assets/icon/lumina_icon_transparent.png', width: 36, height: 36),
+                Image.asset(
+                  'assets/icon/lumina_icon_transparent.png',
+                  width: 36,
+                  height: 36,
+                ),
                 const Spacer(),
                 Consumer<AssetModel>(
                   builder: (context, assetModel, child) {
@@ -594,7 +649,11 @@ class GalleryBodyState extends State<GalleryBody>
                                   color: colorScheme.primary,
                                 ),
                               ),
-                              Icon(Icons.cloud_sync, size: 18, color: colorScheme.primary),
+                              Icon(
+                                Icons.cloud_sync,
+                                size: 18,
+                                color: colorScheme.primary,
+                              ),
                             ],
                           ),
                         ),
@@ -620,7 +679,11 @@ class GalleryBodyState extends State<GalleryBody>
                                   color: colorScheme.primary,
                                 ),
                               ),
-                              Icon(Icons.cloud_sync, size: 18, color: colorScheme.primary),
+                              Icon(
+                                Icons.cloud_sync,
+                                size: 18,
+                                color: colorScheme.primary,
+                              ),
                             ],
                           ),
                         ),
@@ -647,14 +710,19 @@ class GalleryBodyState extends State<GalleryBody>
                   },
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   onSelected: (value) {
                     if (value == 'delete_uploaded') {
                       _showDeleteUploadedDialog(context);
                     } else if (value == 'settings') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SettingBody()),
+                        MaterialPageRoute(
+                          builder: (context) => const SettingBody(),
+                        ),
                       );
                     }
                   },
@@ -787,8 +855,10 @@ class GalleryBodyState extends State<GalleryBody>
     final all = model.getUnifiedAssets();
     final colorScheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).languageCode;
-    final dateFormat =
-        DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE', locale);
+    final dateFormat = DateFormat(
+      'yyyy MMMM d${l10n.chineseday}  EEEEE',
+      locale,
+    );
 
     final slivers = <Widget>[];
     int cursor = 0;
@@ -816,73 +886,76 @@ class GalleryBodyState extends State<GalleryBody>
       }
       cursor = scan;
 
-      slivers.add(SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-          child: Text(
-            dateFormat.format(dayDate),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+            child: Text(
+              dateFormat.format(dayDate),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ),
-      ));
+      );
 
-      slivers.add(SliverPadding(
-        padding: EdgeInsets.zero,
-        sliver: SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columCount,
-            mainAxisSpacing: 2,
-            crossAxisSpacing: 2,
-            childAspectRatio: 1,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, localIndex) {
-              final globalIndex = dayItems[localIndex];
-              final asset = all[globalIndex];
-              final id = asset.stableId();
-              return _PhotoTile(
-                key: ValueKey(id),
-                asset: asset,
-                isSelected: _selectedIds.contains(id),
-                onTap: () {
-                  if (stateModel.isSelectionMode) {
-                    toggleSelection(id);
-                  } else {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        opaque: false,
-                        transitionDuration:
-                            const Duration(milliseconds: 300),
-                        reverseTransitionDuration:
-                            const Duration(milliseconds: 300),
-                        transitionsBuilder: (_, animation, __, child) =>
-                            FadeTransition(opacity: animation, child: child),
-                        pageBuilder: (_, __, ___) => GalleryViewerRoute(
-                          originIndex: globalIndex,
+      slivers.add(
+        SliverPadding(
+          padding: EdgeInsets.zero,
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columCount,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
+              childAspectRatio: 1,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, localIndex) {
+                final globalIndex = dayItems[localIndex];
+                final asset = all[globalIndex];
+                final id = asset.stableId();
+                return _PhotoTile(
+                  key: ValueKey(id),
+                  asset: asset,
+                  isSelected: _selectedIds.contains(id),
+                  onTap: () {
+                    if (stateModel.isSelectionMode) {
+                      toggleSelection(id);
+                    } else {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          opaque: false,
+                          transitionDuration: const Duration(milliseconds: 300),
+                          reverseTransitionDuration: const Duration(
+                            milliseconds: 300,
+                          ),
+                          transitionsBuilder: (_, animation, __, child) =>
+                              FadeTransition(opacity: animation, child: child),
+                          pageBuilder: (_, __, ___) =>
+                              GalleryViewerRoute(originIndex: globalIndex),
                         ),
-                      ),
-                    );
-                  }
-                },
-                onLongPress: () {
-                  if (!stateModel.isSelectionMode) toggleSelection(id);
-                },
-              );
-            },
-            childCount: dayItems.length,
-            findChildIndexCallback: (key) {
-              final id = (key as ValueKey<String>).value;
-              for (int i = 0; i < dayItems.length; i++) {
-                if (all[dayItems[i]].stableId() == id) return i;
-              }
-              return null;
-            },
+                      );
+                    }
+                  },
+                  onLongPress: () {
+                    if (!stateModel.isSelectionMode) toggleSelection(id);
+                  },
+                );
+              },
+              childCount: dayItems.length,
+              findChildIndexCallback: (key) {
+                final id = (key as ValueKey<String>).value;
+                for (int i = 0; i < dayItems.length; i++) {
+                  if (all[dayItems[i]].stableId() == id) return i;
+                }
+                return null;
+              },
+            ),
           ),
         ),
-      ));
+      );
     }
     slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 80)));
     return slivers;
@@ -916,27 +989,22 @@ class GalleryBodyState extends State<GalleryBody>
           crossAxisSpacing: 4,
           childAspectRatio: 1,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final year = years[index];
-            final info = yearMap[year]!;
-            return _TimeGroupTile(
-              asset: info.asset,
-              label: '$year',
-              count: info.count,
-              colorScheme: colorScheme,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => YearDetailBody(year: year),
-                  ),
-                );
-              },
-            );
-          },
-          childCount: years.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final year = years[index];
+          final info = yearMap[year]!;
+          return _TimeGroupTile(
+            asset: info.asset,
+            label: '$year',
+            count: info.count,
+            colorScheme: colorScheme,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => YearDetailBody(year: year)),
+              );
+            },
+          );
+        }, childCount: years.length),
       ),
     );
   }
@@ -971,32 +1039,30 @@ class GalleryBodyState extends State<GalleryBody>
           crossAxisSpacing: 4,
           childAspectRatio: 1,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final key = keys[index];
-            final year = key ~/ 100;
-            final month = key % 100;
-            final info = monthMap[key]!;
-            final label = DateFormat('MMMM yyyy', locale)
-                .format(DateTime(year, month));
-            return _TimeGroupTile(
-              asset: info.asset,
-              label: label,
-              count: info.count,
-              colorScheme: colorScheme,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        MonthDetailBody(year: year, month: month),
-                  ),
-                );
-              },
-            );
-          },
-          childCount: keys.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final key = keys[index];
+          final year = key ~/ 100;
+          final month = key % 100;
+          final info = monthMap[key]!;
+          final label = DateFormat(
+            'MMMM yyyy',
+            locale,
+          ).format(DateTime(year, month));
+          return _TimeGroupTile(
+            asset: info.asset,
+            label: label,
+            count: info.count,
+            colorScheme: colorScheme,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MonthDetailBody(year: year, month: month),
+                ),
+              );
+            },
+          );
+        }, childCount: keys.length),
       ),
     );
   }
@@ -1012,52 +1078,47 @@ class GalleryBodyState extends State<GalleryBody>
         }
       },
       child: Stack(
-      children: [
-        RefreshIndicator(
-          key: _refreshIndicatorKey,
-          onRefresh: () async {
-            refresh(); // Fire-and-forget, returns immediately
-          },
-          child: Consumer<AssetModel>(
-            builder: (context, model, child) => CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              cacheExtent: 1000,
-              slivers: [
-                _buildToolbar(),
-                _buildSyncPanel(),
-                ..._buildContentSlivers(context, model),
-              ],
+        children: [
+          RefreshIndicator(
+            key: _refreshIndicatorKey,
+            onRefresh: () async {
+              refresh(); // Fire-and-forget, returns immediately
+            },
+            child: Consumer<AssetModel>(
+              builder: (context, model, child) => CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                cacheExtent: 1000,
+                slivers: [
+                  _buildToolbar(),
+                  _buildSyncPanel(),
+                  ..._buildContentSlivers(context, model),
+                ],
+              ),
             ),
           ),
-        ),
-        Positioned(
-          bottom: 80,
-          right: 20,
-          child: Offstage(
-            offstage: !_showToTopBtn,
-            child: FloatingActionButton.small(
-              onPressed: _scrollToTop,
-              heroTag: 'gallery_body_toTop',
-              child: const Icon(Icons.arrow_upward),
+          Positioned(
+            bottom: 80,
+            right: 20,
+            child: Offstage(
+              offstage: !_showToTopBtn,
+              child: FloatingActionButton.small(
+                onPressed: _scrollToTop,
+                heroTag: 'gallery_body_toTop',
+                child: const Icon(Icons.arrow_upward),
+              ),
             ),
           ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: _buildSelectionBar(),
-        ),
-        if (_isDeleting)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black26,
-              child: const Center(child: CircularProgressIndicator()),
+          Positioned(left: 0, right: 0, bottom: 0, child: _buildSelectionBar()),
+          if (_isDeleting)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black26,
+                child: const Center(child: CircularProgressIndicator()),
+              ),
             ),
-          ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 }
@@ -1110,9 +1171,12 @@ class _PhotoTileState extends State<_PhotoTile> {
       _loaded = true;
       return;
     }
-    widget.asset.thumbnailDataAsync().then((_) {
-      if (mounted) setState(() => _loaded = true);
-    }).catchError((_) {});
+    widget.asset
+        .thumbnailDataAsync()
+        .then((_) {
+          if (mounted) setState(() => _loaded = true);
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -1155,7 +1219,8 @@ class _PhotoTileState extends State<_PhotoTile> {
             child: Consumer<StateModel>(
               builder: (context, model, child) {
                 final a = widget.asset;
-                if (a.hasLocal && a.local != null &&
+                if (a.hasLocal &&
+                    a.local != null &&
                     model.uploadProgress.containsKey(a.local!.id)) {
                   return SizedBox(
                     width: 16,
@@ -1180,8 +1245,11 @@ class _PhotoTileState extends State<_PhotoTile> {
                   );
                 }
                 if (a.isCloudOnly) {
-                  return const Icon(Icons.cloud_outlined,
-                      size: 14, color: Colors.white);
+                  return const Icon(
+                    Icons.cloud_outlined,
+                    size: 14,
+                    color: Colors.white,
+                  );
                 }
                 return const SizedBox.shrink();
               },
@@ -1272,8 +1340,7 @@ class _TimeGroupTileState extends State<_TimeGroupTile> {
                     image: widget.asset.thumbnailProvider(),
                     fit: BoxFit.cover,
                   )
-                : Container(
-                    color: widget.colorScheme.surfaceContainerHighest),
+                : Container(color: widget.colorScheme.surfaceContainerHighest),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -1299,9 +1366,7 @@ class _TimeGroupTileState extends State<_TimeGroupTile> {
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      shadows: [
-                        Shadow(blurRadius: 4, color: Colors.black54)
-                      ],
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
                     ),
                   ),
                   Text(
@@ -1310,7 +1375,7 @@ class _TimeGroupTileState extends State<_TimeGroupTile> {
                       color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 12,
                       shadows: const [
-                        Shadow(blurRadius: 4, color: Colors.black54)
+                        Shadow(blurRadius: 4, color: Colors.black54),
                       ],
                     ),
                   ),

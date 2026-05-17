@@ -154,18 +154,8 @@ func (d *S3Drive) Upload(path string, reader io.ReadCloser, size int64, lastModi
 	}
 	key := d.fullKey(path)
 
-	// The AWS SDK v2 needs a seekable body to compute request checksums.
-	// Callers typically pass io.NopCloser(bytes.Reader) which hides Seek.
-	// If the reader isn't seekable, buffer it so PutObject works correctly.
-	var body io.Reader = reader
-	if _, ok := reader.(io.ReadSeeker); !ok {
-		data, err := io.ReadAll(reader)
-		if err != nil {
-			return fmt.Errorf("read upload body: %w", err)
-		}
-		size = int64(len(data))
-		body = readSeekCloser{bytes.NewReader(data)}
-	}
+	// Stream the request body directly to avoid buffering large media files.
+	body := reader
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
@@ -324,13 +314,13 @@ type s3FileInfo struct {
 	isDir   bool
 }
 
-func (f *s3FileInfo) Name() string             { return f.name }
-func (f *s3FileInfo) Size() int64              { return f.size }
-func (f *s3FileInfo) Mode() fs.FileMode        { return 0444 }
-func (f *s3FileInfo) ModTime() time.Time       { return f.modTime }
-func (f *s3FileInfo) IsDir() bool              { return f.isDir }
-func (f *s3FileInfo) Sys() interface{}         { return nil }
-func (f *s3FileInfo) Type() fs.FileMode        { return f.Mode().Type() }
+func (f *s3FileInfo) Name() string               { return f.name }
+func (f *s3FileInfo) Size() int64                { return f.size }
+func (f *s3FileInfo) Mode() fs.FileMode          { return 0444 }
+func (f *s3FileInfo) ModTime() time.Time         { return f.modTime }
+func (f *s3FileInfo) IsDir() bool                { return f.isDir }
+func (f *s3FileInfo) Sys() interface{}           { return nil }
+func (f *s3FileInfo) Type() fs.FileMode          { return f.Mode().Type() }
 func (f *s3FileInfo) Info() (fs.FileInfo, error) { return f, nil }
 
 var _ fs.DirEntry = (*s3FileInfo)(nil)

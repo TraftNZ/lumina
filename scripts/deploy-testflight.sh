@@ -45,13 +45,15 @@ IPA_DIR="$PROJECT_DIR/build/ios/ipa"
 EXPORT_OPTIONS="$PROJECT_DIR/ios/ExportOptions.plist"
 ENV_FILE="$PROJECT_DIR/.env"
 
+cd "$PROJECT_DIR"
+
 #──────────────────────────────────────────────────────────────
 # Load .env (KEYCHAIN_PASSWORD, optional API keys)
 #──────────────────────────────────────────────────────────────
 if [ -f "$ENV_FILE" ]; then
   set -a
   # shellcheck disable=SC1090
-  source "$ENV_FILE"
+  . "$ENV_FILE"
   set +a
 fi
 
@@ -70,6 +72,7 @@ step "Pre-flight checks"
 
 command -v flutter >/dev/null || fail "flutter not found in PATH"
 command -v xcrun   >/dev/null || fail "xcrun not found — install Xcode"
+command -v python3 >/dev/null || fail "python3 not found in PATH"
 [ -f "$EXPORT_OPTIONS" ] || fail "ios/ExportOptions.plist not found"
 
 ok "All tools available"
@@ -80,17 +83,43 @@ ok "All tools available"
 step "Incrementing build number"
 
 PUBSPEC="$PROJECT_DIR/pubspec.yaml"
-CURRENT_VERSION=$(grep '^version:' "$PUBSPEC" | sed 's/version: //')
+CURRENT_VERSION=$(python3 - "$PUBSPEC" <<'PY'
+from pathlib import Path
+import sys
+
+for line in Path(sys.argv[1]).read_text().splitlines():
+    if line.startswith("version:"):
+        print(line.split(":", 1)[1].strip())
+        break
+PY
+)
+[ -n "$CURRENT_VERSION" ] || fail "Could not read version from pubspec.yaml"
 BUILD_NAME=$(echo "$CURRENT_VERSION" | cut -d'+' -f1)
 if [[ "$CURRENT_VERSION" == *"+"* ]]; then
   BUILD_NUMBER=$(echo "$CURRENT_VERSION" | cut -d'+' -f2)
 else
   BUILD_NUMBER=0
 fi
+[[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || fail "Build number must be numeric in pubspec.yaml version: $CURRENT_VERSION"
 NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
 NEW_VERSION="${BUILD_NAME}+${NEW_BUILD_NUMBER}"
 
-sed -i '' "s/^version: .*/version: ${NEW_VERSION}/" "$PUBSPEC"
+python3 - "$PUBSPEC" "$NEW_VERSION" <<'PY'
+from pathlib import Path
+import sys
+
+pubspec = Path(sys.argv[1])
+new_version = sys.argv[2]
+lines = pubspec.read_text().splitlines(keepends=True)
+for index, line in enumerate(lines):
+    if line.startswith("version:"):
+        ending = "\n" if line.endswith("\n") else ""
+        lines[index] = f"version: {new_version}{ending}"
+        break
+else:
+    raise SystemExit("version field not found in pubspec.yaml")
+pubspec.write_text("".join(lines))
+PY
 ok "Version: $BUILD_NAME (build $NEW_BUILD_NUMBER)"
 
 #──────────────────────────────────────────────────────────────
@@ -133,7 +162,7 @@ step "Locating IPA"
 API_KEY_ID="${APP_STORE_CONNECT_KEY_ID:-8NHAT5UHHV}"
 API_ISSUER_ID="${APP_STORE_CONNECT_ISSUER_ID:-42725b04-be15-4f93-8b52-c22bb46da07f}"
 
-IPA_PATH=$(find "$IPA_DIR" -name "*.ipa" -type f 2>/dev/null | head -1)
+IPA_PATH=$(find "$IPA_DIR" -name "*.ipa" -type f -print -quit 2>/dev/null || true)
 [ -f "$IPA_PATH" ] || fail "IPA not found in $IPA_DIR — flutter build ipa may have failed"
 
 ok "IPA ready: $IPA_PATH"

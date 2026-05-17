@@ -16,6 +16,11 @@ import 'package:extended_image/extended_image.dart';
 import 'package:lumina/global.dart';
 
 class Asset extends ImageProvider<Asset> {
+  static final DateTime _minimumReliableDate = DateTime(1990, 1, 1);
+  static const Duration _recentDateWindow = Duration(days: 30);
+  static const Duration _significantDateDifference = Duration(days: 1);
+  static const int _maxCachedImageBytes = 10 * 1024 * 1024;
+
   bool hasLocal = false;
   bool hasRemote = false;
   AssetEntity? local;
@@ -75,10 +80,74 @@ class Asset extends ImageProvider<Asset> {
   String? get dedupKey {
     final n = originalName;
     if (n == null || n.isEmpty) return null;
-    final d = dateCreated();
+    final d = _dedupDate(n);
     return "${d.year.toString().padLeft(4, '0')}-"
         "${d.month.toString().padLeft(2, '0')}-"
         "${d.day.toString().padLeft(2, '0')}_$n";
+  }
+
+  static final List<RegExp> _filenameDatePatterns = [
+    RegExp(
+      r'(?:VID|IMG|PXL|Screenshot|MVIMG|PANO)_(\d{4})(\d{2})(\d{2})[_-](\d{2})(\d{2})(\d{2})',
+    ),
+    RegExp(r'(\d{4})(\d{2})(\d{2})[_-](\d{2})(\d{2})(\d{2})'),
+  ];
+
+  DateTime _dedupDate(String name) {
+    final assetDate = dateCreated();
+    if (!hasLocal) return assetDate;
+    final filenameDate = _dateFromFilename(name);
+    if (filenameDate == null) return assetDate;
+    if (_dateLooksSuspicious(assetDate) ||
+        (local?.type == AssetType.video &&
+            _dateDiffSignificant(assetDate, filenameDate))) {
+      return filenameDate;
+    }
+    return assetDate;
+  }
+
+  DateTime? _dateFromFilename(String name) {
+    for (final pattern in _filenameDatePatterns) {
+      final match = pattern.firstMatch(name);
+      if (match == null) continue;
+      final year = int.tryParse(match.group(1) ?? '');
+      final month = int.tryParse(match.group(2) ?? '');
+      final day = int.tryParse(match.group(3) ?? '');
+      final hour = int.tryParse(match.group(4) ?? '');
+      final minute = int.tryParse(match.group(5) ?? '');
+      final second = int.tryParse(match.group(6) ?? '');
+      if (year == null ||
+          month == null ||
+          day == null ||
+          hour == null ||
+          minute == null ||
+          second == null) {
+        continue;
+      }
+      final date = DateTime(year, month, day, hour, minute, second);
+      if (date.year == year &&
+          date.month == month &&
+          date.day == day &&
+          date.hour == hour &&
+          date.minute == minute &&
+          date.second == second &&
+          !date.isBefore(_minimumReliableDate)) {
+        return date;
+      }
+    }
+    return null;
+  }
+
+  bool _dateLooksSuspicious(DateTime date) {
+    if (date.isBefore(_minimumReliableDate)) return true;
+    final now = DateTime.now();
+    if (date.isAfter(now)) return true;
+    return date.year == now.year &&
+        date.isAfter(now.subtract(_recentDateWindow));
+  }
+
+  bool _dateDiffSignificant(DateTime a, DateTime b) {
+    return a.difference(b).abs() > _significantDateDifference;
   }
 
   String stableId() {
@@ -268,8 +337,10 @@ class Asset extends ImageProvider<Asset> {
     _thumbnailDataCompleter = Completer<Uint8List>();
     Uint8List? data;
     if (hasLocal && local != null) {
-      data = await local!
-          .thumbnailDataWithSize(const ThumbnailSize.square(200), quality: 80);
+      data = await local!.thumbnailDataWithSize(
+        const ThumbnailSize.square(200),
+        quality: 80,
+      );
     }
     if (hasRemote && remote != null) {
       data = await remote!.thumbnail();
@@ -304,8 +375,9 @@ class Asset extends ImageProvider<Asset> {
         if (local!.type == AssetType.image) {
           data = await local!.originBytes;
         } else if (local!.type == AssetType.video) {
-          data = await local!
-              .thumbnailDataWithSize(const ThumbnailSize.square(800));
+          data = await local!.thumbnailDataWithSize(
+            const ThumbnailSize.square(800),
+          );
         }
       }
       if (hasRemote) {
@@ -325,7 +397,11 @@ class Asset extends ImageProvider<Asset> {
       return brokenData.buffer.asUint8List();
     } else {
       _dataAsyncCompleter!.complete(data);
-      _data = data;
+      if (data.lengthInBytes <= _maxCachedImageBytes) {
+        _data = data;
+      } else {
+        _dataAsyncCompleter = null;
+      }
       return data;
     }
   }
@@ -412,7 +488,8 @@ class Asset extends ImageProvider<Asset> {
               if (v != "") {
                 try {
                   DateTime dateTime = DateTime.parse(
-                      v.replaceAll(':', '').replaceAll(' ', 'T'));
+                    v.replaceAll(':', '').replaceAll(' ', 'T'),
+                  );
                   DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
                   date = dateFormat.format(dateTime);
                 } catch (e) {

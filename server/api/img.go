@@ -12,6 +12,7 @@ import (
 
 	pb "github.com/traftai/lumina/proto"
 	"github.com/traftai/lumina/server/imgmanager"
+	"github.com/traftai/lumina/server/localstore"
 )
 
 type api struct {
@@ -62,31 +63,45 @@ func (a *api) Delete(ctx context.Context, req *pb.DeleteRequest) (rsp *pb.Delete
 // uuidPrefixRe matches a UUID prefix added by Cloudreve for version uploads
 // e.g. "7f4110d3-cbe9-4321-bb77-6536363abec5_20200723..."
 var uuidPrefixRe = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_`)
+var encodedHashRe = regexp.MustCompile(`^\d{14}_([a-f0-9]{16})_`)
+var encodedNameRe = regexp.MustCompile(`^\d{14}_(?:[a-f0-9]{16}_)?(.+)$`)
+
+func originalNameDateKey(t time.Time, name string) string {
+	return t.Format("2006-01-02") + "_" + name
+}
+
+func addRemoteLookupKeys(path string, names map[string]bool, originalNames map[string]bool, hashes map[string]bool) {
+	name := filepath.Base(path)
+	names[name] = true
+	stripped := uuidPrefixRe.ReplaceAllString(name, "")
+	if stripped != name {
+		names[stripped] = true
+	}
+	if matches := encodedNameRe.FindStringSubmatch(stripped); len(matches) == 2 {
+		if t := localstore.ParseDateFromPath(path); !t.IsZero() {
+			originalNames[originalNameDateKey(t, matches[1])] = true
+		}
+	}
+	if matches := encodedHashRe.FindStringSubmatch(stripped); len(matches) == 2 {
+		hashes[matches[1]] = true
+	}
+}
 
 func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error {
 	all := make(map[string]bool)
+	allOriginalNames := make(map[string]bool)
+	allHashes := make(map[string]bool)
 	// Use local store cache (instant) instead of RangeByDate (slow directory traversal)
 	store := a.im.Store()
 	if store != nil {
 		for _, f := range store.ListRemoteFiles() {
-			name := filepath.Base(f.Path)
-			all[name] = true
-			// Also index without UUID prefix (from Cloudreve version uploads)
-			stripped := uuidPrefixRe.ReplaceAllString(name, "")
-			if stripped != name {
-				all[stripped] = true
-			}
+			addRemoteLookupKeys(f.Path, all, allOriginalNames, allHashes)
 		}
 	}
 	if len(all) == 0 {
 		// Fallback to RangeByDate if store is empty
 		if err := a.im.RangeByDate(time.Now(), func(path string, size int64) bool {
-			name := filepath.Base(path)
-			all[name] = true
-			stripped := uuidPrefixRe.ReplaceAllString(name, "")
-			if stripped != name {
-				all[stripped] = true
-			}
+			addRemoteLookupKeys(path, all, allOriginalNames, allHashes)
 			return true
 		}); err != nil {
 			log.Printf("FilterNotUploaded: RangeByDate failed: %v", err)
@@ -110,7 +125,10 @@ func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error 
 				continue
 			}
 			found := false
-			if info.ContentHash != "" {
+			if len(info.ContentHash) >= 16 {
+				found = allHashes[info.ContentHash[:16]]
+			}
+			if !found && info.ContentHash != "" {
 				found = all[encodeName(t, info.Name, info.ContentHash)]
 			}
 			if !found {
@@ -120,7 +138,7 @@ func (a *api) FilterNotUploaded(stream pb.Lumina_FilterNotUploadedServer) error 
 				found = all[legacyEncodeName(t, info.Name)]
 			}
 			if !found {
-				found = all[info.Name]
+				found = allOriginalNames[originalNameDateKey(t, info.Name)]
 			}
 			if !found {
 				rsp.NotUploaedIDs = append(rsp.NotUploaedIDs, info.Id)

@@ -5,7 +5,6 @@ import 'package:lumina/sync_timer.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
 import 'package:lumina/sync_state_persistence.dart';
-import 'package:lumina/ml_indexer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lumina/logger.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -74,9 +73,6 @@ class Global {
       // Don't await initDrive — if Cloudreve server is unreachable, this can
       // hang for 30s+. Let it run in background so the UI loads immediately.
       initDrive().catchError((e) => print("initDrive error: $e"));
-      if (Platform.isAndroid || Platform.isIOS) {
-        initMLIndexer();
-      }
       reloadAutoSyncTimer();
     });
   }

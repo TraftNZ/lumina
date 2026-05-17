@@ -20,11 +20,12 @@ import (
 )
 
 const (
-	defaultWorkerNum    = 2
-	defaultThumbnailDir = ".thumbnail"
-	defaultTrashDir     = ".trash"
-	defaultLockedDir    = ".locked"
-	trashAutoDeleteDays = 30
+	defaultWorkerNum           = 2
+	defaultThumbnailDir        = ".thumbnail"
+	defaultTrashDir            = ".trash"
+	defaultLockedDir           = ".locked"
+	trashAutoDeleteDays        = 30
+	maxBufferedImageUploadSize = 50 << 20
 )
 
 type TrashItem struct {
@@ -179,6 +180,27 @@ func (im *ImgManager) UploadVideo(content io.Reader, contentSize int64, name str
 func (im *ImgManager) UploadImg(content io.Reader, contentSize int64, name string, date time.Time) error {
 	if content == nil {
 		return fmt.Errorf("no image data")
+	}
+	if contentSize > maxBufferedImageUploadSize {
+		if fnDate, ok := extractDateFromOriginalName(name); ok {
+			if date.IsZero() || dateLooksSuspicious(date) || dateDiffSignificant(date, fnDate) {
+				date = fnDate
+				name = reEncodeName(name, date)
+			}
+		}
+		if date.Before(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)) || date.IsZero() {
+			date = time.Now()
+		}
+		path := filepath.Join(date.Format("2006/01/02"), name)
+		err := im.dri.Upload(path, io.NopCloser(content), contentSize, date)
+		if err != nil {
+			im.logger.Println("Error uploading image:", err)
+			return err
+		}
+		if im.store != nil {
+			im.store.UpsertRemoteFile(path, contentSize, date)
+		}
+		return nil
 	}
 	data, err := io.ReadAll(content)
 	if err != nil {
@@ -596,7 +618,6 @@ func (im *ImgManager) rangeTrashByDate(date time.Time, f func(path string, size 
 	}
 }
 
-
 // Locked folder functions
 
 func (im *ImgManager) MoveToLocked(path string) error {
@@ -719,7 +740,6 @@ func (im *ImgManager) rangeLockedByDate(date time.Time, f func(path string, size
 		}
 	}
 }
-
 
 func (im *ImgManager) SyncIndex() (int, error) {
 	if im.store == nil {
