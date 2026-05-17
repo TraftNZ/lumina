@@ -13,12 +13,14 @@ import BackgroundTasks
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+    guard let registrar = registrar(forPlugin: "LuminaAppDelegate") else {
+      return false
+    }
 
     // Main gRPC server channel
     let channel = FlutterMethodChannel(
       name: "com.traftai.lumina/RunGrpcServer",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: registrar.messenger()
     )
     channel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -33,7 +35,7 @@ import BackgroundTasks
     // Background sync control channel
     let bgChannel = FlutterMethodChannel(
       name: "com.traftai.lumina/BackgroundSync",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: registrar.messenger()
     )
     bgChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
