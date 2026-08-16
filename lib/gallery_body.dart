@@ -1114,7 +1114,6 @@ class GalleryBodyState extends State<GalleryBody>
     DateFormat dateFormat,
     ColorScheme colorScheme,
   ) {
-    TimelineScrubDiagnostics.recordRowBuild();
     final header = row.header;
     if (header != null) {
       return Padding(
@@ -1164,7 +1163,6 @@ class GalleryBodyState extends State<GalleryBody>
     List<Asset> all,
     int globalIndex,
   ) {
-    TimelineScrubDiagnostics.recordTileBuild();
     final asset = all[globalIndex];
     final id = asset.stableId();
     return _PhotoTile(
@@ -1212,7 +1210,6 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void _ensureTimelineGeometry(_GalleryLayout layout, double width) {
-    final stopwatch = Stopwatch()..start();
     final textScaler = MediaQuery.textScalerOf(context);
     final textStyle = Theme.of(context).textTheme.bodyMedium;
     final fontSize = textStyle?.fontSize ?? 14;
@@ -1223,10 +1220,6 @@ class GalleryBodyState extends State<GalleryBody>
         _timelineGeometryScaledFontSize == scaledFontSize &&
         _timelineGeometryTextStyle == textStyle &&
         _timelineGeometryLocale == locale) {
-      TimelineScrubDiagnostics.recordGeometry(
-        cacheHit: true,
-        microseconds: stopwatch.elapsedMicroseconds,
-      );
       return;
     }
 
@@ -1270,10 +1263,6 @@ class GalleryBodyState extends State<GalleryBody>
     _timelineRowEnds = rowEnds;
     _timelineYearOffsets = yearOffsets;
     _timelineMarkerScrollableExtent = -1;
-    TimelineScrubDiagnostics.recordGeometry(
-      cacheHit: false,
-      microseconds: stopwatch.elapsedMicroseconds,
-    );
   }
 
   DateTime? _timelineDateAt(ScrollMetrics metrics) {
@@ -1463,7 +1452,6 @@ class GalleryBodyState extends State<GalleryBody>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    TimelineScrubDiagnostics.recordGalleryBuild();
     return PopScope(
       canPop: !stateModel.isSelectionMode,
       onPopInvokedWithResult: (didPop, result) {
@@ -1483,7 +1471,6 @@ class GalleryBodyState extends State<GalleryBody>
                 _galleryCrossAxisExtent = constraints.maxWidth;
                 return Consumer<AssetModel>(
                   builder: (context, model, child) {
-                    TimelineScrubDiagnostics.recordAssetConsumerBuild();
                     return TimelineScrollbar(
                       controller: _scrollController,
                       dateForMetrics: _timelineDateAt,
@@ -1642,7 +1629,6 @@ class _PhotoTileState extends State<_PhotoTile> {
       _loaded = true;
       return;
     }
-    TimelineScrubDiagnostics.recordThumbnailStart();
     widget.asset
         .thumbnailDataAsync()
         .then((_) {
@@ -1661,7 +1647,6 @@ class _PhotoTileState extends State<_PhotoTile> {
         widget.asset.loadThumbnailFinished() &&
         (_imageMounted || widget.canLoadThumbnail());
     if (showImage && !_imageMounted) {
-      TimelineScrubDiagnostics.recordImageMount();
       _imageMounted = true;
     }
     return GestureDetector(

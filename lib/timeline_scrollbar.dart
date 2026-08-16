@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 
 typedef TimelineDateForMetrics = DateTime? Function(ScrollMetrics metrics);
 typedef TimelineDateForFraction = DateTime? Function(double scrollFraction);
@@ -21,150 +17,6 @@ class TimelineMarker {
   final double scrollFraction;
 
   const TimelineMarker({required this.year, required this.scrollFraction});
-}
-
-class TimelineScrubDiagnostics {
-  static bool _active = false;
-  static bool _dragging = false;
-  static int _jumps = 0;
-  static int _dragRows = 0;
-  static int _releaseRows = 0;
-  static int _dragTiles = 0;
-  static int _releaseTiles = 0;
-  static int _dragThumbnailStarts = 0;
-  static int _releaseThumbnailStarts = 0;
-  static int _dragImageMounts = 0;
-  static int _releaseImageMounts = 0;
-  static int _galleryBuilds = 0;
-  static int _assetConsumerBuilds = 0;
-  static int _geometryHits = 0;
-  static int _geometryMisses = 0;
-  static final List<int> _updateMicros = [];
-  static final List<int> _geometryMicros = [];
-
-  static void begin() {
-    _active = true;
-    _dragging = true;
-    _jumps = 0;
-    _dragRows = 0;
-    _releaseRows = 0;
-    _dragTiles = 0;
-    _releaseTiles = 0;
-    _dragThumbnailStarts = 0;
-    _releaseThumbnailStarts = 0;
-    _dragImageMounts = 0;
-    _releaseImageMounts = 0;
-    _galleryBuilds = 0;
-    _assetConsumerBuilds = 0;
-    _geometryHits = 0;
-    _geometryMisses = 0;
-    _updateMicros.clear();
-    _geometryMicros.clear();
-  }
-
-  static void endDrag() => _dragging = false;
-
-  static void recordJump() {
-    if (_active) _jumps++;
-  }
-
-  static void recordRowBuild() {
-    if (!_active) return;
-    _dragging ? _dragRows++ : _releaseRows++;
-  }
-
-  static void recordTileBuild() {
-    if (!_active) return;
-    _dragging ? _dragTiles++ : _releaseTiles++;
-  }
-
-  static void recordThumbnailStart() {
-    if (!_active) return;
-    _dragging ? _dragThumbnailStarts++ : _releaseThumbnailStarts++;
-  }
-
-  static void recordImageMount() {
-    if (!_active) return;
-    _dragging ? _dragImageMounts++ : _releaseImageMounts++;
-  }
-
-  static void recordGalleryBuild() {
-    if (_active) _galleryBuilds++;
-  }
-
-  static void recordAssetConsumerBuild() {
-    if (_active) _assetConsumerBuilds++;
-  }
-
-  static void recordUpdate(int microseconds) {
-    if (_active) _updateMicros.add(microseconds);
-  }
-
-  static void recordGeometry({
-    required bool cacheHit,
-    required int microseconds,
-  }) {
-    if (!_active) return;
-    cacheHit ? _geometryHits++ : _geometryMisses++;
-    _geometryMicros.add(microseconds);
-  }
-
-  static Map<String, Object> finish(
-    List<FrameTiming> timings, {
-    required String outcome,
-  }) {
-    _active = false;
-    _dragging = false;
-    final buildMicros =
-        timings.map((timing) => timing.buildDuration.inMicroseconds).toList()
-          ..sort();
-    final rasterMicros =
-        timings.map((timing) => timing.rasterDuration.inMicroseconds).toList()
-          ..sort();
-    final totalMicros =
-        timings.map((timing) => timing.totalSpan.inMicroseconds).toList()
-          ..sort();
-    final updateMicros = List<int>.of(_updateMicros)..sort();
-    final geometryMicros = List<int>.of(_geometryMicros)..sort();
-    int percentile95(List<int> values) =>
-        values.isEmpty ? 0 : values[((values.length - 1) * 0.95).round()];
-    int maximum(List<int> values) => values.isEmpty ? 0 : values.last;
-    int misses(Duration budget) => timings
-        .where(
-          (timing) =>
-              timing.buildDuration > budget || timing.rasterDuration > budget,
-        )
-        .length;
-    return <String, Object>{
-      'recordedAt': DateTime.now().toIso8601String(),
-      'outcome': outcome,
-      'frames': timings.length,
-      'misses8333us': misses(const Duration(microseconds: 8333)),
-      'misses16667us': misses(const Duration(microseconds: 16667)),
-      'buildMaxUs': maximum(buildMicros),
-      'rasterMaxUs': maximum(rasterMicros),
-      'totalP95Us': percentile95(totalMicros),
-      'totalMaxUs': maximum(totalMicros),
-      'updates': updateMicros.length,
-      'updateP95Us': percentile95(updateMicros),
-      'updateMaxUs': maximum(updateMicros),
-      'jumps': _jumps,
-      'galleryBuilds': _galleryBuilds,
-      'assetConsumerBuilds': _assetConsumerBuilds,
-      'geometryHits': _geometryHits,
-      'geometryMisses': _geometryMisses,
-      'geometryP95Us': percentile95(geometryMicros),
-      'geometryMaxUs': maximum(geometryMicros),
-      'dragRows': _dragRows,
-      'releaseRows': _releaseRows,
-      'dragTiles': _dragTiles,
-      'releaseTiles': _releaseTiles,
-      'dragThumbnailStarts': _dragThumbnailStarts,
-      'releaseThumbnailStarts': _releaseThumbnailStarts,
-      'dragImageMounts': _dragImageMounts,
-      'releaseImageMounts': _releaseImageMounts,
-    };
-  }
 }
 
 /// A touch-first timeline scrubber modelled after Google Photos.
@@ -219,9 +71,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
   int? _scrubPointer;
   DateFormat? _dateFormatter;
   String _dateFormatterLocale = '';
-  final List<FrameTiming> _profileFrameTimings = [];
-  Timer? _profileTimer;
-  bool _collectingProfileTimings = false;
 
   @override
   void didUpdateWidget(covariant TimelineScrollbar oldWidget) {
@@ -233,7 +82,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
       if (_scrubbing) widget.onScrubStateChanged?.call(false);
       _scrubbing = false;
       _scrubPointer = null;
-      _flushProfileTrace('preview_disabled');
     } else if (!widget.interactive && oldWidget.interactive) {
       _invalidatePendingJump();
       if (_scrubbing) {
@@ -242,7 +90,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
         _scheduleHide();
       }
       _scrubPointer = null;
-      _flushProfileTrace('interaction_disabled');
     }
   }
 
@@ -251,57 +98,8 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
     _scrubPointer = null;
     _invalidatePendingJump();
     _hideTimer?.cancel();
-    _flushProfileTrace('disposed');
     if (_scrubbing) widget.onScrubStateChanged?.call(false);
     super.dispose();
-  }
-
-  void _recordFrameTimings(List<FrameTiming> timings) {
-    if (_collectingProfileTimings) _profileFrameTimings.addAll(timings);
-  }
-
-  void _beginProfileTrace() {
-    if (!kProfileMode) return;
-    if (_collectingProfileTimings) _flushProfileTrace('superseded');
-    _profileFrameTimings.clear();
-    TimelineScrubDiagnostics.begin();
-    _collectingProfileTimings = true;
-    SchedulerBinding.instance.addTimingsCallback(_recordFrameTimings);
-  }
-
-  void _finishProfileTrace() {
-    if (!kProfileMode || !_collectingProfileTimings) return;
-    TimelineScrubDiagnostics.endDrag();
-    _profileTimer?.cancel();
-    _profileTimer = Timer(
-      const Duration(milliseconds: 700),
-      () => _flushProfileTrace('completed'),
-    );
-  }
-
-  void _flushProfileTrace(String outcome) {
-    _profileTimer?.cancel();
-    if (!kProfileMode || !_collectingProfileTimings) return;
-    _collectingProfileTimings = false;
-    SchedulerBinding.instance.removeTimingsCallback(_recordFrameTimings);
-    final record = TimelineScrubDiagnostics.finish(
-      _profileFrameTimings,
-      outcome: outcome,
-    );
-    debugPrint(jsonEncode(record), wrapWidth: 4000);
-    unawaited(_persistProfileRecord(record));
-  }
-
-  Future<void> _persistProfileRecord(Map<String, Object> record) async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/lumina_scrub_profile.jsonl');
-      await file.writeAsString(
-        '${jsonEncode(record)}\n',
-        mode: FileMode.append,
-        flush: true,
-      );
-    } catch (_) {}
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -359,7 +157,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
 
   void _beginScrub(Offset globalPosition, double height) {
     if (!widget.interactive || !widget.controller.hasClients) return;
-    _beginProfileTrace();
     _lastJumpedFraction = null;
     _hideTimer?.cancel();
     setState(() {
@@ -415,7 +212,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
       _jumpToFraction(pendingFraction);
     }
     widget.onScrubStateChanged?.call(false);
-    _finishProfileTrace();
     _scheduleHide();
   }
 
@@ -424,7 +220,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
     _invalidatePendingJump();
     setState(() => _scrubbing = false);
     widget.onScrubStateChanged?.call(false);
-    _finishProfileTrace();
     _scheduleHide();
   }
 
@@ -444,7 +239,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
   }
 
   void _requestJumpToFraction(double fraction) {
-    final stopwatch = Stopwatch()..start();
     _pendingJumpFraction = fraction;
     final date = widget.dateForFraction(fraction);
     final month = date == null ? null : DateTime(date.year, date.month);
@@ -457,7 +251,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
       });
     }
     _scheduleLiveJump();
-    TimelineScrubDiagnostics.recordUpdate(stopwatch.elapsedMicroseconds);
   }
 
   void _scheduleLiveJump() {
@@ -490,7 +283,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
     final position = widget.controller.position;
     final extent = position.maxScrollExtent - position.minScrollExtent;
     if (extent <= 0) return;
-    TimelineScrubDiagnostics.recordJump();
     _lastJumpedFraction = fraction;
     widget.controller.jumpTo(position.minScrollExtent + extent * fraction);
     _showOverlay(position);
