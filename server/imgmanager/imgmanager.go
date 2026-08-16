@@ -346,6 +346,24 @@ func (im *ImgManager) thumbCachePath(key string) string {
 	return filepath.Join(im.store.ThumbCacheDir(), key)
 }
 
+func (im *ImgManager) cacheThumbnail(key string, data []byte) error {
+	if len(data) == 0 {
+		return fmt.Errorf("no thumbnail data")
+	}
+	if cachePath := im.thumbCachePath(key); cachePath != "" {
+		if err := os.MkdirAll(filepath.Dir(cachePath), 0755); err != nil {
+			return fmt.Errorf("create thumbnail cache dir: %w", err)
+		}
+		if err := os.WriteFile(cachePath, data, 0644); err != nil {
+			return fmt.Errorf("write thumbnail cache: %w", err)
+		}
+	}
+	if im.store != nil {
+		im.store.ClearThumbFailure(key)
+	}
+	return nil
+}
+
 // StoreThumbnail caches a thumbnail the client generated for an already
 // uploaded file. The client can produce thumbnails the server cannot — video
 // frames in particular need a decoder that is not compiled in — so accepting
@@ -358,13 +376,8 @@ func (im *ImgManager) StoreThumbnail(path string, data []byte) error {
 	if key == "" || key == "." {
 		return fmt.Errorf("no thumbnail path")
 	}
-	if cachePath := im.thumbCachePath(key); cachePath != "" {
-		if err := os.MkdirAll(filepath.Dir(cachePath), 0755); err != nil {
-			return fmt.Errorf("create thumbnail cache dir: %w", err)
-		}
-		if err := os.WriteFile(cachePath, data, 0644); err != nil {
-			return fmt.Errorf("write thumbnail cache: %w", err)
-		}
+	if err := im.cacheThumbnail(key, data); err != nil {
+		return err
 	}
 	// A smart backend serves its own thumbnails, so pushing one into the user's
 	// storage would only leave a directory nothing ever reads.
@@ -374,9 +387,6 @@ func (im *ImgManager) StoreThumbnail(path string, data []byte) error {
 			io.NopCloser(bytes.NewReader(data)), int64(len(data)), time.Time{}); err != nil {
 			return fmt.Errorf("upload thumbnail: %w", err)
 		}
-	}
-	if im.store != nil {
-		im.store.ClearThumbFailure(key)
 	}
 	return nil
 }
@@ -414,58 +424,91 @@ func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
 		}
 	}
 
-	// Skip paths that failed recently enough that retrying would just fail again.
-	if im.store != nil && im.store.IsThumbFailed(key) {
+	sb, smart := im.drive().(SmartBackend)
+	previouslyFailed := im.store != nil && im.store.IsThumbFailed(key)
+	if previouslyFailed && !smart {
 		return nil, fmt.Errorf("thumbnail previously failed for %s", filepath.Base(key))
 	}
 
-	// Smart backend handles its own thumbnails
-	if sb, ok := im.drive().(SmartBackend); ok {
+	// A smart backend gets the first chance to supply a cheap thumbnail. A
+	// previously failed smart-backend request skips straight to local generation
+	// so old poisoned rows can recover instead of waiting out an increasing
+	// backoff for the same backend response.
+	var smartErr error
+	if smart && !previouslyFailed {
 		data, err := sb.GetThumbnail(key)
-		if err != nil {
-			if im.store != nil {
-				im.store.MarkThumbFailed(key)
+		if err == nil && len(data) > 0 {
+			if err := im.cacheThumbnail(key, data); err != nil {
+				return nil, err
 			}
-			return nil, err
-		}
-		if cachePath := im.thumbCachePath(key); cachePath != "" {
-			go func() {
-				os.MkdirAll(filepath.Dir(cachePath), 0755)
-				os.WriteFile(cachePath, data, 0644)
-			}()
-		}
-		return data, nil
-	}
-
-	// Try a pre-generated thumbnail from remote storage (.thumbnail/<path>)
-	thumbPath := filepath.Join(defaultThumbnailDir, key)
-	if thumbReader, _, err := im.drive().Download(thumbPath); err == nil {
-		data, readErr := io.ReadAll(thumbReader)
-		thumbReader.Close()
-		if readErr == nil && len(data) > 0 {
 			return data, nil
 		}
+		if err == nil {
+			err = fmt.Errorf("smart backend returned an empty thumbnail")
+		}
+		smartErr = err
 	}
 
-	// Generate on-demand via generator pipeline
+	// Non-smart backends may already have a generated thumbnail alongside the
+	// original. Smart backends never receive Lumina's .thumbnail uploads, so
+	// probing that path only adds a guaranteed failed network request.
+	thumbPath := filepath.Join(defaultThumbnailDir, key)
+	if !smart {
+		if thumbReader, _, err := im.drive().Download(thumbPath); err == nil {
+			data, readErr := io.ReadAll(thumbReader)
+			if closeErr := thumbReader.Close(); readErr == nil {
+				readErr = closeErr
+			}
+			if readErr == nil && len(data) > 0 {
+				if err := im.cacheThumbnail(key, data); err != nil {
+					return nil, err
+				}
+				return data, nil
+			}
+		}
+	}
+
+	// Generate on demand from the original. This is also the recovery path for a
+	// smart backend whose thumbnail API returned no usable URL.
 	ext := strings.ToLower(filepath.Ext(key))
 	fullImg, _, err := im.drive().Download(key)
 	if err != nil {
+		if im.store != nil {
+			im.store.MarkThumbFailed(key)
+		}
+		if smartErr != nil {
+			return nil, fmt.Errorf("smart thumbnail failed: %v; error downloading original: %w", smartErr, err)
+		}
 		return nil, fmt.Errorf("error downloading original: %w", err)
 	}
-	defer fullImg.Close()
+	defer func() {
+		if err := fullImg.Close(); err != nil {
+			log.Printf("close original after thumbnail generation %s: %v", key, err)
+		}
+	}()
 
 	thumbData, err := generateThumbnail(fullImg, ext)
 	if err != nil {
 		if im.store != nil {
 			im.store.MarkThumbFailed(key)
 		}
+		if smartErr != nil {
+			return nil, fmt.Errorf("smart thumbnail failed: %v; thumbnail generation failed: %w", smartErr, err)
+		}
 		return nil, fmt.Errorf("thumbnail generation failed: %w", err)
 	}
+	if err := im.cacheThumbnail(key, thumbData); err != nil {
+		return nil, err
+	}
 
-	// Upload generated thumbnail to remote for future use
-	im.drive().Upload(thumbPath,
-		io.NopCloser(bytes.NewReader(thumbData)), int64(len(thumbData)), time.Time{})
+	// Non-smart backends keep the generated thumbnail alongside the original.
+	// Smart backends use the local per-drive cache and avoid an upload per view.
+	if !smart {
+		if err := im.drive().Upload(thumbPath,
+			io.NopCloser(bytes.NewReader(thumbData)), int64(len(thumbData)), time.Time{}); err != nil {
+			log.Printf("cache generated thumbnail %s remotely: %v", key, err)
+		}
+	}
 
 	return thumbData, nil
 }

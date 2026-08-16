@@ -161,6 +161,8 @@ class GalleryBodyState extends State<GalleryBody>
   bool _syncPanelExpanded = false;
   bool _isDeleting = false;
   bool _isTimelineScrubbing = false;
+  bool _timelineThumbnailLoadingSuppressed = false;
+  int _thumbnailResumeGeneration = 0;
   final ValueNotifier<int> _thumbnailResumeSignal = ValueNotifier(0);
   double _galleryCrossAxisExtent = -1;
   @override
@@ -280,15 +282,25 @@ class GalleryBodyState extends State<GalleryBody>
   void _setTimelineScrubbing(bool scrubbing) {
     if (_isTimelineScrubbing == scrubbing || !mounted) return;
     _isTimelineScrubbing = scrubbing;
+    final generation = ++_thumbnailResumeGeneration;
     if (scrubbing) {
+      _timelineThumbnailLoadingSuppressed = true;
       _autoSyncTimer?.cancel();
     } else {
-      _thumbnailResumeSignal.value++;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted ||
+            _isTimelineScrubbing ||
+            generation != _thumbnailResumeGeneration) {
+          return;
+        }
+        _timelineThumbnailLoadingSuppressed = false;
+        _thumbnailResumeSignal.value++;
+      });
       _scheduleAutoSync();
     }
   }
 
-  bool _canLoadTimelineThumbnails() => !_isTimelineScrubbing;
+  bool _canLoadTimelineThumbnails() => !_timelineThumbnailLoadingSuppressed;
 
   List<String> _selectionKeys(Asset asset) => [
     if (asset.local != null) 'l:${asset.local!.id}',
@@ -1557,6 +1569,7 @@ class _PhotoTile extends StatefulWidget {
 class _PhotoTileState extends State<_PhotoTile> {
   bool _loaded = false;
   bool _imageMounted = false;
+  Timer? _deferredThumbnailResume;
 
   @override
   void initState() {
@@ -1574,6 +1587,7 @@ class _PhotoTileState extends State<_PhotoTile> {
       widget.thumbnailResumeSignal.addListener(_resumeThumbnail);
     }
     if (oldWidget.asset != widget.asset) {
+      _deferredThumbnailResume?.cancel();
       _imageMounted = false;
       _loaded =
           widget.canLoadThumbnail() && widget.asset.loadThumbnailFinished();
@@ -1583,11 +1597,37 @@ class _PhotoTileState extends State<_PhotoTile> {
 
   @override
   void dispose() {
+    _deferredThumbnailResume?.cancel();
     widget.thumbnailResumeSignal.removeListener(_resumeThumbnail);
     super.dispose();
   }
 
   void _resumeThumbnail() {
+    _deferredThumbnailResume?.cancel();
+    if (!mounted || !widget.canLoadThumbnail()) return;
+    if (_isVisibleOnScreen()) {
+      _resumeThumbnailNow();
+      return;
+    }
+    _deferredThumbnailResume = Timer(
+      const Duration(milliseconds: 180),
+      _resumeThumbnailNow,
+    );
+  }
+
+  bool _isVisibleOnScreen() {
+    final renderObject = context.findRenderObject();
+    if (renderObject is! RenderBox || !renderObject.hasSize) return false;
+    final topLeft = renderObject.localToGlobal(Offset.zero);
+    final rect = topLeft & renderObject.size;
+    final screenSize = MediaQuery.sizeOf(context);
+    return rect.bottom > 0 &&
+        rect.top < screenSize.height &&
+        rect.right > 0 &&
+        rect.left < screenSize.width;
+  }
+
+  void _resumeThumbnailNow() {
     if (!mounted || !widget.canLoadThumbnail()) return;
     if (widget.asset.loadThumbnailFinished()) {
       if (!_loaded) setState(() => _loaded = true);

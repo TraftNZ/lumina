@@ -407,8 +407,6 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
     final pendingFraction = _pendingJumpFraction;
     _invalidatePendingJump();
     setState(() => _scrubbing = false);
-    widget.onScrubStateChanged?.call(false);
-    _finishProfileTrace();
     if (pendingFraction != null &&
         widget.interactive &&
         widget.showDatePreview &&
@@ -416,6 +414,8 @@ class _TimelineScrollbarState extends State<TimelineScrollbar> {
             (_lastJumpedFraction! - pendingFraction).abs() > 0.0001)) {
       _jumpToFraction(pendingFraction);
     }
+    widget.onScrubStateChanged?.call(false);
+    _finishProfileTrace();
     _scheduleHide();
   }
 
