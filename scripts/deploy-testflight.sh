@@ -60,13 +60,38 @@ fi
 #──────────────────────────────────────────────────────────────
 # Pre-flight checks
 #──────────────────────────────────────────────────────────────
+LOGIN_KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
+SYSTEM_KEYCHAIN="/Library/Keychains/System.keychain"
+ORIGINAL_KEYCHAINS=()
+
+restore_keychain_list() {
+  if [ ${#ORIGINAL_KEYCHAINS[@]} -gt 0 ]; then
+    security list-keychains -d user -s "${ORIGINAL_KEYCHAINS[@]}"
+  fi
+}
+
 step "Unlocking keychain"
 if [ -n "${KEYCHAIN_PASSWORD:-}" ]; then
-  security unlock-keychain -p "$KEYCHAIN_PASSWORD" ~/Library/Keychains/login.keychain-db
+  security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$LOGIN_KEYCHAIN"
 else
-  security unlock-keychain ~/Library/Keychains/login.keychain-db
+  security unlock-keychain "$LOGIN_KEYCHAIN"
 fi
 ok "Keychain unlocked"
+
+# codesign resolves a signing identity by walking the keychain search list in
+# order. Any other keychain holding a copy of the distribution identity shadows
+# the login one, and if it is locked codesign fails with errSecInternalComponent.
+# Signing only ever needs the login keychain, so pin the search list to it for
+# the duration of the build and restore the original list on exit.
+while IFS= read -r keychain_line; do
+  keychain=$(printf '%s' "$keychain_line" | sed -E 's/^[[:space:]]*"?//; s/"?[[:space:]]*$//')
+  [ -n "$keychain" ] || continue
+  ORIGINAL_KEYCHAINS+=("$keychain")
+done < <(security list-keychains -d user)
+
+trap restore_keychain_list EXIT
+security list-keychains -d user -s "$LOGIN_KEYCHAIN" "$SYSTEM_KEYCHAIN"
+ok "Search list pinned to login keychain"
 
 step "Pre-flight checks"
 
