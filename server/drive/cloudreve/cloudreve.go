@@ -24,6 +24,11 @@ import (
 	"github.com/traftai/lumina/server/resolver"
 )
 
+// uploadChunkTimeout bounds a single chunk transfer. Cloudreve hands out 50 MiB
+// chunks, so this is the slowest link a large upload can still finish over —
+// roughly 0.5 Mbit/s — rather than an estimate of how long one should take.
+const uploadChunkTimeout = 15 * time.Minute
+
 var errObjectExisted = errors.New("object already exists")
 
 // Cloudreve implements StorageDrive and SmartBackend for Cloudreve v4.
@@ -38,6 +43,7 @@ type Cloudreve struct {
 	refreshExp    time.Time
 	mu            sync.Mutex
 	client        *http.Client
+	uploadClient  *http.Client
 	logger        *log.Logger
 	onTokenUpdate func(refreshToken string, refreshExp time.Time)
 	authErr       error     // cached auth error to avoid repeated 2FA login attempts
@@ -66,24 +72,34 @@ func NewCloudreveDrive(server, email, password string) *Cloudreve {
 	if !strings.HasPrefix(server, "http://") && !strings.HasPrefix(server, "https://") {
 		server = "https://" + server
 	}
+	transport := &http.Transport{
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 4,
+		IdleConnTimeout:     30 * time.Second,
+		DialContext: resolver.NewDoHDialContext(&net.Dialer{
+			Timeout:   15 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}),
+		TLSHandshakeTimeout:   10 * time.Second,
+		ResponseHeaderTimeout: 5 * time.Minute,
+	}
 	return &Cloudreve{
 		server:   server,
 		email:    email,
 		password: password,
 		client: &http.Client{
-			Timeout: 30 * time.Second,
-			Transport: &http.Transport{
-				TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-				MaxIdleConns:        10,
-				MaxIdleConnsPerHost: 4,
-				IdleConnTimeout:     30 * time.Second,
-				DialContext: resolver.NewDoHDialContext(&net.Dialer{
-					Timeout:   15 * time.Second,
-					KeepAlive: 30 * time.Second,
-				}),
-				TLSHandshakeTimeout:   10 * time.Second,
-				ResponseHeaderTimeout: 5 * time.Minute,
-			},
+			Timeout:   30 * time.Second,
+			Transport: transport,
+		},
+		// http.Client.Timeout caps the whole exchange, body included, so the 30s
+		// that suits a JSON call aborts a chunk PUT of tens of megabytes on any
+		// connection slower than a fast one. Uploads get their own deadline over
+		// the same transport; the transport's dial and header timeouts still
+		// bound a genuinely stalled request.
+		uploadClient: &http.Client{
+			Timeout:   uploadChunkTimeout,
+			Transport: transport,
 		},
 		logger: newLogger(),
 	}
@@ -677,7 +693,11 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 	if totalChunks == 0 {
 		totalChunks = 1
 	}
-	if useUploadURLs && int64(len(session.UploadURLs)) < totalChunks {
+	// A resumable session (OneDrive) hands back one URL that every byte range is
+	// PUT to in order, distinguished only by Content-Range; presigned-part
+	// policies (S3) hand back one URL per chunk. Both are addressable, so the
+	// only unusable answer is several URLs but fewer than there are chunks.
+	if useUploadURLs && len(session.UploadURLs) > 1 && int64(len(session.UploadURLs)) < totalChunks {
 		return fmt.Errorf("upload URL count %d is less than chunk count %d", len(session.UploadURLs), totalChunks)
 	}
 
@@ -700,9 +720,16 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 
 		c.logger.Printf("Upload: chunk %d/%d for %s (size=%d, useUploadURLs=%v)", i+1, totalChunks, filePath, n, useUploadURLs)
 
-		if useUploadURLs && int(i) < len(session.UploadURLs) {
-			// Upload directly to the external storage URL provided by server
-			if err := c.uploadChunkToURL(session.UploadURLs[i], body, start, size); err != nil {
+		if useUploadURLs {
+			// Upload directly to the external storage URL provided by server.
+			// Falling back to the Cloudreve endpoint for later chunks would send
+			// them to a session that never received the earlier ones, which the
+			// server accepts and then reports the file as present but truncated.
+			uploadURL := session.UploadURLs[0]
+			if len(session.UploadURLs) > 1 {
+				uploadURL = session.UploadURLs[i]
+			}
+			if err := c.uploadChunkToURL(uploadURL, body, start, size); err != nil {
 				return fmt.Errorf("upload chunk %d for %s: %w", i, filePath, err)
 			}
 		} else {
@@ -807,7 +834,7 @@ func (c *Cloudreve) uploadChunk(sessionID string, index int64, body chunkBody) e
 		req.Header.Set("Content-Type", "application/octet-stream")
 		req.ContentLength = body.length
 
-		resp, err := c.client.Do(req)
+		resp, err := c.uploadClient.Do(req)
 		if err != nil {
 			lastErr = fmt.Errorf("request failed: %w", err)
 			continue
@@ -858,7 +885,7 @@ func (c *Cloudreve) uploadChunkToURL(uploadURL string, body chunkBody, chunkStar
 		req.ContentLength = body.length
 		req.Header.Set("Content-Range", contentRange)
 
-		resp, err := c.client.Do(req)
+		resp, err := c.uploadClient.Do(req)
 		if err != nil {
 			lastErr = fmt.Errorf("request failed: %w", err)
 			continue
