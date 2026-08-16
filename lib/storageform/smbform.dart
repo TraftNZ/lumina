@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lumina/event_bus.dart';
 import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
@@ -8,7 +7,7 @@ import 'package:lumina/global.dart';
 import 'package:lumina/theme.dart';
 
 class SMBForm extends StatefulWidget {
-  const SMBForm({Key? key}) : super(key: key);
+  const SMBForm({super.key});
   @override
   _SMBFormState createState() => _SMBFormState();
 }
@@ -196,18 +195,18 @@ class _SMBFormState extends State<SMBForm> {
           const SizedBox(width: AppSpacing.md),
           FilledButton(
             onPressed: testSuccess
-                ? () {
-                    SharedPreferences.getInstance().then((value) {
-                      value.setString('addr', smbAddrController!.text);
-                      value.setString('username', smbUsernameController!.text);
-                      value.setString('password', smbPasswordController!.text);
-                      value.setString('share', smbShareController!.text);
-                      value.setString('rootPath', smbRootPathController!.text);
-                      value.setString('drive', driveName[Drive.smb]!);
-                    });
-                    settingModel.setRemoteStorageSetted(true);
-                    assetModel.remoteLastError = null;
-                    eventBus.fire(RemoteRefreshEvent());
+                ? () async {
+                    await saveRemoteStorageConfiguration(
+                      drive: Drive.smb,
+                      settings: {
+                        'addr': smbAddrController!.text,
+                        'username': smbUsernameController!.text,
+                        'password': smbPasswordController!.text,
+                        'share': smbShareController!.text,
+                        'rootPath': smbRootPathController!.text,
+                      },
+                    );
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                   }
                 : null,

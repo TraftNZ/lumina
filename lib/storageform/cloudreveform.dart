@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lumina/event_bus.dart';
 import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
@@ -8,7 +7,7 @@ import 'package:lumina/global.dart';
 import 'package:lumina/theme.dart';
 
 class CloudreveForm extends StatefulWidget {
-  const CloudreveForm({Key? key}) : super(key: key);
+  const CloudreveForm({super.key});
 
   @override
   CloudreveFormState createState() => CloudreveFormState();
@@ -298,22 +297,17 @@ class CloudreveFormState extends State<CloudreveForm> {
               const SizedBox(width: AppSpacing.md),
               FilledButton(
                 onPressed: testSuccess
-                    ? () {
-                        final server = serverController!.text;
-                        final email = emailController!.text;
-                        final password = passwordController!.text;
-                        final rootPath = rootPathController!.text;
-                        SharedPreferences.getInstance().then((value) {
-                          value.setString('cloudreve_server', server);
-                          value.setString('cloudreve_email', email);
-                          value.setString('cloudreve_password', password);
-                          value.setString('cloudreve_root_path', rootPath);
-                          value.setString(
-                              'drive', driveName[Drive.cloudreve]!);
-                        });
-                        settingModel.setRemoteStorageSetted(true);
-                        assetModel.remoteLastError = null;
-                        eventBus.fire(RemoteRefreshEvent());
+                    ? () async {
+                        await saveRemoteStorageConfiguration(
+                          drive: Drive.cloudreve,
+                          settings: {
+                            'cloudreve_server': serverController!.text,
+                            'cloudreve_email': emailController!.text,
+                            'cloudreve_password': passwordController!.text,
+                            'cloudreve_root_path': rootPathController!.text,
+                          },
+                        );
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       }
                     : null,

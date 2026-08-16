@@ -23,7 +23,9 @@ func (a *api) SetDriveWebdav(ctx context.Context, req *pb.SetDriveWebdavRequest)
 		}
 	}
 	configHash := fmt.Sprintf("webdav://%s@%s/%s", req.Username, req.Addr, req.Root)
-	a.im.SwitchDrive(d, configHash)
+	if err := a.im.SwitchDrive(d, configHash); err != nil {
+		rsp.Success, rsp.Message = false, err.Error()
+	}
 	return
 }
 

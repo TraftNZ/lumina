@@ -69,7 +69,9 @@ authDone:
 		}
 	}
 
-	a.im.SwitchDrive(d, configHash)
+	if err := a.im.SwitchDrive(d, configHash); err != nil {
+		rsp.Success, rsp.Message = false, err.Error()
+	}
 	return
 }
 

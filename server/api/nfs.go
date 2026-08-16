@@ -19,14 +19,16 @@ func (a *api) SetDriveNFS(ctx context.Context, req *pb.SetDriveNFSRequest) (rsp 
 		rsp.Success, rsp.Message = false, fmt.Sprintf("new nfs drive failed: %s", err.Error())
 		return
 	}
-	configHash := fmt.Sprintf("nfs://%s/%s", req.Addr, req.Root)
-	a.im.SwitchDrive(d, configHash)
 	if req.Root != "" {
 		err := d.SetRootPath(req.Root)
 		if err != nil {
 			rsp.Success, rsp.Message = false, fmt.Sprintf("set root path failed: %s", err.Error())
 			return
 		}
+	}
+	configHash := fmt.Sprintf("nfs://%s/%s", req.Addr, req.Root)
+	if err := a.im.SwitchDrive(d, configHash); err != nil {
+		rsp.Success, rsp.Message = false, err.Error()
 	}
 	return
 }

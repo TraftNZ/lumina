@@ -38,7 +38,9 @@ func (a *api) SetDriveS3(ctx context.Context, req *pb.SetDriveS3Request) (rsp *p
 		return
 	}
 	configHash := fmt.Sprintf("s3://%s/%s/%s", req.Endpoint, req.Bucket, req.Root)
-	a.im.SwitchDrive(d, configHash)
+	if err := a.im.SwitchDrive(d, configHash); err != nil {
+		rsp.Success, rsp.Message = false, err.Error()
+	}
 	return
 }
 

@@ -7,5 +7,7 @@ class LocalRefreshEvent {
 }
 
 class RemoteRefreshEvent {
-  RemoteRefreshEvent();
+  const RemoteRefreshEvent({this.force = false});
+
+  final bool force;
 }

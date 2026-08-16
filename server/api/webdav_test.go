@@ -140,7 +140,7 @@ func (s *DriveWebdavTestSuite) get(ctx context.Context, path string) ([]byte, er
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(resp.Status)
+		return nil, fmt.Errorf("%s", resp.Status)
 	}
 	return io.ReadAll(resp.Body)
 }

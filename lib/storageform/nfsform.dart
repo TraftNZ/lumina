@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lumina/event_bus.dart';
 import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
@@ -9,7 +8,7 @@ import 'package:lumina/global.dart';
 import 'package:lumina/theme.dart';
 
 class NFSForm extends StatefulWidget {
-  const NFSForm({Key? key}) : super(key: key);
+  const NFSForm({super.key});
 
   @override
   NFSFormState createState() => NFSFormState();
@@ -192,17 +191,15 @@ class NFSFormState extends State<NFSForm> {
               const SizedBox(width: AppSpacing.md),
               FilledButton(
                 onPressed: testSuccess
-                    ? () {
-                        final url = urlController!.text;
-                        final rootPath = rootPathController!.text;
-                        SharedPreferences.getInstance().then((prefs) {
-                          prefs.setString("nfs_url", url);
-                          prefs.setString("nfs_root_path", rootPath);
-                          prefs.setString("drive", driveName[Drive.nfs]!);
-                        });
-                        settingModel.setRemoteStorageSetted(true);
-                        assetModel.remoteLastError = null;
-                        eventBus.fire(RemoteRefreshEvent());
+                    ? () async {
+                        await saveRemoteStorageConfiguration(
+                          drive: Drive.nfs,
+                          settings: {
+                            'nfs_url': urlController!.text,
+                            'nfs_root_path': rootPathController!.text,
+                          },
+                        );
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       }
                     : null,

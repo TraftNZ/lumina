@@ -14,8 +14,10 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lumina/global.dart';
+import 'package:lumina/prefix_extent_sliver.dart';
 import 'package:lumina/setting_body.dart';
 import 'package:lumina/theme.dart';
+import 'package:lumina/timeline_scrollbar.dart';
 import 'package:lumina/year_detail_body.dart';
 import 'package:lumina/month_detail_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,14 +62,14 @@ class _GalleryRow {
   final String key;
 
   _GalleryRow.header(DateTime date)
-      : header = date,
-        start = 0,
-        count = 0,
-        key = 'h:${date.year}-${date.month}-${date.day}';
+    : header = date,
+      start = 0,
+      count = 0,
+      key = 'h:${date.year}-${date.month}-${date.day}';
 
   _GalleryRow.photos(this.start, this.count, String firstId)
-      : header = null,
-        key = 'p:$firstId';
+    : header = null,
+      key = 'p:$firstId';
 }
 
 /// Flat row model backing the "all" view.
@@ -126,11 +128,13 @@ class _GalleryLayout {
       rows.add(_GalleryRow.header(dayDate));
       for (int off = dayStart; off < visible.length; off += columns) {
         final remaining = visible.length - off;
-        rows.add(_GalleryRow.photos(
-          off,
-          remaining < columns ? remaining : columns,
-          assets[visible[off]].stableId(),
-        ));
+        rows.add(
+          _GalleryRow.photos(
+            off,
+            remaining < columns ? remaining : columns,
+            assets[visible[off]].stableId(),
+          ),
+        );
       }
     }
 
@@ -145,8 +149,7 @@ class _GalleryLayout {
 class GalleryBody extends StatefulWidget {
   final GalleryViewMode viewMode;
 
-  const GalleryBody({Key? key, this.viewMode = GalleryViewMode.all})
-    : super(key: key);
+  const GalleryBody({super.key, this.viewMode = GalleryViewMode.all});
 
   @override
   GalleryBodyState createState() => GalleryBodyState();
@@ -157,6 +160,9 @@ class GalleryBodyState extends State<GalleryBody>
   bool _showToTopBtn = false;
   bool _syncPanelExpanded = false;
   bool _isDeleting = false;
+  bool _isTimelineScrubbing = false;
+  final ValueNotifier<int> _thumbnailResumeSignal = ValueNotifier(0);
+  double _galleryCrossAxisExtent = -1;
   @override
   bool get wantKeepAlive => true;
   final ScrollController _scrollController = ScrollController();
@@ -167,6 +173,21 @@ class GalleryBodyState extends State<GalleryBody>
   final Set<String> _selectedIds = {};
 
   _GalleryLayout? _galleryLayout;
+  _GalleryLayout? _timelineGeometryLayout;
+  double _timelineGeometryWidth = -1;
+  double _timelineGeometryScaledFontSize = -1;
+  TextStyle? _timelineGeometryTextStyle;
+  String _timelineGeometryLocale = '';
+  List<double> _timelineRowExtents = const [];
+  List<double> _timelineRowEnds = const [];
+  Map<int, double> _timelineYearOffsets = const {};
+  double _timelineMarkerScrollableExtent = -1;
+  double _timelineMarkerLeadingExtent = -1;
+  double _timelineMarkerMinExtent = -1;
+  List<TimelineMarker> _timelineMarkers = const [];
+
+  final GlobalKey _syncPanelKey = GlobalKey();
+  final GlobalKey _scrollViewKey = GlobalKey();
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
@@ -204,12 +225,17 @@ class GalleryBodyState extends State<GalleryBody>
   @override
   void didUpdateWidget(GalleryBody oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewMode != GalleryViewMode.all &&
+        widget.viewMode == GalleryViewMode.all) {
+      getPhotos();
+    }
   }
 
   @override
   void dispose() {
     assetModel.removeListener(_scheduleAutoSync);
     _autoSyncTimer?.cancel();
+    _thumbnailResumeSignal.dispose();
     _scrollController.dispose();
     _scrollSubject.close();
     super.dispose();
@@ -224,6 +250,7 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void refresh() {
+    if (_isDeleting) return;
     if (stateModel.isDownloading() || stateModel.isUploading()) {
       return;
     }
@@ -235,20 +262,64 @@ class GalleryBodyState extends State<GalleryBody>
   }
 
   void getPhotos() {
-    assetModel.getMorePhotos();
+    unawaited(() async {
+      try {
+        final initialLoad = assetModel.getMorePhotos();
+        if (mounted && widget.viewMode == GalleryViewMode.all) {
+          unawaited(() async {
+            try {
+              await assetModel.loadLocalTimeline();
+            } catch (_) {}
+          }());
+        }
+        await initialLoad;
+      } catch (_) {}
+    }());
   }
 
-  void toggleSelection(String id) async {
+  void _setTimelineScrubbing(bool scrubbing) {
+    if (_isTimelineScrubbing == scrubbing || !mounted) return;
+    _isTimelineScrubbing = scrubbing;
+    if (scrubbing) {
+      _autoSyncTimer?.cancel();
+    } else {
+      _thumbnailResumeSignal.value++;
+      _scheduleAutoSync();
+    }
+  }
+
+  bool _canLoadTimelineThumbnails() => !_isTimelineScrubbing;
+
+  List<String> _selectionKeys(Asset asset) => [
+    if (asset.local != null) 'l:${asset.local!.id}',
+    if (asset.remote != null) 'r:${asset.remote!.path}',
+    if (asset.local == null && asset.remote == null) asset.stableId(),
+  ];
+
+  bool _isAssetSelected(Asset asset) {
+    final local = asset.local;
+    if (local != null && _selectedIds.contains('l:${local.id}')) return true;
+    final remote = asset.remote;
+    if (remote != null && _selectedIds.contains('r:${remote.path}')) {
+      return true;
+    }
+    return local == null &&
+        remote == null &&
+        _selectedIds.contains(asset.stableId());
+  }
+
+  void toggleSelection(Asset asset) async {
     if (Platform.isAndroid || Platform.isIOS) {
       final hasVibrator = await Vibration.hasVibrator();
       if (hasVibrator == true) {
         Vibration.vibrate(duration: 10);
       }
     }
-    if (_selectedIds.contains(id)) {
-      _selectedIds.remove(id);
+    final keys = _selectionKeys(asset);
+    if (keys.any(_selectedIds.contains)) {
+      _selectedIds.removeWhere(keys.contains);
     } else {
-      _selectedIds.add(id);
+      _selectedIds.addAll(keys);
     }
     stateModel.setSelectionMode(_selectedIds.isNotEmpty);
     setState(() {});
@@ -263,7 +334,7 @@ class GalleryBodyState extends State<GalleryBody>
   void _scheduleAutoSync() {
     _autoSyncTimer?.cancel();
     _autoSyncTimer = Timer(const Duration(seconds: 2), () {
-      if (!mounted) return;
+      if (!mounted || _isTimelineScrubbing) return;
       if (stateModel.isSyncing) return;
       if (!settingModel.isRemoteStorageSetted) return;
       if (!isServerReady) return;
@@ -289,7 +360,7 @@ class GalleryBodyState extends State<GalleryBody>
     _autoSyncTimer?.cancel();
     stateModel.startSync(toSync.length);
     for (final asset in toSync) {
-      if (!mounted || stateModel.syncCancelled) break;
+      if (!mounted || stateModel.syncCancelled || _isTimelineScrubbing) break;
       if (!asset.hasLocal || asset.hasRemote) {
         stateModel.advanceSync(asset.name());
         continue;
@@ -309,6 +380,7 @@ class GalleryBodyState extends State<GalleryBody>
     }
     _autoSyncing = false;
     stateModel.finishSync();
+    if (_isTimelineScrubbing) return;
     eventBus.fire(RemoteRefreshEvent());
   }
 
@@ -318,41 +390,59 @@ class GalleryBodyState extends State<GalleryBody>
     });
   }
 
-  void _deleteSelected() {
+  Future<void> _deleteSelected() async {
     if (_isDeleting) return;
-    _isDeleting = true;
+    setState(() => _isDeleting = true);
     final all = assetModel.getUnifiedAssets();
-    final toDelete = all
-        .where((a) => _selectedIds.contains(a.stableId()))
-        .toList();
+    final toDelete = all.where(_isAssetSelected).toList();
     clearSelection();
-    final localToDelete = toDelete.where((e) => e.hasLocal).toList();
-    final remoteToDelete = toDelete.where((e) => e.hasRemote).toList();
+    if (toDelete.isEmpty) {
+      setState(() => _isDeleting = false);
+      return;
+    }
+    final localToDelete = toDelete.where((asset) => asset.hasLocal).toList();
 
-    // Optimistically remove from UI
-    assetModel.removeAssets(toDelete);
-    SnackBarManager.showSnackBar(l10n.movedToTrash);
-    _isDeleting = false;
-
-    // Perform actual deletion in background (no refresh — optimistic removal is sufficient)
-    () async {
-      try {
-        if (localToDelete.isNotEmpty) {
-          await PhotoManager.editor.deleteWithIds(
-            localToDelete.map((e) => e.local!.id).toList(),
-          );
-        }
-        if (remoteToDelete.isNotEmpty) {
-          await storage.cli.moveToTrash(
-            MoveToTrashRequest(
-              paths: remoteToDelete.map((e) => e.remote!.path).toList(),
-            ),
-          );
-        }
-      } catch (e) {
-        SnackBarManager.showSnackBar(e.toString());
+    try {
+      final confirmed = <Asset>[];
+      if (localToDelete.isNotEmpty) {
+        await assetModel.loadLocalTimeline();
+        final requestedLocalIds = localToDelete
+            .map((asset) => asset.local!.id)
+            .toSet();
+        final deletedLocalIds = (await PhotoManager.editor.deleteWithIds(
+          requestedLocalIds.toList(),
+        )).toSet();
+        confirmed.addAll(
+          localToDelete.where(
+            (asset) => deletedLocalIds.contains(asset.local!.id),
+          ),
+        );
       }
-    }();
+      confirmed.addAll(toDelete.where((asset) => !asset.hasLocal));
+
+      final remoteToDelete = confirmed
+          .where((asset) => asset.hasRemote)
+          .toList();
+      if (remoteToDelete.isNotEmpty) {
+        final response = await storage.cli.moveToTrash(
+          MoveToTrashRequest(
+            paths: remoteToDelete.map((asset) => asset.remote!.path).toList(),
+          ),
+        );
+        if (!response.success) throw Exception(response.message);
+      }
+      assetModel.removeAssets(confirmed);
+      if (confirmed.length != toDelete.length) {
+        throw Exception('Some selected photos were not deleted');
+      }
+      SnackBarManager.showSnackBar(l10n.movedToTrash);
+    } catch (error) {
+      eventBus.fire(LocalRefreshEvent());
+      eventBus.fire(RemoteRefreshEvent());
+      SnackBarManager.showSnackBar(error.toString());
+    } finally {
+      if (mounted) setState(() => _isDeleting = false);
+    }
   }
 
   void _shareAsset() async {
@@ -360,9 +450,7 @@ class GalleryBodyState extends State<GalleryBody>
       return;
     }
     final all = assetModel.getUnifiedAssets();
-    final assets = all
-        .where((a) => _selectedIds.contains(a.stableId()))
-        .toList();
+    final assets = all.where(_isAssetSelected).toList();
     List<XFile> xfiles = [];
     for (var asset in assets) {
       final name = asset.name();
@@ -399,7 +487,7 @@ class GalleryBodyState extends State<GalleryBody>
     }
     final all = assetModel.getUnifiedAssets();
     final assets = all
-        .where((a) => _selectedIds.contains(a.stableId()) && a.isCloudOnly)
+        .where((asset) => _isAssetSelected(asset) && asset.isCloudOnly)
         .toList();
     int count = 0;
     try {
@@ -442,7 +530,7 @@ class GalleryBodyState extends State<GalleryBody>
     }
     final all = assetModel.getUnifiedAssets();
     final assets = all
-        .where((a) => _selectedIds.contains(a.stableId()) && a.hasLocal)
+        .where((asset) => _isAssetSelected(asset) && asset.hasLocal)
         .toList();
     clearSelection();
     int uploaded = 0;
@@ -681,9 +769,7 @@ class GalleryBodyState extends State<GalleryBody>
 
   void _performMoveToLockedFolder() async {
     final all = assetModel.getUnifiedAssets();
-    final assets = all
-        .where((a) => _selectedIds.contains(a.stableId()))
-        .toList();
+    final assets = all.where(_isAssetSelected).toList();
 
     if (assets.isEmpty) {
       SnackBarManager.showSnackBar(l10n.noPhotosSelected);
@@ -872,6 +958,7 @@ class GalleryBodyState extends State<GalleryBody>
               ? model.syncDone / model.syncTotal
               : 0.0;
           return AnimatedSize(
+            key: _syncPanelKey,
             duration: const Duration(milliseconds: 200),
             child: _syncPanelExpanded && (model.isSyncing || model.indexSyncing)
                 ? Container(
@@ -971,27 +1058,38 @@ class GalleryBodyState extends State<GalleryBody>
     final all = model.getUnifiedAssets();
     final colorScheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).languageCode;
-    final dateFormat =
-        DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE', locale);
+    final dateFormat = DateFormat(
+      'yyyy MMMM d${l10n.chineseday}  EEEEE',
+      locale,
+    );
     final layout = _layoutFor(all, columCount);
+    final width = _galleryCrossAxisExtent > 0
+        ? _galleryCrossAxisExtent
+        : MediaQuery.sizeOf(context).width;
+    _ensureTimelineGeometry(layout, width);
 
     return [
-      SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final row = layout.rows[index];
-            return KeyedSubtree(
-              key: ValueKey(row.key),
-              child: _buildGalleryRow(
-                  context, layout, row, dateFormat, colorScheme),
-            );
-          },
-          childCount: layout.rows.length,
-          findChildIndexCallback: (key) {
-            if (key is! ValueKey<String>) return null;
-            return layout.rowIndexByKey[key.value];
-          },
-        ),
+      SliverPrefixExtentList.builder(
+        itemCount: layout.rows.length,
+        itemExtents: _timelineRowExtents,
+        cumulativeExtents: _timelineRowEnds,
+        itemBuilder: (context, index) {
+          final row = layout.rows[index];
+          return KeyedSubtree(
+            key: ValueKey(row.key),
+            child: _buildGalleryRow(
+              context,
+              layout,
+              row,
+              dateFormat,
+              colorScheme,
+            ),
+          );
+        },
+        findChildIndexCallback: (key) {
+          if (key is! ValueKey<String>) return null;
+          return layout.rowIndexByKey[key.value];
+        },
       ),
       const SliverToBoxAdapter(child: SizedBox(height: 80)),
     ];
@@ -1004,15 +1102,16 @@ class GalleryBodyState extends State<GalleryBody>
     DateFormat dateFormat,
     ColorScheme colorScheme,
   ) {
+    TimelineScrubDiagnostics.recordRowBuild();
     final header = row.header;
     if (header != null) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
         child: Text(
           dateFormat.format(header),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
       );
     }
@@ -1020,37 +1119,51 @@ class GalleryBodyState extends State<GalleryBody>
       builder: (context, constraints) {
         final tileSize =
             (constraints.maxWidth - _gridSpacing * (layout.columns - 1)) /
-                layout.columns;
+            layout.columns;
         final children = <Widget>[];
         for (int slot = 0; slot < row.count; slot++) {
           if (slot > 0) {
             children.add(const SizedBox(width: _gridSpacing));
           }
-          children.add(SizedBox(
-            width: tileSize,
-            child: _buildPhotoTile(context, layout.assets,
-                layout.visible[row.start + slot]),
-          ));
+          children.add(
+            SizedBox(
+              width: tileSize,
+              child: _buildPhotoTile(
+                context,
+                layout.assets,
+                layout.visible[row.start + slot],
+              ),
+            ),
+          );
         }
         return Padding(
           padding: const EdgeInsets.only(bottom: _gridSpacing),
-          child: SizedBox(height: tileSize, child: Row(children: children)),
+          child: SizedBox(
+            height: tileSize,
+            child: Row(children: children),
+          ),
         );
       },
     );
   }
 
   Widget _buildPhotoTile(
-      BuildContext context, List<Asset> all, int globalIndex) {
+    BuildContext context,
+    List<Asset> all,
+    int globalIndex,
+  ) {
+    TimelineScrubDiagnostics.recordTileBuild();
     final asset = all[globalIndex];
     final id = asset.stableId();
     return _PhotoTile(
       key: ValueKey(id),
       asset: asset,
-      isSelected: _selectedIds.contains(id),
+      thumbnailResumeSignal: _thumbnailResumeSignal,
+      canLoadThumbnail: _canLoadTimelineThumbnails,
+      isSelected: _isAssetSelected(asset),
       onTap: () {
         if (stateModel.isSelectionMode) {
-          toggleSelection(id);
+          toggleSelection(asset);
         } else {
           Navigator.push(
             context,
@@ -1058,17 +1171,16 @@ class GalleryBodyState extends State<GalleryBody>
               opaque: false,
               transitionDuration: const Duration(milliseconds: 300),
               reverseTransitionDuration: const Duration(milliseconds: 300),
-              transitionsBuilder: (_, animation, __, child) =>
+              transitionsBuilder: (_, animation, _, child) =>
                   FadeTransition(opacity: animation, child: child),
-              pageBuilder: (_, __, ___) => GalleryViewerRoute(
-                originIndex: globalIndex,
-              ),
+              pageBuilder: (_, _, _) =>
+                  GalleryViewerRoute(originIndex: globalIndex),
             ),
           );
         }
       },
       onLongPress: () {
-        if (!stateModel.isSelectionMode) toggleSelection(id);
+        if (!stateModel.isSelectionMode) toggleSelection(asset);
       },
     );
   }
@@ -1085,6 +1197,149 @@ class GalleryBodyState extends State<GalleryBody>
     final layout = _GalleryLayout.build(all, columns);
     _galleryLayout = layout;
     return layout;
+  }
+
+  void _ensureTimelineGeometry(_GalleryLayout layout, double width) {
+    final stopwatch = Stopwatch()..start();
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final fontSize = textStyle?.fontSize ?? 14;
+    final scaledFontSize = textScaler.scale(fontSize);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    if (identical(_timelineGeometryLayout, layout) &&
+        _timelineGeometryWidth == width &&
+        _timelineGeometryScaledFontSize == scaledFontSize &&
+        _timelineGeometryTextStyle == textStyle &&
+        _timelineGeometryLocale == locale) {
+      TimelineScrubDiagnostics.recordGeometry(
+        cacheHit: true,
+        microseconds: stopwatch.elapsedMicroseconds,
+      );
+      return;
+    }
+
+    final tileExtent =
+        (width - _gridSpacing * (layout.columns - 1)) / layout.columns +
+        _gridSpacing;
+    final dateFormat = DateFormat(
+      'yyyy MMMM d${l10n.chineseday}  EEEEE',
+      Localizations.localeOf(context).languageCode,
+    );
+    final rowExtents = <double>[];
+    final rowEnds = <double>[];
+    final yearOffsets = <int, double>{};
+    var cumulativeExtent = 0.0;
+    for (final row in layout.rows) {
+      final header = row.header;
+      final double rowExtent;
+      if (header == null) {
+        rowExtent = tileExtent;
+      } else {
+        yearOffsets.putIfAbsent(header.year, () => cumulativeExtent);
+        final painter = TextPainter(
+          text: TextSpan(text: dateFormat.format(header), style: textStyle),
+          textDirection: Directionality.of(context),
+          textScaler: textScaler,
+        )..layout(maxWidth: width - 32);
+        rowExtent = 28 + painter.height;
+        painter.dispose();
+      }
+      rowExtents.add(rowExtent);
+      cumulativeExtent += rowExtent;
+      rowEnds.add(cumulativeExtent);
+    }
+
+    _timelineGeometryLayout = layout;
+    _timelineGeometryWidth = width;
+    _timelineGeometryScaledFontSize = scaledFontSize;
+    _timelineGeometryTextStyle = textStyle;
+    _timelineGeometryLocale = locale;
+    _timelineRowExtents = rowExtents;
+    _timelineRowEnds = rowEnds;
+    _timelineYearOffsets = yearOffsets;
+    _timelineMarkerScrollableExtent = -1;
+    TimelineScrubDiagnostics.recordGeometry(
+      cacheHit: false,
+      microseconds: stopwatch.elapsedMicroseconds,
+    );
+  }
+
+  DateTime? _timelineDateAt(ScrollMetrics metrics) {
+    return _timelineDateAtPixels(metrics.pixels);
+  }
+
+  DateTime? _timelineDateForFraction(double fraction) {
+    if (!_scrollController.hasClients) return null;
+    final position = _scrollController.position;
+    final scrollableExtent =
+        position.maxScrollExtent - position.minScrollExtent;
+    return _timelineDateAtPixels(
+      position.minScrollExtent + scrollableExtent * fraction,
+    );
+  }
+
+  DateTime? _timelineDateAtPixels(double pixels) {
+    final layout = _galleryLayout;
+    if (layout == null || layout.rows.isEmpty) return null;
+    final width =
+        _scrollViewKey.currentContext?.size?.width ??
+        MediaQuery.sizeOf(context).width;
+    _ensureTimelineGeometry(layout, width);
+
+    final syncPanelExtent = _syncPanelKey.currentContext?.size?.height ?? 0;
+    final contentOffset = pixels - 56 - syncPanelExtent;
+    final target = contentOffset.clamp(0.0, _timelineRowEnds.last);
+    var low = 0;
+    var high = _timelineRowEnds.length - 1;
+    while (low < high) {
+      final middle = (low + high) >> 1;
+      if (_timelineRowEnds[middle] <= target) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+
+    final row = layout.rows[low];
+    if (row.header != null) return row.header;
+    if (row.start >= layout.visible.length) return null;
+    return layout.assets[layout.visible[row.start]].dateCreated();
+  }
+
+  List<TimelineMarker> _timelineMarkersAt(ScrollMetrics metrics) {
+    final layout = _galleryLayout;
+    if (layout == null || layout.rows.isEmpty) return const [];
+    final width =
+        _scrollViewKey.currentContext?.size?.width ??
+        MediaQuery.sizeOf(context).width;
+    _ensureTimelineGeometry(layout, width);
+
+    final scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
+    if (scrollableExtent <= 0) return const [];
+    final leadingExtent =
+        56.0 + (_syncPanelKey.currentContext?.size?.height ?? 0);
+    if (_timelineMarkerScrollableExtent == scrollableExtent &&
+        _timelineMarkerLeadingExtent == leadingExtent &&
+        _timelineMarkerMinExtent == metrics.minScrollExtent) {
+      return _timelineMarkers;
+    }
+
+    _timelineMarkers = _timelineYearOffsets.entries
+        .map(
+          (entry) => TimelineMarker(
+            year: entry.key,
+            scrollFraction:
+                ((leadingExtent + entry.value - metrics.minScrollExtent) /
+                        scrollableExtent)
+                    .clamp(0.0, 1.0)
+                    .toDouble(),
+          ),
+        )
+        .toList(growable: false);
+    _timelineMarkerScrollableExtent = scrollableExtent;
+    _timelineMarkerLeadingExtent = leadingExtent;
+    _timelineMarkerMinExtent = metrics.minScrollExtent;
+    return _timelineMarkers;
   }
 
   Widget _buildYearsGrid(BuildContext context, AssetModel model) {
@@ -1196,6 +1451,7 @@ class GalleryBodyState extends State<GalleryBody>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    TimelineScrubDiagnostics.recordGalleryBuild();
     return PopScope(
       canPop: !stateModel.isSelectionMode,
       onPopInvokedWithResult: (didPop, result) {
@@ -1210,17 +1466,37 @@ class GalleryBodyState extends State<GalleryBody>
             onRefresh: () async {
               refresh(); // Fire-and-forget, returns immediately
             },
-            child: Consumer<AssetModel>(
-              builder: (context, model, child) => CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                cacheExtent: 500,
-                slivers: [
-                  _buildToolbar(),
-                  _buildSyncPanel(),
-                  ..._buildContentSlivers(context, model),
-                ],
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                _galleryCrossAxisExtent = constraints.maxWidth;
+                return Consumer<AssetModel>(
+                  builder: (context, model, child) {
+                    TimelineScrubDiagnostics.recordAssetConsumerBuild();
+                    return TimelineScrollbar(
+                      controller: _scrollController,
+                      dateForMetrics: _timelineDateAt,
+                      dateForFraction: _timelineDateForFraction,
+                      markersForMetrics: _timelineMarkersAt,
+                      onScrubStateChanged: _setTimelineScrubbing,
+                      interactive:
+                          widget.viewMode != GalleryViewMode.all ||
+                          model.localTimelineReady,
+                      showDatePreview: widget.viewMode == GalleryViewMode.all,
+                      child: CustomScrollView(
+                        key: _scrollViewKey,
+                        controller: _scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        cacheExtent: 500,
+                        slivers: [
+                          _buildToolbar(),
+                          _buildSyncPanel(),
+                          ..._buildContentSlivers(context, model),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
           Positioned(
@@ -1258,6 +1534,8 @@ class _GroupInfo {
 
 class _PhotoTile extends StatefulWidget {
   final Asset asset;
+  final ValueNotifier<int> thumbnailResumeSignal;
+  final bool Function() canLoadThumbnail;
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
@@ -1265,6 +1543,8 @@ class _PhotoTile extends StatefulWidget {
   const _PhotoTile({
     required Key key,
     required this.asset,
+    required this.thumbnailResumeSignal,
+    required this.canLoadThumbnail,
     required this.isSelected,
     required this.onTap,
     required this.onLongPress,
@@ -1276,31 +1556,59 @@ class _PhotoTile extends StatefulWidget {
 
 class _PhotoTileState extends State<_PhotoTile> {
   bool _loaded = false;
+  bool _imageMounted = false;
 
   @override
   void initState() {
     super.initState();
+    widget.thumbnailResumeSignal.addListener(_resumeThumbnail);
+    _loaded = widget.canLoadThumbnail() && widget.asset.loadThumbnailFinished();
     _kickOffThumbnail();
   }
 
   @override
   void didUpdateWidget(covariant _PhotoTile oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.thumbnailResumeSignal != widget.thumbnailResumeSignal) {
+      oldWidget.thumbnailResumeSignal.removeListener(_resumeThumbnail);
+      widget.thumbnailResumeSignal.addListener(_resumeThumbnail);
+    }
     if (oldWidget.asset != widget.asset) {
-      _loaded = widget.asset.loadThumbnailFinished();
+      _imageMounted = false;
+      _loaded =
+          widget.canLoadThumbnail() && widget.asset.loadThumbnailFinished();
       _kickOffThumbnail();
     }
   }
 
+  @override
+  void dispose() {
+    widget.thumbnailResumeSignal.removeListener(_resumeThumbnail);
+    super.dispose();
+  }
+
+  void _resumeThumbnail() {
+    if (!mounted || !widget.canLoadThumbnail()) return;
+    if (widget.asset.loadThumbnailFinished()) {
+      if (!_loaded) setState(() => _loaded = true);
+      return;
+    }
+    _kickOffThumbnail();
+  }
+
   void _kickOffThumbnail() {
+    if (!widget.canLoadThumbnail()) return;
     if (widget.asset.loadThumbnailFinished()) {
       _loaded = true;
       return;
     }
+    TimelineScrubDiagnostics.recordThumbnailStart();
     widget.asset
         .thumbnailDataAsync()
         .then((_) {
-          if (mounted) setState(() => _loaded = true);
+          if (mounted && widget.canLoadThumbnail()) {
+            setState(() => _loaded = true);
+          }
         })
         .catchError((_) {});
   }
@@ -1308,6 +1616,14 @@ class _PhotoTileState extends State<_PhotoTile> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final showImage =
+        _loaded &&
+        widget.asset.loadThumbnailFinished() &&
+        (_imageMounted || widget.canLoadThumbnail());
+    if (showImage && !_imageMounted) {
+      TimelineScrubDiagnostics.recordImageMount();
+      _imageMounted = true;
+    }
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
@@ -1318,7 +1634,7 @@ class _PhotoTileState extends State<_PhotoTile> {
             tag: "asset_${widget.asset.stableId()}",
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 150),
-              child: _loaded && widget.asset.loadThumbnailFinished()
+              child: showImage
                   ? Image(
                       key: const ValueKey('img'),
                       image: widget.asset.thumbnailProvider(),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lumina/event_bus.dart';
 import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
@@ -8,7 +7,7 @@ import 'package:lumina/global.dart';
 import 'package:lumina/theme.dart';
 
 class S3Form extends StatefulWidget {
-  const S3Form({Key? key}) : super(key: key);
+  const S3Form({super.key});
 
   @override
   S3FormState createState() => S3FormState();
@@ -266,27 +265,20 @@ class S3FormState extends State<S3Form> {
               const SizedBox(width: AppSpacing.md),
               FilledButton(
                 onPressed: testSuccess
-                    ? () {
-                        final endpoint = endpointController!.text;
-                        final region = regionController!.text;
-                        final accessKeyId = accessKeyIdController!.text;
-                        final secretAccessKey =
-                            secretAccessKeyController!.text;
-                        final bucket = bucketController!.text;
-                        final rootPath = rootPathController!.text;
-                        SharedPreferences.getInstance().then((prefs) {
-                          prefs.setString('s3_endpoint', endpoint);
-                          prefs.setString('s3_region', region);
-                          prefs.setString('s3_access_key_id', accessKeyId);
-                          prefs.setString(
-                              's3_secret_access_key', secretAccessKey);
-                          prefs.setString('s3_bucket', bucket);
-                          prefs.setString('s3_root_path', rootPath);
-                          prefs.setString('drive', driveName[Drive.s3]!);
-                        });
-                        settingModel.setRemoteStorageSetted(true);
-                        assetModel.remoteLastError = null;
-                        eventBus.fire(RemoteRefreshEvent());
+                    ? () async {
+                        await saveRemoteStorageConfiguration(
+                          drive: Drive.s3,
+                          settings: {
+                            's3_endpoint': endpointController!.text,
+                            's3_region': regionController!.text,
+                            's3_access_key_id': accessKeyIdController!.text,
+                            's3_secret_access_key':
+                                secretAccessKeyController!.text,
+                            's3_bucket': bucketController!.text,
+                            's3_root_path': rootPathController!.text,
+                          },
+                        );
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       }
                     : null,

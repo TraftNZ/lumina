@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lumina/event_bus.dart';
 import 'package:lumina/proto/lumina.pbgrpc.dart';
 import 'package:lumina/state_model.dart';
 import 'package:lumina/storage/storage.dart';
@@ -8,7 +7,7 @@ import 'package:lumina/global.dart';
 import 'package:lumina/theme.dart';
 
 class WebDavForm extends StatefulWidget {
-  const WebDavForm({Key? key}) : super(key: key);
+  const WebDavForm({super.key});
 
   @override
   WebDavFormState createState() => WebDavFormState();
@@ -213,21 +212,17 @@ class WebDavFormState extends State<WebDavForm> {
               const SizedBox(width: AppSpacing.md),
               FilledButton(
                 onPressed: testSuccess
-                    ? () {
-                        final url = urlController!.text;
-                        final username = usernameController!.text;
-                        final password = passwordController!.text;
-                        final rootPath = rootPathController!.text;
-                        SharedPreferences.getInstance().then((value) {
-                          value.setString('webdav_url', url);
-                          value.setString('webdav_username', username);
-                          value.setString('webdav_password', password);
-                          value.setString('webdav_root_path', rootPath);
-                          value.setString('drive', driveName[Drive.webDav]!);
-                        });
-                        settingModel.setRemoteStorageSetted(true);
-                        assetModel.remoteLastError = null;
-                        eventBus.fire(RemoteRefreshEvent());
+                    ? () async {
+                        await saveRemoteStorageConfiguration(
+                          drive: Drive.webDav,
+                          settings: {
+                            'webdav_url': urlController!.text,
+                            'webdav_username': usernameController!.text,
+                            'webdav_password': passwordController!.text,
+                            'webdav_root_path': rootPathController!.text,
+                          },
+                        );
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       }
                     : null,

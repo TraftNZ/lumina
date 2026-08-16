@@ -87,11 +87,30 @@ class SettingModel extends ChangeNotifier {
   }
 
   void setRemoteStorageSetted(bool setted) {
-    if (isRemoteStorageSetted == setted) return;
-    isRemoteStorageSetted = setted;
-    eventBus.fire(RemoteRefreshEvent());
-    notifyListeners();
+    setRemoteStorageReady(setted);
   }
+
+  void setRemoteStorageReady(bool setted, {bool forceRefresh = false}) {
+    final changed = isRemoteStorageSetted != setted;
+    if (!changed && !forceRefresh) return;
+    isRemoteStorageSetted = setted;
+    eventBus.fire(RemoteRefreshEvent(force: forceRefresh));
+    if (changed) notifyListeners();
+  }
+}
+
+Future<void> saveRemoteStorageConfiguration({
+  required Drive drive,
+  required Map<String, String> settings,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  for (final entry in settings.entries) {
+    await prefs.setString(entry.key, entry.value);
+  }
+  await prefs.setString('drive', driveName[drive]!);
+
+  assetModel.remoteLastError = null;
+  settingModel.setRemoteStorageReady(true, forceRefresh: true);
 }
 
 class transmitState {
@@ -239,7 +258,9 @@ class AssetModel extends ChangeNotifier {
     // Event-bus fires (cold start initDrive, post-upload, post-delete, timer)
     // go through the throttled path — the backend DB already reflects the
     // change, so a full syncIndex within _kIndexSyncThrottle is skipped.
-    eventBus.on<RemoteRefreshEvent>().listen((event) => refreshRemote());
+    eventBus
+        .on<RemoteRefreshEvent>()
+        .listen((event) => refreshRemote(force: event.force));
     // Hashes pair a local photo with its upload; load them before the first
     // merge so matching does not silently fall back to filenames on cold start.
     HashCache.instance.warmUp().then((_) {
@@ -258,12 +279,21 @@ class AssetModel extends ChangeNotifier {
   bool remoteHasMore = true;
   Completer<bool>? localGetting;
   Completer<bool>? remoteGetting;
+  Future<void>? _localTimelineLoadFuture;
+  Future<void>? _localRefreshFuture;
+  bool _localTimelineComplete = false;
+  Future<void>? _remoteRefreshFuture;
+  bool _remoteRefreshPending = false;
+  bool _forceRemoteRefreshPending = false;
+  final Set<String> _removedRemotePaths = {};
 
   String? remoteLastError;
   bool _isRefreshing = false;
   bool get isRefreshing => _isRefreshing;
 
   bool get hasMore => localHasMore || remoteHasMore;
+  bool get localTimelineReady =>
+      _localTimelineComplete && localGetting == null;
 
   List<Asset> getUnifiedAssets() {
     if (_searchResults != null) return _searchResults!;
@@ -345,10 +375,29 @@ class AssetModel extends ChangeNotifier {
 
   void removeAssets(List<Asset> assets) {
     final toRemove = assets.toSet();
-    localAssets.removeWhere((a) => toRemove.contains(a));
-    remoteAssets.removeWhere((a) => toRemove.contains(a));
-    _unifiedAssets.removeWhere((a) => toRemove.contains(a));
-    _searchResults?.removeWhere((a) => toRemove.contains(a));
+    final localIds = assets
+        .map((asset) => asset.local?.id)
+        .whereType<String>()
+        .toSet();
+    final remotePaths = assets
+        .map((asset) => asset.remote?.path)
+        .whereType<String>()
+        .toSet();
+    _removedRemotePaths.addAll(remotePaths);
+    bool shouldRemove(Asset asset) =>
+        toRemove.contains(asset) ||
+        asset.local != null && localIds.contains(asset.local!.id) ||
+        asset.remote != null && remotePaths.contains(asset.remote!.path);
+
+    localAssets = localAssets.where((asset) => !shouldRemove(asset)).toList();
+    remoteAssets = remoteAssets.where((asset) => !shouldRemove(asset)).toList();
+    final searchResults = _searchResults;
+    if (searchResults != null) {
+      _searchResults = searchResults
+          .where((asset) => !shouldRemove(asset))
+          .toList();
+    }
+    _unifiedDirty = true;
     notifyListeners();
   }
 
@@ -369,6 +418,42 @@ class AssetModel extends ChangeNotifier {
     await Future.wait(futures);
   }
 
+  Future<void> loadLocalTimeline() {
+    final activeRefresh = _localRefreshFuture;
+    if (activeRefresh != null) return activeRefresh;
+    final active = _localTimelineLoadFuture;
+    if (active != null) return active;
+
+    final wasComplete = _localTimelineComplete;
+    _localTimelineComplete = false;
+    notifyListeners();
+    var succeeded = false;
+    late final Future<void> operation;
+    operation = Future<void>.sync(_loadRemainingLocalPhotos)
+        .then<void>((_) => succeeded = true)
+        .whenComplete(() {
+      if (identical(_localTimelineLoadFuture, operation)) {
+        _localTimelineLoadFuture = null;
+      }
+      _localTimelineComplete = succeeded || wasComplete;
+      notifyListeners();
+    });
+    _localTimelineLoadFuture = operation;
+    return operation;
+  }
+
+  Future<void> _loadRemainingLocalPhotos() async {
+    while (localHasMore) {
+      final previousCount = localAssets.length;
+      await getLocalPhotos(
+        batchSize: 1000,
+        incrementalNotifications: false,
+      );
+      await Future<void>.delayed(Duration.zero);
+      if (localAssets.length == previousCount) break;
+    }
+  }
+
   Future<void> refreshAll() async {
     _isRefreshing = true;
     notifyListeners();
@@ -380,10 +465,33 @@ class AssetModel extends ChangeNotifier {
     }
   }
 
-  Future<void> refreshLocal() async {
+  Future<void> refreshLocal() {
+    final active = _localRefreshFuture;
+    if (active != null) return active;
+
+    late final Future<void> operation;
+    operation = Future<void>.sync(_refreshLocal).whenComplete(() {
+      if (identical(_localRefreshFuture, operation)) {
+        _localRefreshFuture = null;
+      }
+    });
+    _localRefreshFuture = operation;
+    return operation;
+  }
+
+  Future<void> _refreshLocal() async {
     if (localGetting != null) {
       await localGetting!.future;
     }
+    final activeTimelineLoad = _localTimelineLoadFuture;
+    if (activeTimelineLoad != null) {
+      await activeTimelineLoad;
+    }
+    final wasTimelineComplete = _localTimelineComplete;
+    final wasLocalHasMore = localHasMore;
+    _localTimelineComplete = false;
+    notifyListeners();
+
     final isFirstLoad = localAssets.isEmpty;
     final reuseMap = <String, Asset>{};
     for (final a in localAssets) {
@@ -392,45 +500,81 @@ class AssetModel extends ChangeNotifier {
       }
     }
     localHasMore = true;
-    if (isFirstLoad) {
-      // Cold start: preserve incremental notify for fast first-paint.
-      localAssets = [];
-      _unifiedDirty = true;
-      stateModel.setNotSyncedPhotos([]);
-      await getLocalPhotos(reuseMap: reuseMap);
-    } else {
-      // True refresh: build the next snapshot into a buffer and swap atomically
-      // so the grid never renders a half-empty intermediate state.
-      final buffer = <Asset>[];
-      await getLocalPhotos(reuseMap: reuseMap, targetList: buffer);
-      localAssets = buffer;
-      _unifiedDirty = true;
-      stateModel.setNotSyncedPhotos([]);
-      notifyListeners();
-      if (!stateModel.refreshingUnsynchronized) {
-        refreshUnsynchronizedPhotos(force: true);
+    try {
+      if (isFirstLoad) {
+        // Cold start: preserve incremental notify for fast first-paint, then
+        // complete the timeline so the scrubber has a stable extent.
+        localAssets = [];
+        _unifiedDirty = true;
+        stateModel.setNotSyncedPhotos([]);
+        await getLocalPhotos(reuseMap: reuseMap);
+        await _loadRemainingLocalPhotos();
+        _localTimelineComplete = true;
+        notifyListeners();
+      } else {
+        // Build the complete next snapshot off-screen and swap atomically so
+        // refresh never truncates the visible timeline to its first page.
+        final buffer = <Asset>[];
+        while (localHasMore) {
+          final previousCount = buffer.length;
+          await getLocalPhotos(
+            reuseMap: reuseMap,
+            targetList: buffer,
+            batchSize: 1000,
+            incrementalNotifications: false,
+          );
+          if (buffer.length == previousCount) break;
+        }
+        localAssets = buffer;
+        _localTimelineComplete = true;
+        _unifiedDirty = true;
+        stateModel.setNotSyncedPhotos([]);
+        notifyListeners();
+        if (!stateModel.refreshingUnsynchronized) {
+          refreshUnsynchronizedPhotos(force: true);
+        }
       }
+    } catch (_) {
+      // The old complete snapshot remains visible when a buffered refresh
+      // fails, so restore its scrubber readiness before propagating the error.
+      _localTimelineComplete = wasTimelineComplete;
+      localHasMore = wasLocalHasMore;
+      notifyListeners();
+      rethrow;
     }
   }
 
   Future<void> refreshRemote({bool force = false}) async {
-    if (remoteGetting != null) {
-      await remoteGetting!.future;
+    _remoteRefreshPending = true;
+    _forceRemoteRefreshPending |= force;
+    final active = _remoteRefreshFuture;
+    if (active != null) return active;
+
+    final operation = _drainRemoteRefreshes();
+    _remoteRefreshFuture = operation;
+    return operation;
+  }
+
+  Future<void> _drainRemoteRefreshes() async {
+    try {
+      while (_remoteRefreshPending) {
+        final force = _forceRemoteRefreshPending;
+        _remoteRefreshPending = false;
+        _forceRemoteRefreshPending = false;
+        await _fetchRemotePhotos(force: force);
+      }
+    } finally {
+      _remoteRefreshFuture = null;
     }
-    // Keep old data visible while fetching new data in background
-    remoteHasMore = true;
-    remoteGetting = null;
-    await _fetchRemotePhotos(force: force);
   }
 
   Future<void> _fetchRemotePhotos({bool force = false}) async {
     if (!isServerReady) return;
     if (!settingModel.isRemoteStorageSetted) return;
     await checkServer();
-    if (remoteGetting != null) {
-      await remoteGetting!.future;
-      return;
-    }
+    // Keep existing local and remote assets visible while the remote index is
+    // refreshed. Only remote fetches are serialized by refreshRemote().
+    remoteHasMore = true;
     remoteGetting = Completer<bool>();
     final reuseMap = <String, Asset>{};
     for (final a in remoteAssets) {
@@ -456,10 +600,16 @@ class AssetModel extends ChangeNotifier {
             cachedAssets.add(Asset(remote: image));
           }
         }
-        remoteAssets = cachedAssets;
+        final visibleCachedAssets = cachedAssets
+            .where(
+              (asset) =>
+                  !_removedRemotePaths.contains(asset.remote?.path),
+            )
+            .toList();
+        remoteAssets = visibleCachedAssets;
         _unifiedDirty = true;
         notifyListeners();
-        _persistRemotePaths(cachedAssets);
+        _persistRemotePaths(visibleCachedAssets);
       }
 
       if (force || cachedImages.isEmpty && lastIndexSyncAt == null) {
@@ -469,43 +619,37 @@ class AssetModel extends ChangeNotifier {
           DateTime.now().millisecondsSinceEpoch,
         );
       } else {
-        // Sync index in background (slow for Cloudreve) — don't block UI.
-        // Throttled so cold starts within _kIndexSyncThrottle skip the scan.
-        _syncIndexInBackground(force: force);
+        // Cached rows have already been published above. Awaiting here keeps
+        // remote index operations ordered without blocking the local gallery.
+        await _syncIndexIfNeeded();
       }
     } catch (e) {
       remoteLastError = e.toString();
+    } finally {
+      remoteHasMore = false;
+      _unifiedDirty = true;
+      notifyListeners();
+      remoteGetting?.complete(true);
+      remoteGetting = null;
     }
-    remoteHasMore = false;
-    _unifiedDirty = true;
-    notifyListeners();
-    remoteGetting?.complete(true);
-    remoteGetting = null;
   }
 
-  void _syncIndexInBackground({bool force = false}) async {
+  Future<void> _syncIndexIfNeeded() async {
     final prefs = await SharedPreferences.getInstance();
     final driveSyncKey = _driveSyncKey(prefs);
     final persistence = await SyncStatePersistence.create();
-    if (!force) {
-      final last = persistence.lastIndexSyncAtForDrive(driveSyncKey);
-      if (last != null) {
-        final age = DateTime.now().millisecondsSinceEpoch - last;
-        if (age >= 0 && age < _kIndexSyncThrottle.inMilliseconds) {
-          return;
-        }
+    final last = persistence.lastIndexSyncAtForDrive(driveSyncKey);
+    if (last != null) {
+      final age = DateTime.now().millisecondsSinceEpoch - last;
+      if (age >= 0 && age < _kIndexSyncThrottle.inMilliseconds) {
+        return;
       }
     }
-    _syncIndexAndRefreshRemote(force: false)
-        .then((_) async {
-          await persistence.setLastIndexSyncAtForDrive(
-            driveSyncKey,
-            DateTime.now().millisecondsSinceEpoch,
-          );
-        })
-        .catchError((e) {
-          print("[AssetModel] Background sync error: $e");
-        });
+    await _syncIndexAndRefreshRemote(force: false);
+    await persistence.setLastIndexSyncAtForDrive(
+      driveSyncKey,
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   Future<void> _syncIndexAndRefreshRemote({required bool force}) async {
@@ -531,10 +675,15 @@ class AssetModel extends ChangeNotifier {
         newRemoteAssets.add(Asset(remote: image));
       }
     }
-    remoteAssets = newRemoteAssets;
+    final visibleRemoteAssets = newRemoteAssets
+        .where(
+          (asset) => !_removedRemotePaths.contains(asset.remote?.path),
+        )
+        .toList();
+    remoteAssets = visibleRemoteAssets;
     _unifiedDirty = true;
     notifyListeners();
-    await _persistRemotePaths(newRemoteAssets);
+    await _persistRemotePaths(visibleRemoteAssets);
   }
 
   Future<void> _persistRemotePaths(List<Asset> assets) async {
@@ -555,7 +704,10 @@ class AssetModel extends ChangeNotifier {
     try {
       final persistence = await SyncStatePersistence.create();
       final paths = persistence.cachedRemotePaths
-          .where((p) => p.isNotEmpty)
+          .where(
+            (path) =>
+                path.isNotEmpty && !_removedRemotePaths.contains(path),
+          )
           .toList();
       if (paths.isNotEmpty && remoteAssets.isEmpty) {
         remoteAssets = paths
@@ -578,6 +730,8 @@ class AssetModel extends ChangeNotifier {
   Future<void> getLocalPhotos({
     Map<String, Asset>? reuseMap,
     List<Asset>? targetList,
+    int? batchSize,
+    bool incrementalNotifications = true,
   }) async {
     if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) {
       localHasMore = false;
@@ -587,7 +741,39 @@ class AssetModel extends ChangeNotifier {
       await localGetting?.future;
       return;
     }
-    localGetting = Completer<bool>();
+    final operation = Completer<bool>();
+    localGetting = operation;
+    Object? loadError;
+    StackTrace? loadStackTrace;
+    try {
+      await _loadLocalPhotoBatch(
+        reuseMap: reuseMap,
+        targetList: targetList,
+        batchSize: batchSize,
+        incrementalNotifications: incrementalNotifications,
+      );
+    } catch (error, stackTrace) {
+      loadError = error;
+      loadStackTrace = stackTrace;
+    }
+    if (loadError == null) {
+      operation.complete(true);
+    } else {
+      operation.completeError(loadError, loadStackTrace!);
+    }
+    try {
+      await operation.future;
+    } finally {
+      if (identical(localGetting, operation)) localGetting = null;
+    }
+  }
+
+  Future<void> _loadLocalPhotoBatch({
+    Map<String, Asset>? reuseMap,
+    List<Asset>? targetList,
+    int? batchSize,
+    required bool incrementalNotifications,
+  }) async {
     // When targetList is non-null we're populating a detached buffer (used by
     // refreshLocal's atomic-swap path); skip incremental notifyListeners and
     // post-load hooks so the live list isn't touched until the final swap.
@@ -596,8 +782,7 @@ class AssetModel extends ChangeNotifier {
     final offset = list.length;
     final re = await requestPermission();
     if (!re) {
-      localGetting?.complete(true);
-      localGetting = null;
+      localHasMore = false;
       return;
     }
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
@@ -614,8 +799,7 @@ class AssetModel extends ChangeNotifier {
       }
     }
     if (allPath == null) {
-      localGetting?.complete(true);
-      localGetting = null;
+      localHasMore = false;
       return;
     }
 
@@ -632,11 +816,16 @@ class AssetModel extends ChangeNotifier {
         ],
       ),
     );
-    final List<AssetEntity> entities = await newpath!.getAssetListRange(
+    if (newpath == null) {
+      localHasMore = false;
+      return;
+    }
+    final requestedBatchSize = batchSize ?? pageSize;
+    final List<AssetEntity> entities = await newpath.getAssetListRange(
       start: offset,
-      end: offset + pageSize,
+      end: offset + requestedBatchSize,
     );
-    if (entities.length < pageSize) {
+    if (entities.length < requestedBatchSize) {
       localHasMore = false;
     }
     for (var i = 0; i < entities.length; i++) {
@@ -649,7 +838,7 @@ class AssetModel extends ChangeNotifier {
         asset = Asset(local: entities[i]);
       }
       list.add(asset);
-      if (!atomic) {
+      if (!atomic && incrementalNotifications) {
         // Notify immediately for the first batch so the grid appears fast,
         // then batch every 100 assets to avoid excessive rebuilds.
         if (i == 0 && offset == 0) {
@@ -676,18 +865,10 @@ class AssetModel extends ChangeNotifier {
         refreshUnsynchronizedPhotos();
       }
     }
-
-    localGetting?.complete(true);
-    localGetting = null;
   }
 
   Future<void> getRemotePhotos() async {
-    if (!isServerReady) return;
-    if (remoteGetting != null) {
-      await remoteGetting!.future;
-      return;
-    }
-    await _fetchRemotePhotos();
+    await refreshRemote();
   }
 }
 

@@ -49,6 +49,7 @@ type ImgManager struct {
 	driMu    sync.RWMutex
 	dri      StorageDrive
 	driReady chan struct{}
+	indexMu  sync.Mutex
 
 	actQueue *queue.Queue
 	logger   *log.Logger
@@ -84,19 +85,25 @@ func (im *ImgManager) Store() *localstore.LocalStore {
 }
 
 func (im *ImgManager) SetDrive(dri StorageDrive) {
+	im.indexMu.Lock()
+	defer im.indexMu.Unlock()
 	im.setDrive(dri)
 }
 
-func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
-	im.setDrive(dri)
+func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) error {
+	im.indexMu.Lock()
+	defer im.indexMu.Unlock()
+
 	if im.store != nil {
 		if err := im.store.SwitchDrive(configHash); err != nil {
-			im.logger.Printf("Failed to switch drive store: %v", err)
-			return
+			return fmt.Errorf("switch drive store: %w", err)
 		}
+	}
+	im.setDrive(dri)
+	if im.store != nil {
 		if _, ok := dri.(SmartBackend); ok {
 			im.logger.Printf("Smart backend detected, skipping SyncIndex")
-			return
+			return nil
 		}
 		go func() {
 			count, err := im.SyncIndex()
@@ -107,6 +114,7 @@ func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
 			}
 		}()
 	}
+	return nil
 }
 
 func (im *ImgManager) Drive() StorageDrive {
@@ -488,6 +496,10 @@ func (im *ImgManager) DeleteImg(paths []string) {
 }
 
 func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64) bool) error {
+	return im.rangeByDate(date, false, f)
+}
+
+func (im *ImgManager) rangeByDate(date time.Time, strict bool, f func(path string, size int64) bool) error {
 	t := date
 	if t.IsZero() {
 		t = time.Now()
@@ -513,6 +525,9 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 		mDir, err := im.listDir(filepath.Base(yinfo.Name()))
 		if err != nil {
 			im.logger.Println("Error listing month dir:", err)
+			if strict {
+				return err
+			}
 			continue
 		}
 		sort.Sort(desc(mDir))
@@ -530,6 +545,9 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 			dDir, err := im.listDir(filepath.Join(yinfo.Name(), minfo.Name()))
 			if err != nil {
 				im.logger.Println("Error listing day dir:", err)
+				if strict {
+					return err
+				}
 				continue
 			}
 			sort.Sort(desc(dDir))
@@ -546,12 +564,19 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 				}
 				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
 				var files []fs.FileInfo
-				im.drive().Range(dirPath, func(info fs.FileInfo) bool {
+				err = im.drive().Range(dirPath, func(info fs.FileInfo) bool {
 					if !info.IsDir() {
 						files = append(files, info)
 					}
 					return true
 				})
+				if err != nil {
+					im.logger.Println("Error listing files:", err)
+					if strict {
+						return err
+					}
+					continue
+				}
 				sort.Slice(files, func(i, j int) bool {
 					return files[i].Name() > files[j].Name()
 				})
@@ -846,16 +871,20 @@ func (im *ImgManager) rangeLockedByDate(date time.Time, f func(path string, size
 }
 
 func (im *ImgManager) SyncIndex() (int, error) {
+	im.indexMu.Lock()
+	defer im.indexMu.Unlock()
+
 	if im.store == nil {
 		return 0, fmt.Errorf("local store not available")
 	}
 
-	// SmartBackend (e.g. Cloudreve) provides its own file listing.
+	// SmartBackend (e.g. Cloudreve) provides a complete file listing.
 	if sb, ok := im.drive().(SmartBackend); ok {
 		files, err := sb.ListPhotos()
 		if err != nil {
 			return 0, err
 		}
+		im.store.ClearRemoteFiles()
 		if len(files) > 0 {
 			im.store.UpsertRemoteFiles(files)
 		}
@@ -904,17 +933,20 @@ func (im *ImgManager) SyncIndex() (int, error) {
 }
 
 func (im *ImgManager) FullResyncIndex() (int, error) {
+	im.indexMu.Lock()
+	defer im.indexMu.Unlock()
+
 	if im.store == nil {
 		return 0, fmt.Errorf("local store not available")
 	}
-	im.store.ClearRemoteFiles()
 
-	// SmartBackend (e.g. Cloudreve) provides its own file listing.
+	// SmartBackend (e.g. Cloudreve) provides a complete file listing.
 	if sb, ok := im.drive().(SmartBackend); ok {
 		files, err := sb.ListPhotos()
 		if err != nil {
 			return 0, err
 		}
+		im.store.ClearRemoteFiles()
 		if len(files) > 0 {
 			im.store.UpsertRemoteFiles(files)
 		}
@@ -924,7 +956,7 @@ func (im *ImgManager) FullResyncIndex() (int, error) {
 
 	now := time.Now()
 	var batch []localstore.RemoteFile
-	err := im.RangeByDate(now, func(path string, size int64) bool {
+	err := im.rangeByDate(now, true, func(path string, size int64) bool {
 		rf := localstore.RemoteFile{
 			Path:    path,
 			Size:    size,
@@ -937,6 +969,7 @@ func (im *ImgManager) FullResyncIndex() (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	im.store.ClearRemoteFiles()
 	if len(batch) > 0 {
 		im.store.UpsertRemoteFiles(batch)
 	}

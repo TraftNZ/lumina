@@ -371,7 +371,7 @@ class Asset extends ImageProvider<Asset> {
         quality: 80,
       );
     }
-    if (hasRemote && remote != null) {
+    if (!hasLocal && hasRemote && remote != null) {
       data = await remote!.thumbnail();
     }
     if (data == null || data.isEmpty || !await isValidImage(data)) {
