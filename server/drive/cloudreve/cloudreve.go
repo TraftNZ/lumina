@@ -646,13 +646,28 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 	}
 	c.logger.Printf("Upload: session created for %s: sessionID=%s, chunkSize=%d, uploadURLs=%v", filePath, session.SessionID, session.ChunkSize, session.UploadURLs)
 
-	// Upload chunks according to session.ChunkSize
-	if size <= 0 {
-		return fmt.Errorf("zero-size uploads are not supported")
-	}
+	// Upload chunks according to session.ChunkSize.
+	//
+	// The file is read a chunk at a time rather than buffered whole. This
+	// server is compiled into the app and shares its address space, so holding
+	// an entire original — routinely hundreds of megabytes, far more for 4K
+	// video — is what drove the process past the platform memory limit and got
+	// it killed mid-sync.
 	chunkSize := session.ChunkSize
 	if chunkSize <= 0 {
+		// No chunk size means the server wants the whole file in one request.
 		chunkSize = size
+	}
+	if chunkSize <= 0 {
+		// An empty file still needs a single (empty) request.
+		chunkSize = 1
+	}
+
+	// Only buffer when the file is actually split; a single-chunk upload is
+	// streamed straight through so its size never bounds memory.
+	var buf []byte
+	if chunkSize < size {
+		buf = make([]byte, chunkSize)
 	}
 
 	// If server provides upload_urls, use those (non-local storage policy).
@@ -667,29 +682,32 @@ func (c *Cloudreve) Upload(filePath string, reader io.ReadCloser, size int64, mo
 	}
 
 	for i := int64(0); i < totalChunks; i++ {
-		remaining := size - i*chunkSize
-		if remaining < 0 {
-			remaining = 0
-		}
-		currentChunkSize := chunkSize
-		if remaining < currentChunkSize {
-			currentChunkSize = remaining
-		}
-		chunk := make([]byte, currentChunkSize)
-		if _, err := io.ReadFull(reader, chunk); err != nil {
-			return fmt.Errorf("read upload chunk %d for %s: %w", i, filePath, err)
+		start := i * chunkSize
+		n := chunkSize
+		if remaining := size - start; remaining < n {
+			n = remaining
 		}
 
-		c.logger.Printf("Upload: chunk %d/%d for %s (size=%d, useUploadURLs=%v)", i+1, totalChunks, filePath, len(chunk), useUploadURLs)
+		var body chunkBody
+		if buf != nil {
+			if _, err := io.ReadFull(reader, buf[:n]); err != nil {
+				return fmt.Errorf("read chunk %d for %s: %w", i, filePath, err)
+			}
+			body = bufferedChunk(buf[:n])
+		} else {
+			body = streamedChunk(io.LimitReader(reader, n), n)
+		}
+
+		c.logger.Printf("Upload: chunk %d/%d for %s (size=%d, useUploadURLs=%v)", i+1, totalChunks, filePath, n, useUploadURLs)
 
 		if useUploadURLs && int(i) < len(session.UploadURLs) {
 			// Upload directly to the external storage URL provided by server
-			if err := c.uploadChunkToURL(session.UploadURLs[i], chunk, i*chunkSize, size); err != nil {
+			if err := c.uploadChunkToURL(session.UploadURLs[i], body, start, size); err != nil {
 				return fmt.Errorf("upload chunk %d for %s: %w", i, filePath, err)
 			}
 		} else {
 			// Upload to Cloudreve server (local storage policy)
-			if err := c.uploadChunk(session.SessionID, i, chunk); err != nil {
+			if err := c.uploadChunk(session.SessionID, i, body); err != nil {
 				return fmt.Errorf("upload chunk %d for %s: %w", i, filePath, err)
 			}
 		}
@@ -730,20 +748,45 @@ func (c *Cloudreve) createUploadSession(fileURI string, size, modMs int64, entit
 	return &session, nil
 }
 
-func (c *Cloudreve) uploadChunk(sessionID string, index int64, chunk []byte) error {
+// chunkBody is the payload of one chunk request: its exact length plus a way
+// to obtain the bytes. reset yields a fresh reader per attempt, or nil once the
+// payload is exhausted — a chunk streamed straight from the source file cannot
+// be replayed, so it is sent once and not retried.
+type chunkBody struct {
+	length int64
+	reset  func() io.Reader
+}
+
+// bufferedChunk wraps bytes held in memory, which can be replayed on retry.
+func bufferedChunk(b []byte) chunkBody {
+	return chunkBody{
+		length: int64(len(b)),
+		reset:  func() io.Reader { return bytes.NewReader(b) },
+	}
+}
+
+// streamedChunk wraps a one-shot reader of exactly n bytes.
+func streamedChunk(r io.Reader, n int64) chunkBody {
+	consumed := false
+	return chunkBody{
+		length: n,
+		reset: func() io.Reader {
+			if consumed {
+				return nil
+			}
+			consumed = true
+			return r
+		},
+	}
+}
+
+func (c *Cloudreve) uploadChunk(sessionID string, index int64, body chunkBody) error {
 	if err := c.ensureAuth(); err != nil {
 		return fmt.Errorf("auth failed: %w", err)
 	}
 
 	// Cloudreve uses POST for chunk uploads: POST /api/v4/file/upload/:sessionId/:index
 	uploadURL := fmt.Sprintf("%s/api/v4/file/upload/%s/%d", c.server, sessionID, index)
-	req, err := http.NewRequest("POST", uploadURL, bytes.NewReader(chunk))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+c.accessToken)
-	req.Header.Set("Content-Type", "application/octet-stream")
-	req.ContentLength = int64(len(chunk))
 
 	const maxRetries = 3
 	var lastErr error
@@ -751,9 +794,19 @@ func (c *Cloudreve) uploadChunk(sessionID string, index int64, chunk []byte) err
 		if attempt > 0 {
 			c.logger.Printf("Upload: chunk retry %d/%d (lastErr=%v)", attempt+1, maxRetries, lastErr)
 			time.Sleep(time.Duration(attempt*2) * time.Second)
-			// Reset body for retry
-			req.Body = io.NopCloser(bytes.NewReader(chunk))
 		}
+		payload := body.reset()
+		if payload == nil {
+			break
+		}
+		req, err := http.NewRequest("POST", uploadURL, payload)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", "Bearer "+c.accessToken)
+		req.Header.Set("Content-Type", "application/octet-stream")
+		req.ContentLength = body.length
+
 		resp, err := c.client.Do(req)
 		if err != nil {
 			lastErr = fmt.Errorf("request failed: %w", err)
@@ -781,16 +834,10 @@ func (c *Cloudreve) uploadChunk(sessionID string, index int64, chunk []byte) err
 
 // uploadChunkToURL uploads a chunk directly to an external storage URL (OneDrive, S3, etc.)
 // totalSize is the full file size, chunkStart is the byte offset of this chunk.
-func (c *Cloudreve) uploadChunkToURL(uploadURL string, chunk []byte, chunkStart, totalSize int64) error {
-	req, err := http.NewRequest("PUT", uploadURL, bytes.NewReader(chunk))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/octet-stream")
-	req.ContentLength = int64(len(chunk))
+func (c *Cloudreve) uploadChunkToURL(uploadURL string, body chunkBody, chunkStart, totalSize int64) error {
 	// OneDrive requires Content-Range header for upload sessions
-	chunkEnd := chunkStart + int64(len(chunk)) - 1
-	req.Header.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", chunkStart, chunkEnd, totalSize))
+	chunkEnd := chunkStart + body.length - 1
+	contentRange := fmt.Sprintf("bytes %d-%d/%d", chunkStart, chunkEnd, totalSize)
 
 	const maxRetries = 3
 	var lastErr error
@@ -798,8 +845,19 @@ func (c *Cloudreve) uploadChunkToURL(uploadURL string, chunk []byte, chunkStart,
 		if attempt > 0 {
 			c.logger.Printf("Upload: external chunk retry %d/%d (lastErr=%v)", attempt+1, maxRetries, lastErr)
 			time.Sleep(time.Duration(attempt*2) * time.Second)
-			req.Body = io.NopCloser(bytes.NewReader(chunk))
 		}
+		payload := body.reset()
+		if payload == nil {
+			break
+		}
+		req, err := http.NewRequest("PUT", uploadURL, payload)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Content-Type", "application/octet-stream")
+		req.ContentLength = body.length
+		req.Header.Set("Content-Range", contentRange)
+
 		resp, err := c.client.Do(req)
 		if err != nil {
 			lastErr = fmt.Errorf("request failed: %w", err)

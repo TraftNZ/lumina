@@ -28,6 +28,120 @@ enum GalleryViewMode { years, months, all }
 
 const int _autoSyncBatchLimit = 20;
 
+/// Gap between photo tiles, both axes.
+const double _gridSpacing = 2;
+
+/// Badges sit directly on the photo, which can be any colour; without a shadow
+/// a white icon disappears over a bright thumbnail.
+const List<Shadow> _badgeShadows = [
+  Shadow(blurRadius: 4, color: Colors.black87),
+];
+
+/// Fills a tile that has no image to show — still loading, or a file the
+/// backend cannot render a thumbnail for at all. Videos in particular keep the
+/// play badge drawn over this, so an empty tile still reads as a video rather
+/// than as a failure.
+Widget _tilePlaceholder(ColorScheme colorScheme) => Container(
+  key: const ValueKey('ph'),
+  color: colorScheme.surfaceContainerHighest,
+);
+
+/// One rendered row of the "all" view: either a day header or a run of photos.
+class _GalleryRow {
+  /// Non-null when this row is a day header.
+  final DateTime? header;
+
+  /// Range into [_GalleryLayout.visible] when this row holds photos.
+  final int start;
+  final int count;
+
+  /// Content-derived identity, so a keyed child can be relocated after the
+  /// underlying list shifts.
+  final String key;
+
+  _GalleryRow.header(DateTime date)
+      : header = date,
+        start = 0,
+        count = 0,
+        key = 'h:${date.year}-${date.month}-${date.day}';
+
+  _GalleryRow.photos(this.start, this.count, String firstId)
+      : header = null,
+        key = 'p:$firstId';
+}
+
+/// Flat row model backing the "all" view.
+///
+/// The gallery used to emit a header sliver plus a grid sliver per day and
+/// spread them all into [CustomScrollView.slivers]. A sliver in that list is
+/// laid out no matter where the viewport is, so only the tiles *inside* each
+/// grid were lazy: a multi-year library kept tens of thousands of render
+/// objects and semantics nodes resident and pushed the process past the iOS
+/// memory limit. Flattening days into row descriptors lets a single
+/// [SliverList] build only the rows on screen.
+class _GalleryLayout {
+  final List<Asset> assets;
+  final int columns;
+
+  /// Indices into [assets] that are renderable, in display order.
+  final List<int> visible;
+  final List<_GalleryRow> rows;
+  final Map<String, int> rowIndexByKey;
+
+  _GalleryLayout._(
+    this.assets,
+    this.columns,
+    this.visible,
+    this.rows,
+    this.rowIndexByKey,
+  );
+
+  factory _GalleryLayout.build(List<Asset> assets, int columns) {
+    final visible = <int>[];
+    final rows = <_GalleryRow>[];
+    int cursor = 0;
+    while (cursor < assets.length) {
+      if (assets[cursor].name() == null) {
+        cursor++;
+        continue;
+      }
+      final dayDate = assets[cursor].dateCreated();
+      final dayStart = visible.length;
+      while (cursor < assets.length) {
+        if (assets[cursor].name() == null) {
+          cursor++;
+          continue;
+        }
+        final d = assets[cursor].dateCreated();
+        if (d.year != dayDate.year ||
+            d.month != dayDate.month ||
+            d.day != dayDate.day) {
+          break;
+        }
+        visible.add(cursor);
+        cursor++;
+      }
+      if (visible.length == dayStart) continue;
+
+      rows.add(_GalleryRow.header(dayDate));
+      for (int off = dayStart; off < visible.length; off += columns) {
+        final remaining = visible.length - off;
+        rows.add(_GalleryRow.photos(
+          off,
+          remaining < columns ? remaining : columns,
+          assets[visible[off]].stableId(),
+        ));
+      }
+    }
+
+    final rowIndexByKey = <String, int>{};
+    for (int i = 0; i < rows.length; i++) {
+      rowIndexByKey[rows[i].key] = i;
+    }
+    return _GalleryLayout._(assets, columns, visible, rows, rowIndexByKey);
+  }
+}
+
 class GalleryBody extends StatefulWidget {
   final GalleryViewMode viewMode;
 
@@ -51,6 +165,8 @@ class GalleryBodyState extends State<GalleryBody>
 
   // Keyed by Asset.stableId() so selection survives list reorders/refreshes.
   final Set<String> _selectedIds = {};
+
+  _GalleryLayout? _galleryLayout;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
@@ -855,110 +971,120 @@ class GalleryBodyState extends State<GalleryBody>
     final all = model.getUnifiedAssets();
     final colorScheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).languageCode;
-    final dateFormat = DateFormat(
-      'yyyy MMMM d${l10n.chineseday}  EEEEE',
-      locale,
-    );
+    final dateFormat =
+        DateFormat('yyyy MMMM d${l10n.chineseday}  EEEEE', locale);
+    final layout = _layoutFor(all, columCount);
 
-    final slivers = <Widget>[];
-    int cursor = 0;
-    while (cursor < all.length) {
-      while (cursor < all.length && all[cursor].name() == null) {
-        cursor++;
-      }
-      if (cursor >= all.length) break;
-      final dayDate = all[cursor].dateCreated();
-      final dayItems = <int>[];
-      int scan = cursor;
-      while (scan < all.length) {
-        if (all[scan].name() == null) {
-          scan++;
-          continue;
-        }
-        final d = all[scan].dateCreated();
-        if (d.year != dayDate.year ||
-            d.month != dayDate.month ||
-            d.day != dayDate.day) {
-          break;
-        }
-        dayItems.add(scan);
-        scan++;
-      }
-      cursor = scan;
+    return [
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final row = layout.rows[index];
+            return KeyedSubtree(
+              key: ValueKey(row.key),
+              child: _buildGalleryRow(
+                  context, layout, row, dateFormat, colorScheme),
+            );
+          },
+          childCount: layout.rows.length,
+          findChildIndexCallback: (key) {
+            if (key is! ValueKey<String>) return null;
+            return layout.rowIndexByKey[key.value];
+          },
+        ),
+      ),
+      const SliverToBoxAdapter(child: SizedBox(height: 80)),
+    ];
+  }
 
-      slivers.add(
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-            child: Text(
-              dateFormat.format(dayDate),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+  Widget _buildGalleryRow(
+    BuildContext context,
+    _GalleryLayout layout,
+    _GalleryRow row,
+    DateFormat dateFormat,
+    ColorScheme colorScheme,
+  ) {
+    final header = row.header;
+    if (header != null) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+        child: Text(
+          dateFormat.format(header),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
-            ),
-          ),
-        ),
-      );
-
-      slivers.add(
-        SliverPadding(
-          padding: EdgeInsets.zero,
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columCount,
-              mainAxisSpacing: 2,
-              crossAxisSpacing: 2,
-              childAspectRatio: 1,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, localIndex) {
-                final globalIndex = dayItems[localIndex];
-                final asset = all[globalIndex];
-                final id = asset.stableId();
-                return _PhotoTile(
-                  key: ValueKey(id),
-                  asset: asset,
-                  isSelected: _selectedIds.contains(id),
-                  onTap: () {
-                    if (stateModel.isSelectionMode) {
-                      toggleSelection(id);
-                    } else {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          opaque: false,
-                          transitionDuration: const Duration(milliseconds: 300),
-                          reverseTransitionDuration: const Duration(
-                            milliseconds: 300,
-                          ),
-                          transitionsBuilder: (_, animation, __, child) =>
-                              FadeTransition(opacity: animation, child: child),
-                          pageBuilder: (_, __, ___) =>
-                              GalleryViewerRoute(originIndex: globalIndex),
-                        ),
-                      );
-                    }
-                  },
-                  onLongPress: () {
-                    if (!stateModel.isSelectionMode) toggleSelection(id);
-                  },
-                );
-              },
-              childCount: dayItems.length,
-              findChildIndexCallback: (key) {
-                final id = (key as ValueKey<String>).value;
-                for (int i = 0; i < dayItems.length; i++) {
-                  if (all[dayItems[i]].stableId() == id) return i;
-                }
-                return null;
-              },
-            ),
-          ),
         ),
       );
     }
-    slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 80)));
-    return slivers;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileSize =
+            (constraints.maxWidth - _gridSpacing * (layout.columns - 1)) /
+                layout.columns;
+        final children = <Widget>[];
+        for (int slot = 0; slot < row.count; slot++) {
+          if (slot > 0) {
+            children.add(const SizedBox(width: _gridSpacing));
+          }
+          children.add(SizedBox(
+            width: tileSize,
+            child: _buildPhotoTile(context, layout.assets,
+                layout.visible[row.start + slot]),
+          ));
+        }
+        return Padding(
+          padding: const EdgeInsets.only(bottom: _gridSpacing),
+          child: SizedBox(height: tileSize, child: Row(children: children)),
+        );
+      },
+    );
+  }
+
+  Widget _buildPhotoTile(
+      BuildContext context, List<Asset> all, int globalIndex) {
+    final asset = all[globalIndex];
+    final id = asset.stableId();
+    return _PhotoTile(
+      key: ValueKey(id),
+      asset: asset,
+      isSelected: _selectedIds.contains(id),
+      onTap: () {
+        if (stateModel.isSelectionMode) {
+          toggleSelection(id);
+        } else {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              opaque: false,
+              transitionDuration: const Duration(milliseconds: 300),
+              reverseTransitionDuration: const Duration(milliseconds: 300),
+              transitionsBuilder: (_, animation, __, child) =>
+                  FadeTransition(opacity: animation, child: child),
+              pageBuilder: (_, __, ___) => GalleryViewerRoute(
+                originIndex: globalIndex,
+              ),
+            ),
+          );
+        }
+      },
+      onLongPress: () {
+        if (!stateModel.isSelectionMode) toggleSelection(id);
+      },
+    );
+  }
+
+  /// Row layout for the "all" view, rebuilt only when the asset list instance
+  /// or the column count changes.
+  _GalleryLayout _layoutFor(List<Asset> all, int columns) {
+    final cached = _galleryLayout;
+    if (cached != null &&
+        identical(cached.assets, all) &&
+        cached.columns == columns) {
+      return cached;
+    }
+    final layout = _GalleryLayout.build(all, columns);
+    _galleryLayout = layout;
+    return layout;
   }
 
   Widget _buildYearsGrid(BuildContext context, AssetModel model) {
@@ -1088,7 +1214,7 @@ class GalleryBodyState extends State<GalleryBody>
               builder: (context, model, child) => CustomScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                cacheExtent: 1000,
+                cacheExtent: 500,
                 slivers: [
                   _buildToolbar(),
                   _buildSyncPanel(),
@@ -1198,11 +1324,13 @@ class _PhotoTileState extends State<_PhotoTile> {
                       image: widget.asset.thumbnailProvider(),
                       fit: BoxFit.cover,
                       gaplessPlayback: true,
+                      // Cloud-only assets render straight from the network, so
+                      // a backend that cannot thumbnail the file fails here
+                      // rather than at load time.
+                      errorBuilder: (context, error, stackTrace) =>
+                          _tilePlaceholder(colorScheme),
                     )
-                  : Container(
-                      key: const ValueKey('ph'),
-                      color: colorScheme.surfaceContainerHighest,
-                    ),
+                  : _tilePlaceholder(colorScheme),
             ),
           ),
           if (widget.asset.isVideo())
@@ -1249,6 +1377,18 @@ class _PhotoTileState extends State<_PhotoTile> {
                     Icons.cloud_outlined,
                     size: 14,
                     color: Colors.white,
+                    shadows: _badgeShadows,
+                  );
+                }
+                // A local photo that also exists remotely is backed up. Without
+                // this the grid looks identical whether a photo is safe or has
+                // never left the phone.
+                if (a.hasLocal && a.hasRemote) {
+                  return const Icon(
+                    Icons.cloud_done,
+                    size: 14,
+                    color: Colors.white,
+                    shadows: _badgeShadows,
                   );
                 }
                 return const SizedBox.shrink();
@@ -1339,8 +1479,10 @@ class _TimeGroupTileState extends State<_TimeGroupTile> {
                 ? Image(
                     image: widget.asset.thumbnailProvider(),
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _tilePlaceholder(widget.colorScheme),
                   )
-                : Container(color: widget.colorScheme.surfaceContainerHighest),
+                : _tilePlaceholder(widget.colorScheme),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

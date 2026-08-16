@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/storage/storage.dart';
+import 'package:lumina/storage/hash_cache.dart';
 import 'package:lumina/sync_engine.dart';
 import 'package:lumina/sync_state_persistence.dart';
 import 'package:path_provider/path_provider.dart';
@@ -239,6 +240,12 @@ class AssetModel extends ChangeNotifier {
     // go through the throttled path — the backend DB already reflects the
     // change, so a full syncIndex within _kIndexSyncThrottle is skipped.
     eventBus.on<RemoteRefreshEvent>().listen((event) => refreshRemote());
+    // Hashes pair a local photo with its upload; load them before the first
+    // merge so matching does not silently fall back to filenames on cold start.
+    HashCache.instance.warmUp().then((_) {
+      _unifiedDirty = true;
+      notifyListeners();
+    });
   }
   List<Asset> localAssets = [];
   List<Asset> remoteAssets = [];
@@ -246,7 +253,7 @@ class AssetModel extends ChangeNotifier {
   List<Asset>? _searchResults;
   bool _unifiedDirty = true;
   int columCount = 4;
-  int pageSize = 500;
+  int pageSize = 200;
   bool localHasMore = true;
   bool remoteHasMore = true;
   Completer<bool>? localGetting;
@@ -264,37 +271,76 @@ class AssetModel extends ChangeNotifier {
     return _unifiedAssets;
   }
 
+  /// Pairs local photos with their uploaded copies.
+  ///
+  /// Identity is the file content, never the date. The server rewrites an
+  /// upload's date from EXIF or the original filename when the client-supplied
+  /// one looks wrong, so a photo taken in 2017 but added to the library in 2026
+  /// lands under `2017/12/16/` while the local asset still reports 2026 — a
+  /// date-keyed match can never pair those, and the photo renders twice.
+  /// Matching prefers the content hash the server embeds in the filename and
+  /// falls back to the filename itself for uploads that predate the hash.
   void _rebuildUnifiedList() {
-    // Index remote assets by dedup key
-    final remoteByKey = <String, Asset>{};
+    final remoteByHash = <String, Asset>{};
+    final remoteByName = <String, List<Asset>>{};
     for (final a in remoteAssets) {
-      final key = a.dedupKey;
-      if (key != null) remoteByKey[key] = a;
+      final hash = a.remoteContentHash;
+      if (hash != null) remoteByHash[hash] = a;
+      final n = a.matchName;
+      if (n != null) remoteByName.putIfAbsent(n, () => []).add(a);
     }
 
-    // Merge: local assets gain remote info when a match exists
-    final matchedRemoteKeys = <String>{};
+    final matchedRemotes = <String>{};
     for (final a in localAssets) {
-      final key = a.dedupKey;
-      if (key != null && remoteByKey.containsKey(key)) {
+      final match = _findRemoteFor(a, remoteByHash, remoteByName);
+      if (match?.remote != null) {
         a.hasRemote = true;
-        a.remote = remoteByKey[key]!.remote;
-        matchedRemoteKeys.add(key);
+        a.remote = match!.remote;
+        matchedRemotes.add(match.remote!.path);
       } else {
         a.hasRemote = false;
         a.remote = null;
       }
     }
 
-    // Cloud-only: remote assets with no local match
-    final cloudOnly = remoteAssets.where((a) {
-      final key = a.dedupKey;
-      return key == null || !matchedRemoteKeys.contains(key);
-    });
+    final cloudOnly = remoteAssets.where(
+        (a) => a.remote == null || !matchedRemotes.contains(a.remote!.path));
 
     _unifiedAssets = [...localAssets, ...cloudOnly];
     _unifiedAssets.sort((a, b) => b.dateCreated().compareTo(a.dateCreated()));
     _unifiedDirty = false;
+  }
+
+  /// Resolves the uploaded copy of [local], by content hash when both sides
+  /// know it, otherwise by filename. When several uploads share a filename the
+  /// one created nearest the local date wins, since that is the only signal
+  /// left to separate genuinely different photos that reuse a name.
+  Asset? _findRemoteFor(
+    Asset local,
+    Map<String, Asset> remoteByHash,
+    Map<String, List<Asset>> remoteByName,
+  ) {
+    final entity = local.local;
+    if (entity != null) {
+      final hash = HashCache.instance.cachedHash(entity);
+      if (hash != null && hash.length >= Asset.remoteHashLength) {
+        final byHash = remoteByHash[hash.substring(0, Asset.remoteHashLength)];
+        if (byHash != null) return byHash;
+      }
+    }
+
+    final n = local.matchName;
+    if (n == null) return null;
+    final candidates = remoteByName[n];
+    if (candidates == null || candidates.isEmpty) return null;
+    if (candidates.length == 1) return candidates.first;
+
+    final localDate = local.dateCreated();
+    return candidates.reduce((a, b) =>
+        a.dateCreated().difference(localDate).abs() <=
+                b.dateCreated().difference(localDate).abs()
+            ? a
+            : b);
   }
 
   void removeAssets(List<Asset> assets) {
@@ -575,6 +621,12 @@ class AssetModel extends ChangeNotifier {
 
     final newpath = await allPath.fetchPathProperties(
       filterOptionGroup: FilterOptionGroup(
+        // Titles must come back with the query. On iOS AssetEntity.title is null
+        // unless needTitle is set, and the filename is what pairs a local photo
+        // with an upload the content hash cannot reach: without it those photos
+        // render twice, once local and once cloud-only.
+        imageOption: const FilterOption(needTitle: true),
+        videoOption: const FilterOption(needTitle: true),
         orders: [
           const OrderOption(type: OrderOptionType.createDate, asc: false),
         ],
@@ -707,6 +759,14 @@ Future<void> refreshUnsynchronizedPhotos({bool force = false}) async {
   stateModel.setRefreshingUnsynchronized(true);
   stateModel.setNotSyncedPhotos([]);
 
+  // Stamp the attempt before scanning, not after it succeeds. The scan reads
+  // every original off disk to hash it; if that gets the process killed, a
+  // timestamp written only on success would leave the throttle unarmed and the
+  // next cold start would repeat the identical scan — a boot loop the app
+  // could never escape on its own.
+  await persistence
+      .setLastUnsyncedRefreshAt(DateTime.now().millisecondsSinceEpoch);
+
   final engine = SyncEngine(
     grpcPort: grpcPort,
     httpPort: httpPort,
@@ -715,9 +775,6 @@ Future<void> refreshUnsynchronizedPhotos({bool force = false}) async {
   try {
     final ids = await engine.findNotUploadedIds();
     stateModel.setNotSyncedPhotos(ids);
-    await persistence.setLastUnsyncedRefreshAt(
-      DateTime.now().millisecondsSinceEpoch,
-    );
     await persistence.setCachedNotSyncedIDs(ids);
   } catch (e) {
     print('Error: $e');

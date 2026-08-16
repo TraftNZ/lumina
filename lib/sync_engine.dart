@@ -168,6 +168,15 @@ class SyncEngine {
     }
   }
 
+  /// Assets per streamed request page.
+  static const int _filterPageSize = 50;
+
+  /// How many assets may be hashed at once. Hashing reads an original off disk
+  /// (and materializes iCloud assets on iOS), so this bounds resident bytes.
+  /// The whole page used to be hashed concurrently, which for a page of videos
+  /// meant gigabytes in flight and a kill by the platform memory watchdog.
+  static const int _hashConcurrency = 4;
+
   Future<List<String>> findNotUploadedIds() async {
     final List<String> notUploadedIds = [];
     final re = await _requestPermission();
@@ -274,43 +283,71 @@ class SyncEngine {
 
   Future<void> _sendFilterRequests(
       StreamController<FilterNotUploadedRequest> requests) async {
+    // addStream honors the consumer's pause signal, so hashing suspends when
+    // gRPC's send buffer fills. Adding pages directly to the controller let
+    // the scan run ahead of the network and queue the whole library in memory.
+    try {
+      await requests.addStream(_filterRequestPages());
+    } finally {
+      // Must close even when the scan throws, or the server never sees EOF and
+      // _receiveResponses waits on a stream that will never end.
+      await requests.close();
+    }
+  }
+
+  Stream<FilterNotUploadedRequest> _filterRequestPages() async* {
     final List<AssetPathEntity> paths =
         await PhotoManager.getAssetPathList(type: RequestType.common);
-    for (var path in paths) {
-      if (path.name == localFolder) {
-        final newpath = await path.fetchPathProperties(
-            filterOptionGroup: FilterOptionGroup(
-          orders: [
-            const OrderOption(
-              type: OrderOptionType.createDate,
-              asc: false,
-            ),
-          ],
-        ));
-        int offset = 0;
-        const pageSize = 50;
+    for (final path in paths) {
+      if (path.name != localFolder) continue;
+      final newpath = await path.fetchPathProperties(
+          filterOptionGroup: FilterOptionGroup(
+        orders: [
+          const OrderOption(
+            type: OrderOptionType.createDate,
+            asc: false,
+          ),
+        ],
+      ));
+      if (newpath == null) continue;
 
-        while (true) {
-          final req = FilterNotUploadedRequest(
-              photos:
-                  List<FilterNotUploadedRequestInfo>.empty(growable: true));
-          final List<AssetEntity> assets = await newpath!
-              .getAssetListRange(start: offset, end: offset + pageSize);
-          if (assets.isEmpty) {
-            req.isFinished = true;
-            break;
-          }
-          final futures = <Future<FilterNotUploadedRequestInfo>>[];
-          for (var asset in assets) {
-            futures.add(_createFilterInfo(asset));
-          }
-          req.photos.addAll(await Future.wait(futures));
-          offset += pageSize;
-          requests.add(req);
-        }
+      int offset = 0;
+      while (true) {
+        final List<AssetEntity> assets = await newpath.getAssetListRange(
+            start: offset, end: offset + _filterPageSize);
+        if (assets.isEmpty) break;
+        final infos = await _createFilterInfos(assets);
+        offset += _filterPageSize;
+        yield FilterNotUploadedRequest(photos: infos);
       }
     }
-    await requests.close();
+    // Terminate the stream explicitly. The previous implementation set
+    // isFinished on a request it then discarded without sending, so the server
+    // never learned the scan was complete.
+    yield FilterNotUploadedRequest(isFinished: true);
+  }
+
+  /// Hashes [assets] with at most [_hashConcurrency] files open at a time,
+  /// preserving input order.
+  Future<List<FilterNotUploadedRequestInfo>> _createFilterInfos(
+      List<AssetEntity> assets) async {
+    final results =
+        List<FilterNotUploadedRequestInfo?>.filled(assets.length, null);
+    var next = 0;
+
+    Future<void> worker() async {
+      while (true) {
+        final index = next++;
+        if (index >= assets.length) return;
+        results[index] = await _createFilterInfo(assets[index]);
+      }
+    }
+
+    final workers = assets.length < _hashConcurrency
+        ? assets.length
+        : _hashConcurrency;
+    await Future.wait(List.generate(workers, (_) => worker()));
+    return results.whereType<FilterNotUploadedRequestInfo>().toList();
   }
 
   Future<void> _receiveResponses(
@@ -405,13 +442,23 @@ class SyncEngine {
         req.headers['Image-Date'] = dateStr;
         req.headers['Content-Hash'] = contentHash;
         req.contentLength = await retryFile.length();
-        retryFile.openRead().listen((chunk) {
-          uploaded += chunk.length;
-          onFileProgress(uploaded / imgLen);
-          req.sink.add(chunk);
-        }, onDone: () {
-          req.sink.close();
-        });
+        retryFile.openRead().listen(
+          (chunk) {
+            uploaded += chunk.length;
+            if (imgLen > 0) onFileProgress(uploaded / imgLen);
+            req.sink.add(chunk);
+          },
+          onDone: () => req.sink.close(),
+          // Without this a read failure becomes an unhandled async error,
+          // which is fatal in the background sync isolate. Forwarding it to
+          // the sink surfaces it as a normal send() failure instead, so the
+          // retry loop below can handle it.
+          onError: (Object e, StackTrace st) {
+            req.sink.addError(e, st);
+            req.sink.close();
+          },
+          cancelOnError: true,
+        );
         final response = await req.send();
         if (response.statusCode != 200) {
           final body = await response.stream.bytesToString();

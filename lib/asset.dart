@@ -77,13 +77,35 @@ class Asset extends ImageProvider<Asset> {
     return null;
   }
 
-  String? get dedupKey {
+  /// Number of leading hex characters of the SHA-256 the server writes into
+  /// uploaded filenames (see `encodeName` in server/api/http.go).
+  static const int remoteHashLength = 16;
+
+  static final _hashPrefixRe = RegExp(r'^\d{14}_([a-f0-9]{16})_');
+
+  /// The content hash the server embedded in an uploaded filename, or null for
+  /// uploads that predate the hash prefix.
+  ///
+  /// This is the only part of a remote path that identifies the photo itself:
+  /// the directory and timestamp prefix are derived from a date the server may
+  /// rewrite from EXIF or the original filename, so they cannot be matched
+  /// against the local creation date.
+  String? get remoteContentHash {
+    if (!hasRemote || remote == null) return null;
+    return _hashPrefixRe.firstMatch(basename(remote!.path))?.group(1);
+  }
+
+  /// Filename normalized for matching, scoped by the date the file is filed
+  /// under so two photos sharing a name on different days stay distinct. Case
+  /// is folded because the same photo has been observed stored remotely as both
+  /// `.3GP` and `.3gp`.
+  String? get matchName {
     final n = originalName;
     if (n == null || n.isEmpty) return null;
     final d = _dedupDate(n);
     return "${d.year.toString().padLeft(4, '0')}-"
         "${d.month.toString().padLeft(2, '0')}-"
-        "${d.day.toString().padLeft(2, '0')}_$n";
+        "${d.day.toString().padLeft(2, '0')}_${n.toLowerCase()}";
   }
 
   static final List<RegExp> _filenameDatePatterns = [
@@ -153,8 +175,8 @@ class Asset extends ImageProvider<Asset> {
   String stableId() {
     if (hasLocal && local != null) return 'l:${local!.id}';
     if (hasRemote && remote != null) return 'r:${remote!.path}';
-    final k = dedupKey;
-    if (k != null) return 'k:$k';
+    final n = matchName;
+    if (n != null) return 'k:$n';
     return 'o:${identityHashCode(this)}';
   }
 
@@ -304,11 +326,18 @@ class Asset extends ImageProvider<Asset> {
 
   ImageProvider thumbnailProvider() {
     // For remote-only assets, use cached network image (disk cache + auto retry)
+    // ResizeImage caps the decoded pixel dimensions so 500px server thumbnails
+    // don't each consume ~1MB RGBA in the image cache.
     if (isCloudOnly && remote != null && isServerReady) {
-      return ExtendedNetworkImageProvider(
-        remote!.thumbnailUrl(),
-        cache: true,
-        cacheKey: remote!.path.replaceAll('/', '_'),
+      return ResizeImage(
+        ExtendedNetworkImageProvider(
+          remote!.thumbnailUrl(),
+          cache: true,
+          cacheKey: remote!.path.replaceAll('/', '_'),
+        ),
+        width: 200,
+        height: 200,
+        policy: ResizeImagePolicy.fit,
       );
     }
     try {
@@ -350,9 +379,6 @@ class Asset extends ImageProvider<Asset> {
       _thumbnailDataCompleter!.complete(brokenData.buffer.asUint8List());
       // Reset so next call retries the download instead of returning fallback forever
       _thumbnailDataCompleter = null;
-      if (hasRemote && remote != null) {
-        remote!.thumbnailData = null;
-      }
       return brokenData.buffer.asUint8List();
     } else {
       _thumbnailDataCompleter!.complete(data);
@@ -454,23 +480,24 @@ class Asset extends ImageProvider<Asset> {
     }
     _isInfoReaded = true;
     final data = await imageDataAsync();
+    final pending = <Future<void>>[];
     if (isLocal()) {
       imageWidth = getLocal()!.width;
       imageHeight = getLocal()!.height;
       imageSize = data.length / 1024 / 1024;
       _isSizeInfoReadedFinished = true;
     } else {
-      compute(img.decodeImage, data).then((image) {
+      pending.add(compute(img.decodeImage, data).then((image) {
         if (image != null) {
           imageWidth = image.width;
           imageHeight = image.height;
           imageSize = data.length / 1024 / 1024;
         }
         _isSizeInfoReadedFinished = true;
-      });
+      }));
       _isSizeInfoReadedFinished = true;
     }
-    compute(readExifFromBytes, data).then((exifData) {
+    pending.add(compute(readExifFromBytes, data).then((exifData) {
       if (exifData.isEmpty) {
         print("No Exif data found");
       } else {
@@ -536,7 +563,8 @@ class Asset extends ImageProvider<Asset> {
         }
       }
       _isExifInfoReadedFinished = true;
-    });
+    }));
+    Future.wait(pending).whenComplete(() => _releaseFullImageBytes(data));
   }
 
   @override
@@ -546,46 +574,48 @@ class Asset extends ImageProvider<Asset> {
 
   @override
   ImageStreamCompleter loadImage(Asset key, ImageDecoderCallback decode) {
-    if (extension(path()) == ".gif") {
-      return MultiFrameImageStreamCompleter(
-        codec: _loadAsyncMultiFrame(key),
-        scale: 1,
-        informationCollector: () sync* {
-          yield ErrorDescription('Image provider: ${describeIdentity(key)}');
-        },
-      );
-    }
-    return OneFrameImageStreamCompleter(_loadAsync(key));
+    return MultiFrameImageStreamCompleter(
+      codec: _resolveCodec(key, decode),
+      scale: 1,
+      informationCollector: () sync* {
+        yield ErrorDescription('Image provider: ${describeIdentity(key)}');
+      },
+    );
   }
 
-  Future<ImageInfo> _loadAsync(Asset key) async {
+  Future<ui.Codec> _resolveCodec(Asset key, ImageDecoderCallback decode) async {
     Uint8List data = await imageDataAsync();
     if (data.isEmpty) {
       data = await thumbnailDataAsync();
     }
+    if (data.isEmpty) {
+      data = await _loadFallbackImageData();
+    }
     try {
-      final ui.Codec codec = await ui.instantiateImageCodec(data);
-      final ui.FrameInfo fi = await codec.getNextFrame();
-      return ImageInfo(image: fi.image);
+      final buffer = await ui.ImmutableBuffer.fromUint8List(data);
+      _releaseFullImageBytes(data);
+      // Going through `decode` (instead of `ui.instantiateImageCodec`) lets
+      // Flutter honor cacheWidth/cacheHeight on the consuming Image widget,
+      // capping decoded pixel buffers (e.g. a 12MP HEIC otherwise allocates
+      // ~48MB RGBA per frame and overruns the iOS memory watermark).
+      return await decode(buffer);
     } catch (e) {
       print(e);
     }
-    return await loadFallbackImage("assets/images/gray.jpg");
+    final fallback = await _loadFallbackImageData();
+    final fallbackBuffer = await ui.ImmutableBuffer.fromUint8List(fallback);
+    return await decode(fallbackBuffer);
   }
 
-  Future<ui.Codec> _loadAsyncMultiFrame(Asset key) async {
-    Uint8List data = await imageDataAsync();
-    if (data.isEmpty) {
-      data = await thumbnailDataAsync();
+  // Drops the cached original-image byte buffer once a consumer is done with
+  // it. The decoded ui.Image lives in Flutter's image cache (capped via
+  // PaintingBinding.imageCache); keeping the raw HEIC/JPEG bytes around as
+  // well meant every viewed photo retained its full payload, exhausting the
+  // iOS 3GB memory watermark after scrolling through enough photos.
+  void _releaseFullImageBytes(Uint8List consumed) {
+    if (identical(_data, consumed)) {
+      _data = null;
     }
-    try {
-      final ui.Codec codec = await ui.instantiateImageCodec(data);
-      return codec;
-    } catch (e) {
-      print(e);
-    }
-    data = await _loadFallbackImageData();
-    return ui.instantiateImageCodec(data);
   }
 
   Future<Uint8List> _loadFallbackImageData() async {

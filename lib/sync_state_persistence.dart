@@ -31,7 +31,13 @@ class SyncStatePersistence {
   List<String> get pendingSyncQueue {
     final json = _prefs.getString(_pendingSyncQueueKey);
     if (json == null) return [];
-    return List<String>.from(jsonDecode(json));
+    try {
+      return List<String>.from(jsonDecode(json));
+    } catch (_) {
+      // A write interrupted by the process being killed can leave truncated
+      // JSON. Treat it as an empty queue rather than throwing out of sync.
+      return [];
+    }
   }
 
   Future<void> setPendingSyncQueue(List<String> ids) =>
@@ -39,6 +45,10 @@ class SyncStatePersistence {
 
   Future<void> clearPendingSyncQueue() => _prefs.remove(_pendingSyncQueueKey);
 
+  /// A sync that was killed mid-run never clears the flag, so a run older than
+  /// [_staleThreshold] is treated as finished. Kept side-effect free: every
+  /// caller that sees `false` goes on to call [setSyncInProgress] itself, and
+  /// writing from a getter meant an unawaited future escaping into the void.
   bool get isSyncInProgress {
     final inProgress = _prefs.getBool(_syncInProgressKey) ?? false;
     if (!inProgress) return false;

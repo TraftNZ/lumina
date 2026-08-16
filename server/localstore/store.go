@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS remote_files (
 
 CREATE TABLE IF NOT EXISTS thumb_failures (
     path      TEXT PRIMARY KEY,
-    failed_at INTEGER NOT NULL DEFAULT 0
+    failed_at INTEGER NOT NULL DEFAULT 0,
+    attempts  INTEGER NOT NULL DEFAULT 0
 );
 `
 
@@ -91,10 +92,14 @@ func (s *LocalStore) SwitchDrive(configHash string) error {
 		`ALTER TABLE remote_files ADD COLUMN taken_at INTEGER NOT NULL DEFAULT 0`,
 		`ALTER TABLE remote_files ADD COLUMN latitude REAL NOT NULL DEFAULT 0`,
 		`ALTER TABLE remote_files ADD COLUMN longitude REAL NOT NULL DEFAULT 0`,
+		`ALTER TABLE thumb_failures ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0`,
 	} {
 		db.Exec(stmt) // ignore "duplicate column" errors
 	}
 	db.Exec(`CREATE INDEX IF NOT EXISTS idx_remote_files_taken_at ON remote_files(taken_at)`)
+	// Thumbnail failures were once keyed with a leading slash. Nothing looks
+	// them up under that form any more, so they would sit here unread forever.
+	db.Exec(`DELETE FROM thumb_failures WHERE path LIKE '/%'`)
 
 	s.db = db
 

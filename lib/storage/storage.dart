@@ -11,7 +11,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:lumina/global.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
 import 'package:lumina/util.dart';
 
 RemoteStorage storage = RemoteStorage("127.0.0.1", 10000);
@@ -51,19 +50,21 @@ class RemoteStorage {
       ':',
       ss,
     ]);
-    final fileBytes = await file.readAsBytes();
-    final contentHash = sha256.convert(fileBytes).toString();
+    // Stream through the digest instead of readAsBytes(): a picked video can
+    // be gigabytes, and buffering it whole exhausts the memory limit.
+    final contentHash = (await sha256.bind(file.openRead()).first).toString();
     var req = http.StreamedRequest("POST", Uri.parse("$httpBaseUrl/$name"));
     req.headers['Image-Date'] = dateStr;
     req.headers['Content-Hash'] = contentHash;
-    req.contentLength = fileBytes.length;
+    req.contentLength = await file.length();
     file.openRead().listen(
-      (chunk) {
-        req.sink.add(chunk);
-      },
-      onDone: () {
+      (chunk) => req.sink.add(chunk),
+      onDone: () => req.sink.close(),
+      onError: (Object e, StackTrace st) {
+        req.sink.addError(e, st);
         req.sink.close();
       },
+      cancelOnError: true,
     );
     final response = await req.send();
     if (response.statusCode != 200) {
@@ -117,27 +118,37 @@ class RemoteStorage {
             stateModel.updateUploadProgress(asset.id, uploaded, imgLen);
             req.sink.add(chunk);
           },
-          onDone: () {
+          onDone: () => req.sink.close(),
+          // Surface read failures through send() rather than letting them
+          // escape as unhandled async errors.
+          onError: (Object e, StackTrace st) {
+            req.sink.addError(e, st);
             req.sink.close();
           },
+          cancelOnError: true,
         );
         final response = await req.send();
+        final remotePath = await response.stream.bytesToString();
         if (response.statusCode != 200) {
-          final body = await response.stream.bytesToString();
-          throw Exception("upload failed: [${response.statusCode}] $body");
+          throw Exception("upload failed: [${response.statusCode}] $remotePath");
         }
         stateModel.finishUpload(asset.id, true);
-        // Upload video thumbnail from device (OS-generated frame)
-        if (asset.type == AssetType.video) {
+        // The server cannot decode video frames, so the only thumbnail a video
+        // will ever have is the one the OS already made for us. It is stored
+        // under the path the server just reported, which is where the viewer
+        // looks — the server may have filed the video under a different date
+        // than the one we sent.
+        if (asset.type == AssetType.video && remotePath.isNotEmpty) {
           try {
             final thumb = await asset.thumbnailDataWithSize(
               const ThumbnailSize.square(500),
               quality: 75,
             );
             if (thumb != null && thumb.isNotEmpty) {
-              final thumbUrl = Uri.encodeFull('$httpBaseUrl/thumbnail/$name');
+              final thumbUrl = Uri.encodeFull(
+                '$httpBaseUrl/thumbnail/$remotePath',
+              );
               final thumbReq = http.Request("POST", Uri.parse(thumbUrl));
-              thumbReq.headers['Image-Date'] = dateStr;
               thumbReq.bodyBytes = thumb;
               await thumbReq.send();
             }
@@ -183,14 +194,10 @@ class RemoteStorage {
 }
 
 class RemoteImage {
-  static const int _maxCachedRemoteBytes = 10 * 1024 * 1024;
-
   LuminaClient cli;
   String path;
-  Uint8List? data;
-  Uint8List? thumbnailData;
 
-  RemoteImage(this.cli, this.path, {this.data, this.thumbnailData});
+  RemoteImage(this.cli, this.path);
 
   bool isVideo() {
     return isVideoByPath(path);
@@ -204,10 +211,11 @@ class RemoteImage {
     return Uri.encodeFull('$httpBaseUrl/thumbnail/$urlPath');
   }
 
+  /// Returns empty when the backend has no thumbnail for this file. Video
+  /// formats it cannot decode never get one, and substituting a broken-image
+  /// bitmap here would make that bitmap the asset's thumbnail forever — the
+  /// caller can only draw a proper placeholder if it can tell the two apart.
   Future<Uint8List> thumbnail() async {
-    if (thumbnailData != null) {
-      return thumbnailData!;
-    }
     var urlPath = path;
     if (urlPath.isNotEmpty && urlPath[0] == '/') {
       urlPath = urlPath.substring(1);
@@ -217,14 +225,12 @@ class RemoteImage {
         Uri.parse('$httpBaseUrl/thumbnail/$urlPath'),
       );
       if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
-        thumbnailData = response.bodyBytes;
-        return thumbnailData!;
+        return response.bodyBytes;
       }
     } catch (e) {
       print("get $path thumbnail failed: $e");
     }
-    final data = await rootBundle.load("assets/images/broken.png");
-    return data.buffer.asUint8List();
+    return Uint8List(0);
   }
 
   Stream<Uint8List> dataStream() async* {
@@ -290,18 +296,10 @@ class RemoteImage {
   }
 
   Future<Uint8List> imageData() async {
-    if (data != null && data!.isNotEmpty) {
-      return data!;
-    }
-    var currentData = BytesBuilder();
-    var stream = dataStream();
-    await for (var d in stream) {
+    final currentData = BytesBuilder();
+    await for (final d in dataStream()) {
       currentData.add(d);
     }
-    final result = currentData.takeBytes();
-    if (result.isNotEmpty && result.lengthInBytes <= _maxCachedRemoteBytes) {
-      data = result;
-    }
-    return result;
+    return currentData.takeBytes();
   }
 }

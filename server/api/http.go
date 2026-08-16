@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -14,6 +15,11 @@ import (
 	"strings"
 	"time"
 )
+
+// How long a request will wait for the storage backend to be configured before
+// giving up. Long enough to cover app startup, short enough that a genuinely
+// unconfigured server does not hold connections open.
+const driveWaitTimeout = 15 * time.Second
 
 func (a *api) SetHttpPort(port int) {
 	a.httpPort = port
@@ -78,10 +84,11 @@ func (a *api) httpUpload(w http.ResponseWriter, r *http.Request) {
 		length = int64(len(data))
 	}
 	encoded := encodeName(dateTime, name, contentHash)
+	var remotePath string
 	if isVideo(path) {
-		err = a.im.UploadVideo(body, length, encoded, dateTime)
+		remotePath, err = a.im.UploadVideo(body, length, encoded, dateTime)
 	} else {
-		err = a.im.UploadImg(body, length, encoded, dateTime)
+		remotePath, err = a.im.UploadImg(body, length, encoded, dateTime)
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -89,7 +96,12 @@ func (a *api) httpUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
+	// The stored path is echoed back because the server may have moved the file
+	// to a date recovered from EXIF or from the filename. It is the only handle
+	// the client can use to attach a thumbnail to what was just uploaded.
+	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(remotePath))
 }
 
 func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
@@ -98,13 +110,9 @@ func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	name := strings.TrimPrefix(path, "/thumbnail/")
-	date := r.Header.Get("Image-Date")
-	dateTime, err := time.Parse("2006:01:02 15:04:05", date)
-	if err != nil {
-		dateTime = time.Now()
-	}
-	thumbPath := filepath.Join(".thumbnail", dateTime.Format("2006/01/02"), name)
+	// The path is the remote path httpUpload returned, so the thumbnail is
+	// stored under exactly the key a later lookup will use.
+	remotePath := strings.TrimPrefix(path, "/thumbnail/")
 	data, err := io.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
@@ -112,15 +120,11 @@ func (a *api) httpUploadThumbnail(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	if err := a.im.Drive().Upload(thumbPath, io.NopCloser(bytes.NewReader(data)), int64(len(data)), time.Time{}); err != nil {
-		log.Printf("upload thumbnail error: %v", err)
+	if err := a.im.StoreThumbnail(remotePath, data); err != nil {
+		log.Printf("upload thumbnail error for %s: %v", remotePath, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
-	}
-	// Clear any failure record so the server uses this uploaded thumbnail
-	if store := a.im.Store(); store != nil {
-		store.ClearThumbFailure(filepath.Join(dateTime.Format("2006/01/02"), name))
 	}
 	w.WriteHeader(http.StatusOK)
 }
@@ -207,7 +211,19 @@ func (a *api) httpDownloadThumbnail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	realPath := strings.TrimPrefix(path, "/thumbnail")
+	realPath := strings.TrimPrefix(path, "/thumbnail/")
+	// The gallery requests thumbnails as soon as it has paths, which can be
+	// before the saved backend has finished being restored. Waiting costs a held
+	// connection; not waiting leaves the newest rows blank until the user
+	// scrolls them out of view and back.
+	ctx, cancel := context.WithTimeout(r.Context(), driveWaitTimeout)
+	defer cancel()
+	if err := a.im.WaitForDrive(ctx); err != nil {
+		// Retryable: the drive is not ready yet, the request is not wrong.
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("storage backend not ready"))
+		return
+	}
 	data, err := a.im.GetCachedThumbnail(realPath)
 	if err != nil {
 		log.Printf("thumbnail error for %s: %v", realPath, err)

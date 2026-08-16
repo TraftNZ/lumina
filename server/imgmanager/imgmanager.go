@@ -2,6 +2,7 @@ package imgmanager
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/fs"
@@ -13,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Workiva/go-datastructures/queue"
@@ -20,12 +22,17 @@ import (
 )
 
 const (
-	defaultWorkerNum           = 2
-	defaultThumbnailDir        = ".thumbnail"
-	defaultTrashDir            = ".trash"
-	defaultLockedDir           = ".locked"
-	trashAutoDeleteDays        = 30
-	maxBufferedImageUploadSize = 50 << 20
+	defaultWorkerNum    = 2
+	defaultThumbnailDir = ".thumbnail"
+	defaultTrashDir     = ".trash"
+	defaultLockedDir    = ".locked"
+	trashAutoDeleteDays = 30
+
+	// How much of an image is buffered when its date has to be recovered from
+	// EXIF. Every format we accept carries its metadata in the header, so this
+	// is far more than a scan needs while staying small enough that a 4K
+	// original never has to be held in memory.
+	exifScanLimit = 4 << 20
 )
 
 type TrashItem struct {
@@ -36,7 +43,13 @@ type TrashItem struct {
 }
 
 type ImgManager struct {
+	// dri is replaced whenever the user switches backends, while requests are
+	// already in flight; driReady is closed the first time a real drive lands so
+	// callers that arrive during startup can wait instead of failing.
+	driMu    sync.RWMutex
 	dri      StorageDrive
+	driReady chan struct{}
+
 	actQueue *queue.Queue
 	logger   *log.Logger
 	opt      Option
@@ -57,6 +70,7 @@ func NewImgManager(opt Option) *ImgManager {
 		logger:   log.New(os.Stdout, "[ImgManager] ", log.LstdFlags),
 		opt:      opt,
 		dri:      &UnimplementedDrive{},
+		driReady: make(chan struct{}),
 		store:    opt.LocalStore,
 	}
 	for i := 0; i < im.opt.WorkerNum; i++ {
@@ -70,11 +84,11 @@ func (im *ImgManager) Store() *localstore.LocalStore {
 }
 
 func (im *ImgManager) SetDrive(dri StorageDrive) {
-	im.dri = dri
+	im.setDrive(dri)
 }
 
 func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
-	im.dri = dri
+	im.setDrive(dri)
 	if im.store != nil {
 		if err := im.store.SwitchDrive(configHash); err != nil {
 			im.logger.Printf("Failed to switch drive store: %v", err)
@@ -96,7 +110,38 @@ func (im *ImgManager) SwitchDrive(dri StorageDrive, configHash string) {
 }
 
 func (im *ImgManager) Drive() StorageDrive {
+	return im.drive()
+}
+
+func (im *ImgManager) drive() StorageDrive {
+	im.driMu.RLock()
+	defer im.driMu.RUnlock()
 	return im.dri
+}
+
+func (im *ImgManager) setDrive(dri StorageDrive) {
+	im.driMu.Lock()
+	defer im.driMu.Unlock()
+	im.dri = dri
+	// The write lock is what makes this close exactly once.
+	select {
+	case <-im.driReady:
+	default:
+		close(im.driReady)
+	}
+}
+
+// WaitForDrive blocks until a storage backend has been configured, or ctx is
+// done. Requests can reach the server before the client finishes restoring its
+// saved backend; without this they fail against UnimplementedDrive and the UI
+// renders a permanent gap for content that is in fact available.
+func (im *ImgManager) WaitForDrive(ctx context.Context) error {
+	select {
+	case <-im.driReady:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 type actType int
@@ -126,14 +171,14 @@ func (im *ImgManager) runWorker() {
 		act := item[0].(action)
 		switch act.t {
 		case actUpload:
-			err := im.dri.Upload(
+			err := im.drive().Upload(
 				act.path,
 				io.NopCloser(bytes.NewReader(act.content)), int64(len(act.content)), act.lastModified)
 			if err != nil {
 				im.logger.Println("Error uploading image:", err)
 			}
 		case actDelete:
-			err := im.dri.Delete(act.path)
+			err := im.drive().Delete(act.path)
 			if err != nil {
 				im.logger.Println("Error deleting image:", err)
 			}
@@ -150,9 +195,13 @@ func (im *ImgManager) UploadImgAsync(path string, content []byte, lastModified t
 	})
 }
 
-func (im *ImgManager) UploadVideo(content io.Reader, contentSize int64, name string, date time.Time) error {
+// UploadVideo stores the video and returns the remote path it was written to.
+// The path is not derivable by the caller: the date carried by the client is
+// overridden here whenever the filename disagrees with it, which moves the file
+// into a different directory and rewrites its name.
+func (im *ImgManager) UploadVideo(content io.Reader, contentSize int64, name string, date time.Time) (string, error) {
 	if content == nil {
-		return fmt.Errorf("no video data")
+		return "", fmt.Errorf("no video data")
 	}
 	// If client-provided date looks wrong (future or very recent),
 	// try to extract the real date from the original filename.
@@ -166,52 +215,43 @@ func (im *ImgManager) UploadVideo(content io.Reader, contentSize int64, name str
 		}
 	}
 	path := filepath.Join(date.Format("2006/01/02"), name)
-	err := im.dri.Upload(path, io.NopCloser(content), contentSize, date)
+	err := im.drive().Upload(path, io.NopCloser(content), contentSize, date)
 	if err != nil {
 		im.logger.Println("Error uploading video:", err)
-		return fmt.Errorf("error uploading video: %w", err)
+		return "", fmt.Errorf("error uploading video: %w", err)
 	}
 	if im.store != nil {
 		im.store.UpsertRemoteFile(path, contentSize, date)
 	}
-	return nil
+	return path, nil
 }
 
-func (im *ImgManager) UploadImg(content io.Reader, contentSize int64, name string, date time.Time) error {
-	if content == nil {
-		return fmt.Errorf("no image data")
+// UploadImg stores the image and returns the remote path it was written to.
+// As with UploadVideo the path is decided here, since EXIF can override the
+// date the client supplied.
+func (im *ImgManager) UploadImg(content io.Reader, contentSize int64, name string, date time.Time) (string, error) {
+	if content == nil || contentSize <= 0 {
+		return "", fmt.Errorf("no image data")
 	}
-	if contentSize > maxBufferedImageUploadSize {
-		if fnDate, ok := extractDateFromOriginalName(name); ok {
-			if date.IsZero() || dateLooksSuspicious(date) || dateDiffSignificant(date, fnDate) {
-				date = fnDate
-				name = reEncodeName(name, date)
-			}
-		}
-		if date.Before(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)) || date.IsZero() {
-			date = time.Now()
-		}
-		path := filepath.Join(date.Format("2006/01/02"), name)
-		err := im.dri.Upload(path, io.NopCloser(content), contentSize, date)
-		if err != nil {
-			im.logger.Println("Error uploading image:", err)
-			return err
-		}
-		if im.store != nil {
-			im.store.UpsertRemoteFile(path, contentSize, date)
-		}
-		return nil
-	}
-	data, err := io.ReadAll(content)
-	if err != nil {
-		return err
-	}
-	if len(data) == 0 {
-		return fmt.Errorf("no image data")
-	}
-	// Try EXIF extraction if date is missing or looks suspicious (future/very recent)
+	// The image is streamed to the drive; only the leading bytes are ever held,
+	// and only when the date is untrustworthy enough to need EXIF. This server
+	// is compiled into the app and shares its address space, so buffering whole
+	// originals is what drove the process past the platform memory limit.
+	body := content
 	if date.IsZero() || dateLooksSuspicious(date) {
-		meta, metaErr := GetImageMetadata(data)
+		head := make([]byte, min(int64(exifScanLimit), contentSize))
+		n, err := io.ReadFull(content, head)
+		if err != nil && err != io.ErrUnexpectedEOF && err != io.EOF {
+			return "", err
+		}
+		head = head[:n]
+		// Put the consumed prefix back in front of the rest of the file.
+		body = io.MultiReader(bytes.NewReader(head), content)
+
+		// EXIF lives in the header of every format we accept; an image whose
+		// metadata falls outside the scanned prefix keeps the client's date,
+		// exactly as one carrying no EXIF at all does.
+		meta, metaErr := GetImageMetadata(head)
 		if metaErr == nil {
 			var dateStr string
 			if meta.DateTimeOriginal != "" {
@@ -244,22 +284,20 @@ func (im *ImgManager) UploadImg(content io.Reader, contentSize int64, name strin
 		date = time.Now()
 	}
 	path := filepath.Join(date.Format("2006/01/02"), name)
-	err = im.dri.Upload(path,
-		io.NopCloser(bytes.NewReader(data)), int64(len(data)), date)
-	if err != nil {
+	if err := im.drive().Upload(path, io.NopCloser(body), contentSize, date); err != nil {
 		im.logger.Println("Error uploading image:", err)
-		return err
+		return "", err
 	}
 	if im.store != nil {
-		im.store.UpsertRemoteFile(path, int64(len(data)), date)
+		im.store.UpsertRemoteFile(path, contentSize, date)
 	}
-	return nil
+	return path, nil
 }
 
 func (im *ImgManager) GetImg(path string) (*Image, error) {
 	img := &Image{}
 	var err error
-	img.Content, img.Size, err = im.dri.Download(path)
+	img.Content, img.Size, err = im.drive().Download(path)
 	if err != nil {
 		return img, err
 	}
@@ -270,7 +308,7 @@ func (im *ImgManager) GetImg(path string) (*Image, error) {
 func (im *ImgManager) GetOffset(path string, offset int64) (*Image, error) {
 	img := &Image{}
 	var err error
-	img.Content, img.Size, err = im.dri.DownloadWithOffset(path, offset)
+	img.Content, img.Size, err = im.drive().DownloadWithOffset(path, offset)
 	if err != nil {
 		return img, err
 	}
@@ -283,51 +321,117 @@ const (
 	thumbnailMaxHeight = 500
 )
 
+// thumbnailKey normalises a remote path into the single form used for the
+// thumbnail disk cache and the failure table. Requests reach the server both
+// with and without a leading slash, and a lookup keyed differently from the
+// store that satisfies it never hits.
+func thumbnailKey(path string) string {
+	return strings.TrimPrefix(filepath.ToSlash(filepath.Clean("/"+path)), "/")
+}
+
+// thumbCachePath returns where the thumbnail for key lives on disk, or "" if
+// there is no store to hold it.
+func (im *ImgManager) thumbCachePath(key string) string {
+	if im.store == nil {
+		return ""
+	}
+	return filepath.Join(im.store.ThumbCacheDir(), key)
+}
+
+// StoreThumbnail caches a thumbnail the client generated for an already
+// uploaded file. The client can produce thumbnails the server cannot — video
+// frames in particular need a decoder that is not compiled in — so accepting
+// them is the only way those entries ever get an image.
+func (im *ImgManager) StoreThumbnail(path string, data []byte) error {
+	if len(data) == 0 {
+		return fmt.Errorf("no thumbnail data")
+	}
+	key := thumbnailKey(path)
+	if key == "" || key == "." {
+		return fmt.Errorf("no thumbnail path")
+	}
+	if cachePath := im.thumbCachePath(key); cachePath != "" {
+		if err := os.MkdirAll(filepath.Dir(cachePath), 0755); err != nil {
+			return fmt.Errorf("create thumbnail cache dir: %w", err)
+		}
+		if err := os.WriteFile(cachePath, data, 0644); err != nil {
+			return fmt.Errorf("write thumbnail cache: %w", err)
+		}
+	}
+	// A smart backend serves its own thumbnails, so pushing one into the user's
+	// storage would only leave a directory nothing ever reads.
+	if _, smart := im.drive().(SmartBackend); !smart {
+		thumbPath := filepath.Join(defaultThumbnailDir, key)
+		if err := im.drive().Upload(thumbPath,
+			io.NopCloser(bytes.NewReader(data)), int64(len(data)), time.Time{}); err != nil {
+			return fmt.Errorf("upload thumbnail: %w", err)
+		}
+	}
+	if im.store != nil {
+		im.store.ClearThumbFailure(key)
+	}
+	return nil
+}
+
+// moveThumbnail follows a file that has been renamed, so its thumbnail stays
+// reachable under the file's new path.
+func (im *ImgManager) moveThumbnail(oldPath, newPath string) {
+	oldKey, newKey := thumbnailKey(oldPath), thumbnailKey(newPath)
+	if oldKey == newKey {
+		return
+	}
+	if oldCache, newCache := im.thumbCachePath(oldKey), im.thumbCachePath(newKey); oldCache != "" {
+		if err := os.MkdirAll(filepath.Dir(newCache), 0755); err == nil {
+			_ = os.Rename(oldCache, newCache)
+		}
+	}
+	if _, smart := im.drive().(SmartBackend); !smart {
+		_ = im.drive().Rename(
+			filepath.Join(defaultThumbnailDir, oldKey),
+			filepath.Join(defaultThumbnailDir, newKey))
+	}
+	if im.store != nil {
+		im.store.ClearThumbFailure(oldKey)
+	}
+}
+
 func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
+	key := thumbnailKey(path)
+
+	// Locally cached thumbnails are authoritative for every backend: they are
+	// either a previous fetch or one the client uploaded for us.
+	if cachePath := im.thumbCachePath(key); cachePath != "" {
+		if data, err := os.ReadFile(cachePath); err == nil && len(data) > 0 {
+			return data, nil
+		}
+	}
+
+	// Skip paths that failed recently enough that retrying would just fail again.
+	if im.store != nil && im.store.IsThumbFailed(key) {
+		return nil, fmt.Errorf("thumbnail previously failed for %s", filepath.Base(key))
+	}
+
 	// Smart backend handles its own thumbnails
-	if sb, ok := im.dri.(SmartBackend); ok {
-		// Check on-disk cache first
-		if im.store != nil {
-			cachePath := filepath.Join(im.store.ThumbCacheDir(), path)
-			if data, err := os.ReadFile(cachePath); err == nil && len(data) > 0 {
-				return data, nil
-			}
-		}
-
-		// Check failure table
-		if im.store != nil && im.store.IsThumbFailed(path) {
-			return nil, fmt.Errorf("thumbnail previously failed for %s", filepath.Base(path))
-		}
-
-		// Fetch from SmartBackend
-		data, err := sb.GetThumbnail(path)
+	if sb, ok := im.drive().(SmartBackend); ok {
+		data, err := sb.GetThumbnail(key)
 		if err != nil {
 			if im.store != nil {
-				im.store.MarkThumbFailed(path)
+				im.store.MarkThumbFailed(key)
 			}
 			return nil, err
 		}
-
-		// Write to disk cache asynchronously
-		if im.store != nil {
-			cachePath := filepath.Join(im.store.ThumbCacheDir(), path)
+		if cachePath := im.thumbCachePath(key); cachePath != "" {
 			go func() {
 				os.MkdirAll(filepath.Dir(cachePath), 0755)
 				os.WriteFile(cachePath, data, 0644)
 			}()
 		}
-
 		return data, nil
 	}
 
-	// 1. Check failure table — skip known failures instantly
-	if im.store != nil && im.store.IsThumbFailed(path) {
-		return nil, fmt.Errorf("thumbnail previously failed for %s", filepath.Base(path))
-	}
-
-	// 2. Try pre-generated thumbnail from remote storage (.thumbnail/<path>)
-	thumbPath := filepath.Join(defaultThumbnailDir, path)
-	if thumbReader, _, err := im.dri.Download(thumbPath); err == nil {
+	// Try a pre-generated thumbnail from remote storage (.thumbnail/<path>)
+	thumbPath := filepath.Join(defaultThumbnailDir, key)
+	if thumbReader, _, err := im.drive().Download(thumbPath); err == nil {
 		data, readErr := io.ReadAll(thumbReader)
 		thumbReader.Close()
 		if readErr == nil && len(data) > 0 {
@@ -335,9 +439,9 @@ func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
 		}
 	}
 
-	// 3. Generate on-demand via generator pipeline
-	ext := strings.ToLower(filepath.Ext(path))
-	fullImg, _, err := im.dri.Download(path)
+	// Generate on-demand via generator pipeline
+	ext := strings.ToLower(filepath.Ext(key))
+	fullImg, _, err := im.drive().Download(key)
 	if err != nil {
 		return nil, fmt.Errorf("error downloading original: %w", err)
 	}
@@ -346,13 +450,13 @@ func (im *ImgManager) GetCachedThumbnail(path string) ([]byte, error) {
 	thumbData, err := generateThumbnail(fullImg, ext)
 	if err != nil {
 		if im.store != nil {
-			im.store.MarkThumbFailed(path)
+			im.store.MarkThumbFailed(key)
 		}
 		return nil, fmt.Errorf("thumbnail generation failed: %w", err)
 	}
 
 	// Upload generated thumbnail to remote for future use
-	im.dri.Upload(thumbPath,
+	im.drive().Upload(thumbPath,
 		io.NopCloser(bytes.NewReader(thumbData)), int64(len(thumbData)), time.Time{})
 
 	return thumbData, nil
@@ -362,7 +466,7 @@ func (im *ImgManager) DeleteSingleImg(path string) error {
 	if path == "" {
 		return nil
 	}
-	err := im.dri.Delete(path)
+	err := im.drive().Delete(path)
 	if err == nil && im.store != nil {
 		im.store.RemoveRemoteFile(path)
 	}
@@ -442,7 +546,7 @@ func (im *ImgManager) RangeByDate(date time.Time, f func(path string, size int64
 				}
 				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
 				var files []fs.FileInfo
-				im.dri.Range(dirPath, func(info fs.FileInfo) bool {
+				im.drive().Range(dirPath, func(info fs.FileInfo) bool {
 					if !info.IsDir() {
 						files = append(files, info)
 					}
@@ -470,7 +574,7 @@ BREAK:
 
 func (im *ImgManager) listDir(path string) ([]fs.FileInfo, error) {
 	infos := make([]fs.FileInfo, 0)
-	err := im.dri.Range(path, func(info fs.FileInfo) bool {
+	err := im.drive().Range(path, func(info fs.FileInfo) bool {
 		infos = append(infos, info)
 		return true
 	})
@@ -479,7 +583,7 @@ func (im *ImgManager) listDir(path string) ([]fs.FileInfo, error) {
 
 func (im *ImgManager) MoveToTrash(path string) error {
 	trashPath := filepath.Join(defaultTrashDir, path)
-	if err := im.dri.Rename(path, trashPath); err != nil {
+	if err := im.drive().Rename(path, trashPath); err != nil {
 		return fmt.Errorf("move to trash error: %w", err)
 	}
 	if im.store != nil {
@@ -491,7 +595,7 @@ func (im *ImgManager) MoveToTrash(path string) error {
 func (im *ImgManager) RestoreFromTrash(trashPath string) error {
 	originalPath := trashPath
 	fullTrashPath := filepath.Join(defaultTrashDir, trashPath)
-	if err := im.dri.Rename(fullTrashPath, originalPath); err != nil {
+	if err := im.drive().Rename(fullTrashPath, originalPath); err != nil {
 		return fmt.Errorf("restore from trash error: %w", err)
 	}
 	if im.store != nil {
@@ -512,7 +616,7 @@ func (im *ImgManager) ListTrash(offset, maxReturn int) ([]TrashItem, error) {
 		// Auto-purge files older than 30 days
 		if now.Sub(modTime) > trashAutoDeleteDays*24*time.Hour {
 			fullPath := filepath.Join(defaultTrashDir, path)
-			_ = im.dri.Delete(fullPath)
+			_ = im.drive().Delete(fullPath)
 			return true
 		}
 		if currentOffset < offset {
@@ -535,7 +639,7 @@ func (im *ImgManager) EmptyTrash() error {
 	var lastErr error
 	im.rangeTrashByDate(now, func(path string, size int64, modTime time.Time) bool {
 		fullPath := filepath.Join(defaultTrashDir, path)
-		if err := im.dri.Delete(fullPath); err != nil {
+		if err := im.drive().Delete(fullPath); err != nil {
 			im.logger.Printf("Error deleting trash item %s: %v", fullPath, err)
 			lastErr = err
 		}
@@ -603,7 +707,7 @@ func (im *ImgManager) rangeTrashByDate(date time.Time, f func(path string, size 
 				}
 				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
 				goOn := true
-				im.dri.Range(filepath.Join(defaultTrashDir, dirPath), func(info fs.FileInfo) bool {
+				im.drive().Range(filepath.Join(defaultTrashDir, dirPath), func(info fs.FileInfo) bool {
 					if info.IsDir() {
 						return true
 					}
@@ -622,7 +726,7 @@ func (im *ImgManager) rangeTrashByDate(date time.Time, f func(path string, size 
 
 func (im *ImgManager) MoveToLocked(path string) error {
 	lockedPath := filepath.Join(defaultLockedDir, path)
-	if err := im.dri.Rename(path, lockedPath); err != nil {
+	if err := im.drive().Rename(path, lockedPath); err != nil {
 		return fmt.Errorf("move to locked error: %w", err)
 	}
 	if im.store != nil {
@@ -634,7 +738,7 @@ func (im *ImgManager) MoveToLocked(path string) error {
 func (im *ImgManager) RestoreFromLocked(lockedPath string) error {
 	originalPath := lockedPath
 	fullLockedPath := filepath.Join(defaultLockedDir, lockedPath)
-	if err := im.dri.Rename(fullLockedPath, originalPath); err != nil {
+	if err := im.drive().Rename(fullLockedPath, originalPath); err != nil {
 		return fmt.Errorf("restore from locked error: %w", err)
 	}
 	if im.store != nil {
@@ -726,7 +830,7 @@ func (im *ImgManager) rangeLockedByDate(date time.Time, f func(path string, size
 				}
 				dirPath := filepath.Join(yinfo.Name(), minfo.Name(), dinfo.Name())
 				goOn := true
-				im.dri.Range(filepath.Join(defaultLockedDir, dirPath), func(info fs.FileInfo) bool {
+				im.drive().Range(filepath.Join(defaultLockedDir, dirPath), func(info fs.FileInfo) bool {
 					if info.IsDir() {
 						return true
 					}
@@ -747,7 +851,7 @@ func (im *ImgManager) SyncIndex() (int, error) {
 	}
 
 	// SmartBackend (e.g. Cloudreve) provides its own file listing.
-	if sb, ok := im.dri.(SmartBackend); ok {
+	if sb, ok := im.drive().(SmartBackend); ok {
 		files, err := sb.ListPhotos()
 		if err != nil {
 			return 0, err
@@ -806,7 +910,7 @@ func (im *ImgManager) FullResyncIndex() (int, error) {
 	im.store.ClearRemoteFiles()
 
 	// SmartBackend (e.g. Cloudreve) provides its own file listing.
-	if sb, ok := im.dri.(SmartBackend); ok {
+	if sb, ok := im.drive().(SmartBackend); ok {
 		files, err := sb.ListPhotos()
 		if err != nil {
 			return 0, err
@@ -1015,11 +1119,14 @@ func (im *ImgManager) FixDatesVerbose(targetDir string, w io.Writer) (moved int,
 		// 2. For images, try EXIF
 		if !found && isImageFile(originalName) {
 			fmt.Fprintf(w, "[FixDates] downloading %s for EXIF...\n", f.Path)
-			content, _, dlErr := im.dri.Download(f.Path)
+			content, _, dlErr := im.drive().Download(f.Path)
 			if dlErr != nil {
 				fmt.Fprintf(w, "[FixDates] download error for %s: %v\n", f.Path, dlErr)
 			} else {
-				data, readErr := io.ReadAll(content)
+				// Only the header is needed, and only the header is read: this
+				// runs inside the app's own process, where a whole original is
+				// enough to get it killed.
+				data, readErr := io.ReadAll(io.LimitReader(content, exifScanLimit))
 				content.Close()
 				if readErr != nil {
 					fmt.Fprintf(w, "[FixDates] read error for %s: %v\n", f.Path, readErr)
@@ -1057,17 +1164,16 @@ func (im *ImgManager) FixDatesVerbose(targetDir string, w io.Writer) (moved int,
 		}
 
 		fmt.Fprintf(w, "[FixDates] moving %s -> %s\n", f.Path, newPath)
-		if renameErr := im.dri.Rename(f.Path, newPath); renameErr != nil {
+		if renameErr := im.drive().Rename(f.Path, newPath); renameErr != nil {
 			fmt.Fprintf(w, "[FixDates] rename error: %v\n", renameErr)
 			continue
 		}
 		// Update store
 		im.store.RemoveRemoteFile(f.Path)
 		im.store.UpsertRemoteFile(newPath, f.Size, correctDate)
-		// Also move thumbnail if it exists
-		oldThumb := filepath.Join(defaultThumbnailDir, parts[0], parts[1], parts[2], originalName)
-		newThumb := filepath.Join(defaultThumbnailDir, correctDate.Format("2006/01/02"), originalName)
-		_ = im.dri.Rename(oldThumb, newThumb)
+		// The thumbnail is keyed by the file's path, so moving the file without
+		// moving its thumbnail loses it.
+		im.moveThumbnail(f.Path, newPath)
 		moved++
 	}
 	return moved, nil
@@ -1085,7 +1191,7 @@ func isVideoFile(name string) bool {
 // extractVideoDate downloads a video and uses ffprobe to get creation_time.
 func extractVideoDate(im *ImgManager, filePath string, w io.Writer) (time.Time, bool) {
 	fmt.Fprintf(w, "[FixDates] downloading video %s for ffprobe...\n", filePath)
-	content, size, err := im.dri.Download(filePath)
+	content, size, err := im.drive().Download(filePath)
 	if err != nil {
 		fmt.Fprintf(w, "[FixDates] video download error for %s: %v\n", filePath, err)
 		return time.Time{}, false

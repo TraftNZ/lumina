@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lumina/global.dart';
 import 'package:provider/provider.dart';
 import 'package:lumina/state_model.dart';
+import 'package:lumina/storage/hash_cache.dart';
 import 'gallery_body.dart';
 import 'collections_body.dart';
 import 'search_body.dart';
@@ -14,16 +15,25 @@ import 'package:lumina/theme.dart';
 
 const seedThemeColor = Color(0xFF5B9BD5);
 
-const int _imageCacheMaxBytes = 200 << 20;
+const int _imageCacheMaxBytes = 100 << 20;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PaintingBinding.instance.imageCache.maximumSizeBytes = _imageCacheMaxBytes;
-  // Hydrate the grid from persisted remote paths + not-synced IDs so the
-  // first frame shows yesterday's state instead of an empty grid while the
-  // embedded gRPC server is still starting.
-  await assetModel.hydrateFromCache();
+  // Default count (1000) allows too many decoded RGBA frames to linger during
+  // fast scrolling. 80 keeps peak decoded memory well under the iOS 3GB
+  // watermark even with concurrent decodes on IO threads.
+  PaintingBinding.instance.imageCache.maximumSize = 80;
   Global.init();
+  // Hydrate the grid from persisted remote paths + not-synced IDs so it shows
+  // yesterday's state instead of an empty grid while the embedded gRPC server
+  // is still starting. Deliberately after runApp: SharedPreferences.getInstance()
+  // materializes every key in the store, so awaiting it here delayed the first
+  // frame by however large the store had grown.
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await assetModel.hydrateFromCache();
+    await HashCache.purgeLegacyPrefsCache();
+  });
   runApp(
     MultiProvider(
       providers: [

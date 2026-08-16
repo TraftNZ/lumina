@@ -44,6 +44,9 @@ dependencies:
   ffi: ^2.1.0
   path: ^1.8.2
   shared_preferences: ^2.5.4
+  # Direct dependency so the hash cache can clear legacy keys by prefix in a
+  # single native call instead of one store rewrite per key.
+  shared_preferences_platform_interface: ^2.4.1
   crypto: ^3.0.6
   event_bus: ^2.0.1
   exif: ^3.3.0

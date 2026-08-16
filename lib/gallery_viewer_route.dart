@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lumina/asset.dart';
@@ -468,12 +469,25 @@ class GalleryViewerRouteState extends State<GalleryViewerRoute> {
               }
             },
             itemBuilder: (BuildContext context, int index) {
+              final mq = MediaQuery.of(context);
+              final maxSide = (math.max(mq.size.width, mq.size.height) *
+                      mq.devicePixelRatio)
+                  .round();
               return Stack(
                 alignment: Alignment.center,
                 fit: StackFit.expand,
                 children: [
                   ExtendedImage(
-                    image: all[index],
+                    // ResizeImage caps decoded pixel dimensions to the screen.
+                    // Without it, a 12MP HEIC decodes to ~48MB RGBA per frame,
+                    // which (when stacked across the PageView's pre-cached
+                    // neighbors) blows past iOS's 3GB memory watermark.
+                    image: ResizeImage(
+                      all[index],
+                      width: maxSide,
+                      height: maxSide,
+                      policy: ResizeImagePolicy.fit,
+                    ),
                     fit: BoxFit.contain,
                     mode: ExtendedImageMode.gesture,
                     initGestureConfigHandler: (state) {
